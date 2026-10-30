@@ -466,14 +466,14 @@ function taskForm(id){const obj=tasks.find(t=>t.id===id)||{id:'t'+Date.now(),tit
     }
     const weekdays=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
     return [...grouped.entries()].map(([date,items],index)=>{
-      const uncovered=items.filter(x=>x.status==='À couvrir').length;
-      const done=items.length-uncovered;
+      const uncovered=items.filter(x=>x.status==='À couvrir'&&!cflPendingFor(x)).length;
+      const waiting=items.filter(x=>!!cflPendingFor(x)).length;const done=items.length-uncovered-waiting;
       const day=weekdays[cdate(date).getDay()];
       const checked=items.filter(x=>selectedCoverIds.includes(x.id)).length;
       return `<details class="cover-day" ${cflDayOpen(date,index)?'open':''}>
-        <summary class="cover-day-header" onclick="cflToggleCoverDay('${date}')"><div class="cover-day-summary"><strong>${esc(day.charAt(0).toUpperCase()+day.slice(1))} ${cfmt(date)}</strong><span>${items.length} cours · ${done} traité${done>1?'s':''}</span></div><div class="cover-day-status"><button type="button" class="cover-day-select" onclick="event.preventDefault();event.stopPropagation();selectCoverDay('${date}',${checked!==items.length})">${checked===items.length?'✓ Tout désélectionner':'☑ Tout sélectionner'}</button>${uncovered?`<span class="cover-day-urgent">${uncovered} à couvrir</span>`:'<span class="cover-day-done">Tous couverts</span>'}<span class="cover-day-chevron">⌄</span></div></summary>
+        <summary class="cover-day-header" onclick="cflToggleCoverDay('${date}')"><div class="cover-day-summary"><strong>${esc(day.charAt(0).toUpperCase()+day.slice(1))} ${cfmt(date)}</strong><span>${items.length} cours · ${done} traité${done>1?'s':''}${waiting?' · '+waiting+' en attente':''}</span></div><div class="cover-day-status"><button type="button" class="cover-day-select" onclick="event.preventDefault();event.stopPropagation();selectCoverDay('${date}',${checked!==items.length})">${checked===items.length?'✓ Tout désélectionner':'☑ Tout sélectionner'}</button>${uncovered?`<span class="cover-day-urgent">${uncovered} à couvrir</span>`:waiting?`<span class="cfl-waiting-tag">${waiting} en attente</span>`:'<span class="cover-day-done">Tous couverts</span>'}<span class="cover-day-chevron">⌄</span></div></summary>
         <div class="cover-day-content"><div class="cover-day-tools"><label><input type="checkbox" ${checked===items.length?'checked':''} onchange="selectCoverDay('${date}',this.checked)"> Tout sélectionner (${items.length})</label></div>
-          ${items.map(x=>`<div class="coach-cover-row ${selectedCoverIds.includes(x.id)?'selected':''}"><input class="coach-cover-check" type="checkbox" ${selectedCoverIds.includes(x.id)?'checked':''} onchange="toggleCoverSelection('${x.id}',this.checked)"><div><strong>${esc(x.time)} · ${esc(x.course)} - ${esc(x.room)}</strong><span>${esc(cname(x.coach)||'Coach à définir')} ${x.replacement?'→ '+esc(cname(x.replacement)):'→ Remplaçant à définir'}</span></div><em class="cover-${x.status==='À couvrir'?'red':x.status==='Confirmé'?'amber':'green'}">${esc(x.status)}</em><button class="btn" onclick="ccoverEdit('${x.id}')">Modifier</button></div>`).join('')}
+          ${items.map(x=>`<div class="coach-cover-row ${selectedCoverIds.includes(x.id)?'selected':''} ${cflPendingFor(x)?'cfl-row-awaiting':''}"><input class="coach-cover-check" type="checkbox" ${selectedCoverIds.includes(x.id)?'checked':''} onchange="toggleCoverSelection('${x.id}',this.checked)"><div><strong>${esc(x.time)} · ${esc(x.course)} - ${esc(x.room)}</strong><span>${esc(cname(x.coach)||'Coach à définir')} ${x.replacement?'→ '+esc(cname(x.replacement)):(cflPendingFor(x)?'→ Proposition à '+esc(cflPendingName(x)):'→ Remplaçant à définir')}</span></div><em class="cover-${cflPendingFor(x)?'amber':x.status==='À couvrir'?'red':x.status==='Confirmé'?'amber':'green'}">${esc(cflPendingFor(x)?'En attente de '+cflPendingName(x):x.status)}</em>${x.status==='À couvrir'&&!cflPendingFor(x)?`<button class="btn" onclick="cflOfferReplacement('${x.id}')">✉ Proposer</button>`:''}<button class="btn" onclick="ccoverEdit('${x.id}')">Modifier</button></div>`).join('')}
         </div></details>`;
     }).join('');
   }
@@ -525,7 +525,7 @@ function taskForm(id){const obj=tasks.find(t=>t.id===id)||{id:'t'+Date.now(),tit
     document.body.classList.toggle('has-cfl-bulk-dock',visible);
     if(!visible)return;
     const count=selectedCoverIds.length;
-    dock.innerHTML=`<div class="cfl-bulk-dock-info"><span class="cfl-bulk-dock-count">${count}</span><div><strong>${count} cours sélectionné${count>1?'s':''}</strong><small>Attribuez-les sans remonter dans la liste</small></div></div><div class="cfl-bulk-dock-actions"><button type="button" class="btn" onclick="clearCoverSelection()">Effacer</button><button type="button" class="btn primary" onclick="openBulkAssign()">Attribuer les ${count} cours <span aria-hidden="true">→</span></button></div>`;
+    dock.innerHTML=`<div class="cfl-bulk-dock-info"><span class="cfl-bulk-dock-count">${count}</span><div><strong>${count} cours sélectionné${count>1?'s':''}</strong><small>Attribuez-les sans remonter dans la liste</small></div></div><div class="cfl-bulk-dock-actions"><button type="button" class="btn" onclick="clearCoverSelection()">Effacer</button><button type="button" class="btn primary" onclick="cflBulkActionMenu()">Attribuer les ${count} cours <span aria-hidden="true">→</span></button></div>`;
   }
   function renderCoachWeeklyProfile(coachId){
     const days=[['LUN',1],['MAR',2],['MER',3],['JEU',4],['VEN',5],['SAM',6],['DIM',0]];
@@ -553,7 +553,7 @@ function taskForm(id){const obj=tasks.find(t=>t.id===id)||{id:'t'+Date.now(),tit
     const pending=cdata.requests.filter(r=>r.status==='En attente').length;
     const uncovered=cdata.cover.filter(c=>c.status==='À couvrir').length;
     $('main').innerHTML=heading('CROSSFIT LÉMAN / MANAGEMENT','COACHS <span class="accent">& ABSENCES.</span>','Demandes de congés, planning des cours habituels et remplacements à suivre.')+
-    `<div class="coach-top"><button class="coach-kpi clickable" onclick="setCoachSubTab('team')"><b>${cdata.coaches.length}</b><span>Coachs enregistrés</span><small>Voir l’équipe et les cours</small></button><button class="coach-kpi clickable" onclick="setCoachSubTab('requests')"><b>${pending}</b><span>Demandes en attente</span><small>Ouvrir le panneau des demandes</small></button><button class="coach-kpi clickable" onclick="setCoachSubTab('cover')"><b>${uncovered}</b><span>Cours à couvrir</span><small>Traiter les remplacements</small></button></div><div class="coach-toolbar"><button class="btn primary" onclick="cformRequest()">＋ Demande d’absence</button><button class="btn" onclick="cformCoach()">＋ Coach</button><button class="btn" onclick="cformRoutine()">＋ Cours habituel</button></div>${cweeklySchedule()}<div class="coach-subnav" role="tablist" aria-label="Gestion des coachs">${[['absences','Vacances & absences'],['requests','Demandes'],['cover','Remplacements'],['team','Équipe & cours']].map(([id,label])=>`<button role="tab" aria-selected="${coachSubTab===id}" class="${coachSubTab===id?'active':''}" onclick="setCoachSubTab('${id}')">${label}${id==='requests'&&pending?` <span>${pending}</span>`:id==='cover'&&uncovered?` <span>${uncovered}</span>`:''}</button>`).join('')}</div><div class="coach-subcontent"><div class="coach-tab-pane ${coachSubTab==='absences'?'active':''}"><section class="panel coach-panel-anchor"><div class="panel-title"><h2>VACANCES & ABSENCES</h2><span class="meta">Vue claire par semaine et par coach</span></div><div class="coach-week-views">${weekMini(0)}${weekMini(1)}</div><div class="panel-title" style="margin-top:24px"><h2>CALENDRIER DES ABSENCES</h2><span class="meta">Vue chronologique · 1, 3 ou 6 mois</span></div>${coachAnnualCards()}</section></div><div class="coach-tab-pane ${coachSubTab==='requests'?'active':''}"><section class="panel coach-panel-anchor"><div class="panel-title"><div><h2>DEMANDES À VALIDER</h2><div class="t-premium-note">Les demandes approuvées et refusées sont conservées dans les archives.</div></div><button class="btn t-archive-toggle" onclick="toggleRequestArchive()">${showRequestArchive?'← Demandes en attente':'▣ Archives · '+cdata.requests.filter(r=>r.status!=='En attente').length}</button></div>${(showRequestArchive?cdata.requests.filter(r=>r.status!=='En attente'):cdata.requests.filter(r=>r.status==='En attente')).length?(showRequestArchive?cdata.requests.filter(r=>r.status!=='En attente'):cdata.requests.filter(r=>r.status==='En attente')).slice().sort((a,b)=>b.start.localeCompare(a.start)).map(r=>`<div class="t-request-card"><div class="t-request-person"><span class="t-request-initial">${esc(coachFirstName(r.coach).charAt(0))}</span><div><strong>${esc(cname(r.coach))}</strong><div class="t-premium-note">${esc(r.type)} · ${cfmt(r.start)} → ${cfmt(r.end)}</div></div></div><div class="t-request-actions"><span class="t-status ${r.status==='En attente'?'pending':'archived'}">${esc(r.status)}</span><button class="btn" onclick="cformRequest('${r.id}')">Détails / modifier</button>${r.status==='En attente'?`<button class="btn primary" onclick="cvalidate('${r.id}','Validée')">Valider</button><button class="btn" onclick="cvalidate('${r.id}','Refusée')">Refuser</button>`:''}</div></div>`).join(''):`<div class="t-empty-state"><strong>${showRequestArchive?'Aucune demande archivée':'Tout est à jour'}</strong><span>${showRequestArchive?'Aucune demande traitée pour le moment.':'Aucune demande en attente de validation.'}</span></div>`}</section></div><div class="coach-tab-pane ${coachSubTab==='cover'?'active':''}"><section class="panel coach-panel-anchor"><div class="panel-title"><div><h2>REMPLACEMENTS</h2><div class="t-premium-note">Suivi opérationnel des cours à couvrir et des mises à jour Zen Planner.</div></div><button class="btn t-archive-toggle" onclick="toggleCoverArchive()">${showCoverArchive?'← Remplacements actifs':'▣ Archives · '+cdata.cover.filter(x=>x.status==='Zen Planner mis à jour').length}</button></div>${!showCoverArchive&&selectedCoverIds.length?`<div class="cover-bulkbar"><div><strong>${selectedCoverIds.length}</strong> cours sélectionnés</div><div class="cover-bulk-actions"><button class="btn primary" onclick="openBulkAssign()">Attribuer à une seule personne</button><button class="btn" onclick="clearCoverSelection()">Effacer la sélection</button></div></div>`:''}${showCoverArchive?archivedCoverList():coverDayGroups()}</section></div><div class="coach-tab-pane ${coachSubTab==='team'?'active':''}"><section class="panel coach-panel-anchor"><div class="panel-title"><div><h2>ÉQUIPE & COURS HABITUELS</h2><div class="t-premium-note">Gérez les profils, attribuez les créneaux et transférez les heures sans doublons.</div></div><button class="btn primary" onclick="cformCoach()">＋ Ajouter un coach</button></div><div class="t-team-stats"><div><strong>${cdata.coaches.length}</strong><span>Coachs</span></div><div><strong>${cdata.routines.length}</strong><span>Cours attribués</span></div><div><strong>${CFL_WEEKLY_SLOTS.filter(x=>!croutineForSlot(x)).length}</strong><span>Sans coach fixe</span></div></div><div class="t-team-list">${cdata.coaches.slice().sort((a,b)=>cdata.routines.filter(x=>x.coach===b.id).length-cdata.routines.filter(x=>x.coach===a.id).length||a.name.localeCompare(b.name)).map(c=>`<details class="t-team-person" id="team-${c.id}" ${openTeamIds.includes(c.id)?'open':''} ontoggle="rememberTeamOpen('${c.id}',this.open)"><summary><div class="t-team-avatar">${esc(coachFirstName(c.id).charAt(0))}</div><div class="t-team-ident"><strong>${esc(c.name)}</strong><span>${cdata.routines.filter(x=>x.coach===c.id).length} cours hebdomadaires</span></div><span class="t-team-chevron">⌄</span></summary><div class="t-team-inner"><div class="t-team-actions"><button class="btn primary" onclick="event.stopPropagation();openCoachCoursePicker('${c.id}')">＋ Attribuer des heures</button><button class="btn" onclick="event.stopPropagation();cformCoach('${c.id}')">Modifier</button><button class="btn t-danger" onclick="event.stopPropagation();deleteCoach('${c.id}')">Supprimer</button></div>${renderCoachWeeklyProfile(c.id)}</div></details>`).join('')}</div></section></div></div></div><p class="prototype-label">Prototype local : saisies et validations conservées dans ce navigateur. Cliquer sur une case du planning permet d’ajuster rapidement le cours habituel ou l’affectation de la semaine.</p>`;
+    `<div class="coach-top"><button class="coach-kpi clickable" onclick="setCoachSubTab('team')"><b>${cdata.coaches.length}</b><span>Coachs enregistrés</span><small>Voir l’équipe et les cours</small></button><button class="coach-kpi clickable" onclick="setCoachSubTab('requests')"><b>${pending}</b><span>Demandes en attente</span><small>Ouvrir le panneau des demandes</small></button><button class="coach-kpi clickable" onclick="setCoachSubTab('cover')"><b>${uncovered}</b><span>Cours à couvrir</span><small>Traiter les remplacements</small></button></div><div class="coach-toolbar"><button class="btn primary" onclick="cformRequest()">＋ Demande d’absence</button><button class="btn" onclick="cformCoach()">＋ Coach</button><button class="btn" onclick="cformRoutine()">＋ Cours habituel</button></div>${cweeklySchedule()}<div class="coach-subnav" role="tablist" aria-label="Gestion des coachs">${[['absences','Vacances & absences'],['requests','Demandes'],['cover','Remplacements'],['team','Équipe & cours']].map(([id,label])=>`<button role="tab" aria-selected="${coachSubTab===id}" class="${coachSubTab===id?'active':''}" onclick="setCoachSubTab('${id}')">${label}${id==='requests'&&pending?` <span>${pending}</span>`:id==='cover'&&uncovered?` <span>${uncovered}</span>`:''}</button>`).join('')}</div><div class="coach-subcontent"><div class="coach-tab-pane ${coachSubTab==='absences'?'active':''}"><section class="panel coach-panel-anchor"><div class="panel-title"><h2>VACANCES & ABSENCES</h2><span class="meta">Vue claire par semaine et par coach</span></div><div class="coach-week-views">${weekMini(0)}${weekMini(1)}</div><div class="panel-title" style="margin-top:24px"><h2>CALENDRIER DES ABSENCES</h2><span class="meta">Vue chronologique · 1, 3 ou 6 mois</span></div>${coachAnnualCards()}</section></div><div class="coach-tab-pane ${coachSubTab==='requests'?'active':''}"><section class="panel coach-panel-anchor"><div class="panel-title"><div><h2>DEMANDES À VALIDER</h2><div class="t-premium-note">Les demandes approuvées et refusées sont conservées dans les archives.</div></div><button class="btn t-archive-toggle" onclick="toggleRequestArchive()">${showRequestArchive?'← Demandes en attente':'▣ Archives · '+cdata.requests.filter(r=>r.status!=='En attente').length}</button></div>${(showRequestArchive?cdata.requests.filter(r=>r.status!=='En attente'):cdata.requests.filter(r=>r.status==='En attente')).length?(showRequestArchive?cdata.requests.filter(r=>r.status!=='En attente'):cdata.requests.filter(r=>r.status==='En attente')).slice().sort((a,b)=>b.start.localeCompare(a.start)).map(r=>`<div class="t-request-card cfl-request-open" role="button" tabindex="0" onclick="if(!event.target.closest('button'))openAbsenceDetail('${r.id}')" onkeydown="if(event.key==='Enter'&&event.target===this)openAbsenceDetail('${r.id}')"><div class="t-request-person"><span class="t-request-initial">${esc(coachFirstName(r.coach).charAt(0))}</span><div><strong>${esc(cname(r.coach))}</strong><div class="t-premium-note">${esc(r.type)} · ${cfmt(r.start)} → ${cfmt(r.end)}</div></div></div><div class="t-request-actions"><span class="t-status ${r.status==='En attente'?'pending':'archived'}">${esc(r.status)}</span><button class="btn" onclick="openAbsenceDetail('${r.id}')">Voir la demande</button>${r.status==='En attente'?`<button class="btn primary" onclick="cvalidate('${r.id}','Validée')">Valider</button><button class="btn" onclick="cvalidate('${r.id}','Refusée')">Refuser</button>`:''}</div></div>`).join(''):`<div class="t-empty-state"><strong>${showRequestArchive?'Aucune demande archivée':'Tout est à jour'}</strong><span>${showRequestArchive?'Aucune demande traitée pour le moment.':'Aucune demande en attente de validation.'}</span></div>`}</section></div><div class="coach-tab-pane ${coachSubTab==='cover'?'active':''}"><section class="panel coach-panel-anchor"><div class="panel-title"><div><h2>REMPLACEMENTS</h2><div class="t-premium-note">Suivi opérationnel des cours à couvrir et des mises à jour Zen Planner.</div></div><button class="btn t-archive-toggle" onclick="toggleCoverArchive()">${showCoverArchive?'← Remplacements actifs':'▣ Archives · '+cdata.cover.filter(x=>x.status==='Zen Planner mis à jour').length}</button></div>${!showCoverArchive&&selectedCoverIds.length?`<div class="cover-bulkbar"><div><strong>${selectedCoverIds.length}</strong> cours sélectionnés</div><div class="cover-bulk-actions"><button class="btn primary" onclick="cflBulkActionMenu()">Attribuer à une seule personne</button><button class="btn" onclick="clearCoverSelection()">Effacer la sélection</button></div></div>`:''}${showCoverArchive?archivedCoverList():coverDayGroups()}</section></div><div class="coach-tab-pane ${coachSubTab==='team'?'active':''}"><section class="panel coach-panel-anchor"><div class="panel-title"><div><h2>ÉQUIPE & COURS HABITUELS</h2><div class="t-premium-note">Gérez les profils, attribuez les créneaux et transférez les heures sans doublons.</div></div><button class="btn primary" onclick="cformCoach()">＋ Ajouter un coach</button></div><div class="t-team-stats"><div><strong>${cdata.coaches.length}</strong><span>Coachs</span></div><div><strong>${cdata.routines.length}</strong><span>Cours attribués</span></div><div><strong>${CFL_WEEKLY_SLOTS.filter(x=>!croutineForSlot(x)).length}</strong><span>Sans coach fixe</span></div></div><div class="t-team-list">${cdata.coaches.slice().sort((a,b)=>cdata.routines.filter(x=>x.coach===b.id).length-cdata.routines.filter(x=>x.coach===a.id).length||a.name.localeCompare(b.name)).map(c=>`<details class="t-team-person" id="team-${c.id}" ${openTeamIds.includes(c.id)?'open':''} ontoggle="rememberTeamOpen('${c.id}',this.open)"><summary><div class="t-team-avatar">${esc(coachFirstName(c.id).charAt(0))}</div><div class="t-team-ident"><strong>${esc(c.name)}</strong><span>${cdata.routines.filter(x=>x.coach===c.id).length} cours hebdomadaires</span></div><span class="t-team-chevron">⌄</span></summary><div class="t-team-inner"><div class="t-team-actions"><button class="btn primary" onclick="event.stopPropagation();openCoachCoursePicker('${c.id}')">＋ Attribuer des heures</button><button class="btn" onclick="event.stopPropagation();cformCoach('${c.id}')">Modifier</button><button class="btn t-danger" onclick="event.stopPropagation();deleteCoach('${c.id}')">Supprimer</button></div>${renderCoachWeeklyProfile(c.id)}</div></details>`).join('')}</div></section></div></div></div><p class="prototype-label">Prototype local : saisies et validations conservées dans ce navigateur. Cliquer sur une case du planning permet d’ajuster rapidement le cours habituel ou l’affectation de la semaine.</p>`;
     updateBulkDock();
   };
 
@@ -1908,6 +1908,539 @@ function cflRenderedWeekSlot(slot,date){
   }).join('');
   if($('taskWeeksPreview'))$('taskWeeksPreview').innerHTML=Array.from({length:4},(_,i)=>preview(weekOffset+i+1,list)).join('');
   if($('taskAgendaList'))$('taskAgendaList').innerHTML=list.length?list.map(t=>`<div class="cfl-simple-row" style="${colorStyle(t.category)}" onclick="taskDetail('${esc(t.id)}')" title="${esc(t.category)}"><span class="hour">${fmt(t.date)} ${t.time?'<strong>'+esc(t.time)+'</strong>':''}</span><div class="task-main"><span class="task-dot"></span><span class="title">${esc(t.title)}</span></div><input class="mini-check" type="checkbox" ${t.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleTask('${esc(t.id)}',this.checked)"></div>`).join(''):'<p class="muted">Aucune tâche.</p>';
+ };
+})();
+</script>
+
+<style id="cfl-v2530-themes">
+/* Dark is the existing reference. Light theme affects the admin shell only. */
+.cfl-theme-switch{position:fixed;top:14px;right:18px;z-index:18;border:1px solid #414651;background:#242630;color:#f6f7fa;border-radius:999px;box-shadow:0 6px 24px #0005;display:flex;align-items:center;gap:8px;padding:9px 13px;font-size:12px;font-weight:750;cursor:pointer}
+.cfl-theme-switch:hover{border-color:#d54651}
+.cfl-theme-switch .cfl-theme-symbol{font-size:17px;line-height:1}
+body{--cfl-light-bg:#f3f5f8}
+body[data-cfl-theme="light"]{color-scheme:light;--bg:#f3f5f8;--panel:#fff;--panel2:#f5f7fa;--line:#d8dde5;--text:#17202e;--muted:#626e7e;background:#f3f5f8!important;color:#17202e!important}
+body[data-cfl-theme="light"] .app,body[data-cfl-theme="light"] .content,body[data-cfl-theme="light"] #main{background:#f3f5f8!important;color:#17202e!important}
+body[data-cfl-theme="light"] .sidebar,body[data-cfl-theme="light"] .mobile-top,body[data-cfl-theme="light"] .mobilebar{background:#fff!important;border-color:#dce0e8!important;color:#1c2430!important}
+body[data-cfl-theme="light"] .sidebar .logo,body[data-cfl-theme="light"] .side-bottom{border-color:#dce0e8!important}
+body[data-cfl-theme="light"] .brand-title,body[data-cfl-theme="light"] .mobile-brand,body[data-cfl-theme="light"] .sidebar .nav button:not(.active),body[data-cfl-theme="light"] .sidebar .ni{color:#2c3442!important}
+body[data-cfl-theme="light"] .sidebar .nav button:hover{background:#f1f3f7!important}
+body[data-cfl-theme="light"] .sidebar .nav button.active{background:#fbe8ec!important;border-color:#eac0c7!important;color:#a91d30!important}
+body[data-cfl-theme="light"] .sidebar .nav button.active .ni{color:#cc3545!important}
+body[data-cfl-theme="light"] .side-bottom,body[data-cfl-theme="light"] .stat,body[data-cfl-theme="light"] .panel,body[data-cfl-theme="light"] .module-card,body[data-cfl-theme="light"] .info,body[data-cfl-theme="light"] .module-hero,body[data-cfl-theme="light"] .summary-card{background:#fff!important;border-color:#dce0e8!important;box-shadow:0 3px 15px rgba(26,40,61,.04)!important;color:#1b2634!important}
+body[data-cfl-theme="light"] .stat .number,body[data-cfl-theme="light"] .panel-title h2,body[data-cfl-theme="light"] .h1,body[data-cfl-theme="light"] .item .title,body[data-cfl-theme="light"] .task-row .title,body[data-cfl-theme="light"] .detail-section h3{color:#1a2534!important}
+body[data-cfl-theme="light"] .sub,body[data-cfl-theme="light"] .muted,body[data-cfl-theme="light"] .s-label,body[data-cfl-theme="light"] .s-detail,body[data-cfl-theme="light"] .panel-title .meta,body[data-cfl-theme="light"] .detail,body[data-cfl-theme="light"] .prototype-label,body[data-cfl-theme="light"] .info{color:#647082!important}
+body[data-cfl-theme="light"] .btn:not(.primary),body[data-cfl-theme="light"] .field,body[data-cfl-theme="light"] .iconbtn,body[data-cfl-theme="light"] .formrow input,body[data-cfl-theme="light"] .formrow select,body[data-cfl-theme="light"] .formrow textarea{background:#f8f9fb!important;color:#202c3d!important;border-color:#cbd2de!important}
+body[data-cfl-theme="light"] .btn:not(.primary):hover,body[data-cfl-theme="light"] .iconbtn:hover{background:#e9eef5!important}
+body[data-cfl-theme="light"] .item,body[data-cfl-theme="light"] .task-row,body[data-cfl-theme="light"] .summary-row,body[data-cfl-theme="light"] .summary-note{border-color:#dce0e8!important}
+body[data-cfl-theme="light"] .modal{background:#fff!important;border-color:#cbd2de!important;color:#202a39!important}
+body[data-cfl-theme="light"] .modal h2,body[data-cfl-theme="light"] .modal strong,body[data-cfl-theme="light"] .formrow label{color:#1a2534!important}
+body[data-cfl-theme="light"] .detail-facts>div,body[data-cfl-theme="light"] .slot-edit-facts .fact{background:#f7f9fc!important;border-color:#d9e0ea!important;color:#1a2534!important}
+body[data-cfl-theme="light"] .coach-kpi,body[data-cfl-theme="light"] .t-team-person,body[data-cfl-theme="light"] .t-team-inner,body[data-cfl-theme="light"] .t-team-stats>div,body[data-cfl-theme="light"] .t-request-card,body[data-cfl-theme="light"] .cover-day,body[data-cfl-theme="light"] .cover-day-header,body[data-cfl-theme="light"] .coach-cover-row,body[data-cfl-theme="light"] .t-archive-row{background:#fff!important;color:#202a39!important;border-color:#d9dfe8!important}
+body[data-cfl-theme="light"] .cover-day-header:hover,body[data-cfl-theme="light"] .t-archive-row:hover{background:#f0f4f9!important}
+body[data-cfl-theme="light"] .cover-day-header strong,body[data-cfl-theme="light"] .coach-cover-row strong,body[data-cfl-theme="light"] .t-request-person strong,body[data-cfl-theme="light"] .t-team-ident strong,body[data-cfl-theme="light"] .t-team-stats strong{color:#202a39!important}
+body[data-cfl-theme="light"] .coach-subnav,body[data-cfl-theme="light"] .coach-subnav button,body[data-cfl-theme="light"] .task-toolbar,body[data-cfl-theme="light"] .task-week-nav{color:#202a39!important}
+body[data-cfl-theme="light"] .coach-subnav button:not(.active){background:#f5f7fa!important;border-color:#d8dde5!important}
+body[data-cfl-theme="light"] .ab-scroller,body[data-cfl-theme="light"] .ab-chart,body[data-cfl-theme="light"] .ab-row,body[data-cfl-theme="light"] .ab-coach-label,body[data-cfl-theme="light"] .ab-month-row,body[data-cfl-theme="light"] .ab-date-row,body[data-cfl-theme="light"] .ab-coach-row{background:#fff!important;color:#263346!important;border-color:#e2e6ed!important}
+body[data-cfl-theme="light"] .ab-date.weekend,body[data-cfl-theme="light"] .ab-cell.weekend:not(.absent):not(.pending-absence){background:#eef1f6!important}
+body[data-cfl-theme="light"] .ab-cell.absent,body[data-cfl-theme="light"] .ab-cell.absent.weekend{background:var(--ab-accent)!important}
+body[data-cfl-theme="light"] .task-day-col,body[data-cfl-theme="light"] .task-miniweek,body[data-cfl-theme="light"] .task-hero-card,body[data-cfl-theme="light"] .task-agenda-row,body[data-cfl-theme="light"] .cfl-simple-row,body[data-cfl-theme="light"] .task-empty{background:#f8fafc!important;border-color:#dce2ec!important;color:#1f2c3c!important}
+body[data-cfl-theme="light"] .task-day-head,body[data-cfl-theme="light"] .task-day-count{background:#eef2f7!important;border-color:#dce2ec!important}
+body[data-cfl-theme="light"] .task-day-label strong,body[data-cfl-theme="light"] .task-week-current strong,body[data-cfl-theme="light"] .task-miniweek strong,body[data-cfl-theme="light"] .cfl-simple-row .title{color:#172233!important}
+body[data-cfl-theme="light"] .task-cat-chip{background:#fff!important}
+body[data-cfl-theme="light"] .cfl-mini-task{background:color-mix(in srgb,var(--cat) 11%,white)!important;color:#192434!important}
+body[data-cfl-theme="light"] .cfl-mini-task:hover{background:color-mix(in srgb,var(--cat) 19%,white)!important}
+body[data-cfl-theme="light"] .cfl-mini-task-title{color:#162333!important}
+/* Weekly class planner: light canvas and restrained slots; urgent red/hatched cases retain their semantics. */
+body[data-cfl-theme="light"] .cweekly-panel,body[data-cfl-theme="light"] .cweekly-grid,body[data-cfl-theme="light"] .cweekly-cell,body[data-cfl-theme="light"] .cweekly-time,body[data-cfl-theme="light"] .cweekly-day{background:#f4f6fa!important;border-color:#dde2ea!important;color:#293547!important}
+body[data-cfl-theme="light"] .cweekly-slot:not(.to-cover):not(.missing-coach):not(.pending-request):not(.weekend-event-cancelled):not(.lesson-cancelled){background:#fff!important;border-color:#c5cfdd!important;color:#273446!important}
+body[data-cfl-theme="light"] .cweekly-slot:not(.to-cover):not(.missing-coach):not(.pending-request) .slot-coach,body[data-cfl-theme="light"] .cweekly-slot:not(.to-cover):not(.missing-coach):not(.pending-request) .slot-course{color:#243146!important}
+body[data-cfl-theme="light"] .cweekly-slot.pending-request{background:repeating-linear-gradient(135deg,rgba(134,90,173,.06) 0 6px,rgba(134,90,173,.18) 6px 10px),#fff!important}
+body[data-cfl-theme="light"] .cweekly-slot.to-cover,body[data-cfl-theme="light"] .cweekly-slot.missing-coach{background:#7c303e!important;color:#fff!important}
+body[data-cfl-theme="light"] .cweekly-slot.to-cover .slot-coach,body[data-cfl-theme="light"] .cweekly-slot.to-cover .slot-course,body[data-cfl-theme="light"] .cweekly-slot.missing-coach .slot-coach{color:#fff!important}
+body[data-cfl-theme="light"] .coach-timetable-cell,body[data-cfl-theme="light"] .coach-timetable-grid,body[data-cfl-theme="light"] .coach-time-label,body[data-cfl-theme="light"] .coach-day-head,body[data-cfl-theme="light"] .coach-times-head{background:#f2f5f9!important;color:#293547!important;border-color:#dce2eb!important}
+body[data-cfl-theme="light"] .coach-timetable-course{background:#fff!important;color:#273446!important;border-color:#ccd3de!important;border-left-color:#c14856!important}
+body[data-cfl-theme="light"] .coach-course-name{color:#243146!important}
+body[data-cfl-theme="light"] .coach-course-time{color:#a6283c!important}
+body[data-cfl-theme="light"] .cfl-week-nav,body[data-cfl-theme="light"] .cweekly-headnote,body[data-cfl-theme="light"] .cweekly-pill{background:#fff!important;color:#243146!important;border-color:#dce2eb!important}
+body[data-cfl-theme="light"] .cfl-week-nav .week-range strong,body[data-cfl-theme="light"] .cweekly-pill strong{color:#243146!important}
+body[data-cfl-theme="light"] .cfl-theme-switch{background:#fff;color:#263449;border-color:#cbd3df;box-shadow:0 6px 24px #2f40551f}
+/* Retain the dedicated dark editorial calendar in the embedded iframe. */
+body[data-cfl-theme="light"] .embedded-events,body[data-cfl-theme="light"] .events-frame{background:#0b0b0e!important}
+@media(max-width:780px){.cfl-theme-switch{top:8px;right:12px;padding:7px 10px;font-size:11px}}
+</style>
+<script id="cfl-v2530-theme-script">
+(function(){
+ const KEY='cfl_control_theme_v1';
+ function stored(){try{return localStorage.getItem(KEY)==='light'?'light':'dark'}catch{return 'dark'}}
+ function apply(theme){
+   document.body.setAttribute('data-cfl-theme',theme);
+   document.documentElement.style.colorScheme=theme;
+   document.querySelectorAll('.cfl-theme-switch').forEach(b=>{const light=theme==='light';b.innerHTML='<span class="cfl-theme-symbol">'+(light?'☀':'☾')+'</span><span class="cfl-theme-text">'+(light?'Clair':'Sombre')+'</span>';b.title='Passer en mode '+(light?'sombre':'clair');b.setAttribute('aria-label',b.title);b.setAttribute('aria-pressed',String(light));});
+ }
+ window.cflToggleTheme=function(){const next=document.body.getAttribute('data-cfl-theme')==='light'?'dark':'light';try{localStorage.setItem(KEY,next)}catch{}apply(next)};
+ const btn=document.createElement('button');btn.type='button';btn.id='cflThemeSwitch';btn.className='cfl-theme-switch';btn.onclick=window.cflToggleTheme;(document.querySelector('.sidebar')||document.body).appendChild(btn);
+ const mobileHost=document.querySelector('.mobile-top');
+ if(mobileHost){const mobile=btn.cloneNode(false);mobile.id='cflThemeSwitchMobile';mobile.onclick=window.cflToggleTheme;mobileHost.appendChild(mobile)}
+ apply(stored());
+})();
+</script>
+
+<style id="cfl-v2531-theme-polish">
+/* Theme control lives in navigation, never over a page action or task. */
+@media(min-width:781px){
+ .sidebar #cflThemeSwitch{position:relative!important;inset:auto!important;right:auto!important;top:auto!important;bottom:auto!important;z-index:6!important;flex:0 0 auto;order:50;margin:0 auto 8px!important;width:46px;height:42px;padding:0!important;display:flex;align-items:center;justify-content:center;border-radius:11px}
+ .sidebar #cflThemeSwitch .cfl-theme-symbol{font-size:20px!important}
+ .sidebar #cflThemeSwitch .cfl-theme-text{display:none!important}
+ body.cfl-sidebar-open .sidebar #cflThemeSwitch{width:100%;padding:9px 12px!important;margin:0 0 7px!important;justify-content:flex-start;gap:12px}
+ body.cfl-sidebar-open .sidebar #cflThemeSwitch .cfl-theme-text{display:inline!important;font-size:13px}
+ .sidebar .side-bottom{order:51}
+ #cflThemeSwitchMobile{display:none!important}
+}
+@media(max-width:780px){
+ #cflThemeSwitch{display:none!important}
+ .mobile-top{gap:12px}
+ #cflThemeSwitchMobile{position:static!important;margin-left:auto!important;z-index:2!important;padding:7px 10px!important;box-shadow:none!important;white-space:nowrap}
+}
+/* Legible labels and surfaces in light mode (do not overwrite event iframe theme). */
+body[data-cfl-theme="light"] .nav-caption,
+body[data-cfl-theme="light"] .brand-caption,
+body[data-cfl-theme="light"] .side-bottom small,
+body[data-cfl-theme="light"] .stat .s-label,
+body[data-cfl-theme="light"] .stat .s-detail,
+body[data-cfl-theme="light"] .task-toolbar label,
+body[data-cfl-theme="light"] .task-section-title .meta,
+body[data-cfl-theme="light"] .task-week-current span,
+body[data-cfl-theme="light"] .task-day-label span,
+body[data-cfl-theme="light"] .cfl-simple-row .hour,
+body[data-cfl-theme="light"] .coach-timetable-grid small,
+body[data-cfl-theme="light"] .coach-compact-hint,
+body[data-cfl-theme="light"] .t-premium-note,
+body[data-cfl-theme="light"] .coach-person-head span{color:#566578!important}
+body[data-cfl-theme="light"] .task-week-buttons .btn,
+body[data-cfl-theme="light"] .week-mode-toggle button:not(.active),
+body[data-cfl-theme="light"] .ab-actions button:not(.active),
+body[data-cfl-theme="light"] .coach-subnav button:not(.active),
+body[data-cfl-theme="light"] .task-miniweek{color:#253348!important}
+body[data-cfl-theme="light"] .task-cat-chip{color:color-mix(in srgb,var(--cat) 70%,#172033)!important}
+body[data-cfl-theme="light"] .task-cat-chip.is-selected{background:color-mix(in srgb,var(--cat) 14%,white)!important}
+body[data-cfl-theme="light"] .cfl-mini-task .cfl-mini-task-time{color:color-mix(in srgb,var(--cat) 70%,#142233)!important}
+body[data-cfl-theme="light"] .cfl-simple-row .title{color:#1d293a!important}
+body[data-cfl-theme="light"] .task-day-count{color:#38465a!important}
+body[data-cfl-theme="light"] .task-day-label strong{color:#1b2939!important}
+body[data-cfl-theme="light"] .task-week-current strong{color:#1b2939!important}
+body[data-cfl-theme="light"] .cweekly-intro,
+body[data-cfl-theme="light"] .cweekly-head-left .meta,
+body[data-cfl-theme="light"] .cweekly-legend,
+body[data-cfl-theme="light"] .slot-meta{color:#526278!important}
+body[data-cfl-theme="light"] .formrow input::placeholder,
+body[data-cfl-theme="light"] .field::placeholder{color:#657385!important}
+body[data-cfl-theme="light"] .modalwrap .formrow input,
+body[data-cfl-theme="light"] .modalwrap .formrow select,
+body[data-cfl-theme="light"] .modalwrap .formrow textarea{color:#1d293a!important}
+</style>
+
+<style id="cfl-coach-portal-admin">
+.cfl-coach-portal-link{position:fixed;right:20px;bottom:24px;z-index:15;background:#222832;color:#fff;border:1px solid #71829a;border-radius:12px;padding:10px 13px;box-shadow:0 4px 26px #0008;text-decoration:none;font:700 12px Inter,Segoe UI,sans-serif}
+.cfl-coach-portal-link:hover{background:#38404c}
+@media(max-width:780px){.cfl-coach-portal-link{bottom:74px;right:10px;padding:9px}}
+</style>
+<a class="cfl-coach-portal-link" href="coach.html" target="_blank" rel="noopener" title="Ouvrir la démonstration du portail coach">↗ Portail coachs · Démo</a>
+<script id="cfl-coach-portal-sync">
+(function(){
+ const KEY='cfl_control_coaches_v1';
+ let old=localStorage.getItem(KEY);
+ function reloadIfChanged(){const next=localStorage.getItem(KEY);if(next===old)return;old=next;try{let state=JSON.parse(next);if(!state||!Array.isArray(state.requests))return;cdata={...cdata,...state};if(typeof render==='function')render()}catch(e){console.warn('Erreur de synchronisation locale',e)}}
+ window.addEventListener('storage',e=>{if(e.key===KEY)reloadIfChanged()});
+ window.addEventListener('focus',reloadIfChanged);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)reloadIfChanged()});
+})();
+</script>
+
+<script id="cfl-v2533-replacement-offers">
+(function(){
+ const KEY='cfl_coach_replacement_offers_v1';
+ const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')||[]}catch{return []}};
+ window.cflOfferReplacement=function(coverId){
+  const x=cdata.cover.find(c=>c.id===coverId);if(!x){alert('Cours introuvable');return}
+  const people=cdata.coaches.filter(c=>c.id!==x.coach&&c.id!=='assistant');
+  copen(`<h2>Proposer un remplacement</h2><p class="sub">${cfmt(x.date)} · ${esc(x.time)} · ${esc(x.course)} · ${esc(x.room)}</p><form id="cflOfferForm"><div class="formrow"><label>Coach sollicité</label><select name="coach" required><option value="">Sélectionner un coach</option>${people.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')}</select></div><div class="formrow"><label>Message facultatif</label><textarea name="note" rows="3" placeholder="Précisions pour le remplacement…"></textarea></div><div class="formactions"><button type="button" class="btn" onclick="closeModal()">Annuler</button><button class="btn primary">Envoyer la proposition</button></div></form><p class="muted">Mode démonstration : proposition accessible dans le portail coach sur le même navigateur. Aucun e-mail n'est envoyé.</p>`);
+  const f=document.getElementById('cflOfferForm');if(!f)return;
+  f.addEventListener('submit',event=>{event.preventDefault();const data=new FormData(f),coachId=String(data.get('coach')||'');if(!coachId)return;
+    const arr=read();if(arr.some(o=>o.coverId===x.id&&o.coachId===coachId&&o.status==='Proposé')){alert('Une proposition est déjà en attente pour ce coach et ce cours.');return}
+    arr.push({id:'offer_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7),coverId:x.id,coachId,course:x.course,room:x.room,time:x.time,date:x.date,originalCoach:cname(x.coach),note:String(data.get('note')||'').trim(),status:'Proposé',createdAt:new Date().toISOString()});
+    try{localStorage.setItem(KEY,JSON.stringify(arr))}catch{alert('Impossible de sauvegarder la proposition');return}
+    closeModal();notice('Proposition enregistrée dans le portail coach (même navigateur)');
+  });
+ };
+ // Reload shared coach data when the admin tab regains focus after a portal response.
+ window.addEventListener('focus',()=>{try{const stored=JSON.parse(localStorage.getItem('cfl_control_coaches_v1')||'null');if(stored&&JSON.stringify(stored)!==JSON.stringify(cdata)){cdata={...cdata,...stored};render()}}catch{}});
+})();
+</script>
+<style id="cfl-v2534-admin-style">
+.cfl-bulk-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}
+.cfl-bulk-menu button{background:#292e39;color:#f3f5fc;border:1px solid #515a6d;border-radius:13px;text-align:left;padding:17px;font-weight:760;min-height:92px;display:flex;flex-direction:column;gap:6px}
+.cfl-bulk-menu button:hover{border-color:#e16b78;background:#34303b}
+.cfl-bulk-menu button small{font-size:11px;font-weight:400;color:#aeb6c8}
+.cfl-bulk-menu button.danger{border-color:#8b4651}
+.cfl-bulk-summary{max-height:165px;overflow:auto;border-radius:11px;padding:12px;background:#16191f;border:1px solid #414653;font-size:12px;line-height:1.8}
+body[data-cfl-theme="light"] .cfl-bulk-menu button{background:#f7f8fb!important;color:#1d293b!important;border-color:#cbd3df!important}
+body[data-cfl-theme="light"] .cfl-bulk-menu button small{color:#536075!important}
+body[data-cfl-theme="light"] .cfl-bulk-summary{background:#f6f7f9!important;color:#1d293b!important}
+@media(max-width:540px){.cfl-bulk-menu{grid-template-columns:1fr}}
+</style>
+<script id="cfl-v2534-admin-bulk">
+(function(){
+const KEY='cfl_coach_replacement_offers_v1';
+const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')||[]}catch{return []}};
+const selected=()=>{const ids=window.cflGetSelectedCoverIds?.()||[];return cdata.cover.filter(c=>ids.includes(c.id))};
+window.cflBulkActionMenu=function(){
+ const rows=selected();if(!rows.length)return alert('Sélectionnez au moins un cours.');
+ copen(`<h2>${rows.length} cours sélectionné${rows.length>1?'s':''}</h2><p class="sub">Choisissez une action pour ce bloc de cours.</p><div class="cfl-bulk-summary">${rows.map(x=>`${cfmt(x.date)} · ${esc(x.time)} · ${esc(x.course)} · ${esc(x.room)}`).join('<br>')}</div><div class="cfl-bulk-menu"><button type="button" onclick="cflBulkDirectAssign()">✓ Attribuer directement<small>Confirmer un remplaçant sur tous les cours</small></button><button type="button" onclick="cflBulkPropose()">✉ Proposer à un coach<small>Le coach accepte ou refuse le bloc complet</small></button><button type="button" onclick="cflBulkMergeLessons()">⇄ Fusionner les cours<small>Maintenir les cours sélectionnés et annuler leur parallèle</small></button><button type="button" class="danger" onclick="cflBulkCancelLessons()">✕ Annuler les cours<small>Annulation pour les dates sélectionnées uniquement</small></button></div><div class="formactions"><button class="btn" onclick="closeModal()">Fermer</button></div>`);
+};
+window.cflBulkDirectAssign=function(){window.openBulkAssign()};
+window.cflBulkPropose=function(){
+ const rows=selected();if(!rows.length)return alert('Sélectionnez des cours.');
+ const names=cdata.coaches.filter(c=>c.id!=='assistant');
+ copen(`<h2>Proposer un bloc de ${rows.length} cours</h2><p class="sub">Le coach répondra à l'ensemble des cours en une seule fois.</p><div class="cfl-bulk-summary">${rows.map(x=>`${cfmt(x.date)} · ${esc(x.time)} · ${esc(x.course)} · ${esc(x.room)}`).join('<br>')}</div><form id="cflBulkOfferForm"><div class="formgrid"><div class="formrow full"><label>Coach sollicité</label><select name="coach" required><option value="">Choisir un coach</option>${names.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')}</select></div><div class="formrow full"><label>Message facultatif</label><textarea name="note" placeholder="Informations pour ce bloc de cours..."></textarea></div></div><div class="formactions"><button type="button" class="btn" onclick="cflBulkActionMenu()">Retour</button><button class="btn primary">Envoyer la proposition</button></div></form><p class="muted">Démo locale : aucun e-mail envoyé. Même navigateur et même origine nécessaires.</p>`);
+ document.getElementById('cflBulkOfferForm').onsubmit=function(e){e.preventDefault();const fd=new FormData(this),coachId=String(fd.get('coach')||'');if(!coachId)return;
+ const conflicts=rows.filter(x=>x.coach===coachId||x.replacement&&x.status!=='À couvrir'||read().some(o=>o.coverId===x.id&&o.status==='Proposé'));
+ if(conflicts.length){alert(`${conflicts.length} cours incompatibles : coach habituel, déjà attribué ou proposition en attente. Aucune proposition envoyée.`);return}
+ const arr=read(),blockId='block_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8),createdAt=new Date().toISOString(),note=String(fd.get('note')||'').trim();
+ rows.forEach(x=>arr.push({id:'offer_'+Math.random().toString(36).slice(2,11),blockId,blockSize:rows.length,coverId:x.id,coachId,course:x.course,room:x.room,time:x.time,date:x.date,originalCoach:cname(x.coach),note,status:'Proposé',createdAt}));
+ try{localStorage.setItem(KEY,JSON.stringify(arr))}catch{alert('Enregistrement impossible');return}
+ closeModal();window.clearCoverSelection?.();notice(`Bloc de ${rows.length} cours proposé au coach`);
+ };
+};
+// Replace bulk menu offered by older patches, including the fixed action dock.
+window.openBulkAssign=function(){
+ const rows=selected();if(!rows.length)return alert('Sélectionnez des cours.');
+ copen(`<h2>Attribuer ${rows.length} cours</h2><p class="sub">Attribution directe avec statut de suivi.</p><form id="bulkAssignForm"><div class="formrow"><label>Coach</label><select name="replacement" required><option value="">Choisir</option>${cdata.coaches.filter(c=>c.id!=='assistant').map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')}</select></div><div class="formrow"><label>Statut</label><select name="status"><option>Confirmé</option><option>Zen Planner mis à jour</option></select></div><div class="formactions"><button class="btn" type="button" onclick="cflBulkActionMenu()">Retour</button><button class="btn primary">Attribuer</button></div></form>`);
+ document.getElementById('bulkAssignForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target),coachId=String(fd.get('replacement')||''),status=String(fd.get('status')||'Confirmé');if(!coachId)return;
+ if(rows.some(x=>x.coach===coachId)){alert('Un cours appartient déjà à ce coach. Vérifiez la sélection.');return}
+ rows.forEach(x=>{x.replacement=coachId;x.status=status});csave();closeModal();window.clearCoverSelection?.();render();notice(`${rows.length} cours attribués`)};
+};
+// Add the unified action on top of existing selection controls and floating bar.
+const previous=window.updateBulkDock;
+if(typeof previous==='function')window.updateBulkDock=function(){previous();enhance()};
+function enhance(){
+ const bulk=document.querySelector('.cover-bulk-actions');if(bulk&&!bulk.querySelector('.cfl-v2534-main'))bulk.insertAdjacentHTML('afterbegin','<button class="btn primary cfl-v2534-main" onclick="cflBulkActionMenu()">Actions sur la sélection ▾</button>');
+ const dock=document.querySelector('.cfl-bulk-dock-actions');if(dock&&!dock.querySelector('.cfl-v2534-main'))dock.insertAdjacentHTML('afterbegin','<button class="btn primary cfl-v2534-main" onclick="cflBulkActionMenu()">Actions ▾</button>');
+}
+const observer=new MutationObserver(()=>{if(page==='coaches')enhance()});observer.observe(document.getElementById('main'),{childList:true,subtree:true});enhance();
+})();
+</script>
+<style id="cfl-v2536-status-actions-style">
+.cfl-status-chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.cfl-status-chips span{font-size:12px;padding:7px 10px;background:#262a33;border:1px solid #485061;border-radius:10px;color:#e0e5f0}
+.cfl-bulk-menu button .cfl-action-title{font-weight:800;font-size:13px}
+.cfl-bulk-menu button .cfl-action-note{font-size:11px;font-weight:400;color:#aeb6c8}
+.cfl-bulk-menu button:disabled{opacity:.35;cursor:not-allowed}
+.cfl-bulk-state{font-size:12px;color:#b7becc;padding:12px 14px;border:1px solid #424958;border-radius:12px;margin:10px 0}
+.cfl-confirm-note{font-size:12px;color:#d8bf83}
+.cfl-quick-state{display:inline-flex;align-items:center;gap:7px;border-radius:10px;padding:6px 9px;background:#2c343d;border:1px solid #47515b;color:#cde7d6;font-size:11px;font-weight:750;cursor:pointer}
+.cfl-quick-state:hover{border-color:#85d7a7}
+body[data-cfl-theme="light"] .cfl-status-chips span,
+body[data-cfl-theme="light"] .cfl-bulk-state{background:#f6f8fb;color:#243044;border-color:#cbd5e1}
+body[data-cfl-theme="light"] .cfl-quick-state{background:#e7f3e9;color:#195e35}
+</style>
+<script id="cfl-v2536-status-actions-script">
+(function(){
+ const selected=()=>{const ids=window.cflGetSelectedCoverIds?.()||[];return cdata.cover.filter(x=>ids.includes(x.id))};
+ const shortName=id=>cdata.coaches.find(x=>x.id===id)?.name||'À définir';
+ const line=x=>`${cfmt(x.date)} · ${esc(x.time)} · ${esc(x.course)} · ${esc(x.room)} · ${esc(x.status)}`;
+ const counters=rows=>({empty:rows.filter(x=>x.status==='À couvrir').length, confirmed:rows.filter(x=>x.status==='Confirmé').length, synced:rows.filter(x=>x.status==='Zen Planner mis à jour').length});
+ const overview=rows=>{const n=counters(rows);return `<div class="cfl-status-chips"><span>À couvrir : <b>${n.empty}</b></span><span>Confirmés : <b>${n.confirmed}</b></span><span>Zen Planner coché : <b>${n.synced}</b></span></div>`};
+ function afterAction(message){csave();closeModal();window.clearCoverSelection?.();render();notice(message);}
+ window.cflBulkActionMenu=function(){
+  const rows=selected();if(!rows.length){alert('Sélectionnez au moins un cours.');return;}
+  copen(`<h2>${rows.length} cours sélectionné${rows.length>1?'s':''}</h2><p class="sub">Choisissez une opération selon l’état des cours.</p>${overview(rows)}<div class="cfl-bulk-summary">${rows.map(line).join('<br>')}</div>
+   <div class="cfl-bulk-menu">
+    <button type="button" onclick="cflBulkChangeCoach()"><span class="cfl-action-title">✎ Attribuer / modifier le coach</span><span class="cfl-action-note">Fonctionne aussi sur des cours déjà confirmés</span></button>
+    <button type="button" onclick="cflBulkZenStatus()"><span class="cfl-action-title">✓ Suivi Zen Planner</span><span class="cfl-action-note">Cocher les cours mis à jour ou revenir à « Confirmé »</span></button>
+    <button type="button" onclick="cflBulkPropose()"><span class="cfl-action-title">✉ Proposer à un coach</span><span class="cfl-action-note">Sur des cours à couvrir uniquement</span></button>
+    <button type="button" onclick="cflBulkMergeLessons()"><span class="cfl-action-title">⇄ Fusionner</span><span class="cfl-action-note">Garder une salle et annuler son parallèle</span></button>
+    <button type="button" class="danger" onclick="cflBulkCancelLessons()"><span class="cfl-action-title">✕ Annuler</span><span class="cfl-action-note">Annulation sur les dates sélectionnées</span></button>
+   </div><div class="formactions"><button class="btn" onclick="closeModal()">Fermer</button></div>`);
+ };
+ window.cflBulkChangeCoach=function(){
+  const rows=selected();if(!rows.length)return;
+  const coaches=cdata.coaches.filter(c=>c.id!=='assistant');
+  copen(`<h2>${rows.length>1?'Modifier les attributions':'Attribution du cours'}</h2><p class="sub">Le coach choisi remplace l’attribution actuelle sur toute la sélection.</p>
+    ${overview(rows)}<div class="cfl-bulk-summary">${rows.map(x=>`${line(x)} · ${esc(shortName(x.replacement))}`).join('<br>')}</div>
+    <form id="cflChangeCoachesForm"><div class="formgrid">
+      <div class="formrow full"><label>Coach à attribuer</label><select name="replacement" required><option value="">Choisir un coach</option>${coaches.map(c=>`<option value="${esc(c.id)}" ${rows.every(x=>x.replacement===c.id)?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>
+      <div class="formrow full"><label>État après modification</label><select name="status"><option value="Confirmé">Confirmé — mise à jour Zen Planner à vérifier</option><option value="Zen Planner mis à jour">Zen Planner mis à jour (coché manuellement)</option></select></div>
+    </div><p class="cfl-confirm-note">Cette action remplace l’ancien coach sur les cours sélectionnés. Elle ne modifie pas Zen Planner automatiquement.</p>
+    <div class="formactions"><button type="button" class="btn" onclick="cflBulkActionMenu()">Retour</button><button class="btn primary">Enregistrer les attributions</button></div></form>`);
+  document.getElementById('cflChangeCoachesForm').onsubmit=e=>{
+   e.preventDefault();const data=new FormData(e.target),id=String(data.get('replacement')||''),status=String(data.get('status')||'Confirmé');
+   if(!id)return;
+   if(rows.some(x=>x.coach===id)){alert('Le coach sélectionné est déjà le coach habituel de certains cours. Vérifiez la sélection.');return;}
+   rows.forEach(x=>{x.replacement=id;x.status=status});
+   afterAction(`${rows.length} attribution(s) enregistrée(s)`);
+  };
+ };
+ window.cflBulkZenStatus=function(){
+  const rows=selected();if(!rows.length)return;
+  if(rows.some(x=>x.status==='À couvrir'||!x.replacement)){alert('Sélectionnez uniquement des cours attribués.');return;}
+  copen(`<h2>Suivi Zen Planner · ${rows.length} cours</h2><p class="sub">Enregistrez l’état de suivi des cours sélectionnés.</p>${overview(rows)}
+   <div class="cfl-bulk-summary">${rows.map(x=>`${line(x)} · ${esc(shortName(x.replacement))}`).join('<br>')}</div>
+   <div class="cfl-bulk-menu"><button type="button" onclick="cflBulkSetZenStatus('Zen Planner mis à jour')"><span class="cfl-action-title">✓ Cocher « Zen Planner mis à jour »</span><span class="cfl-action-note">Archiver les cours après vérification manuelle dans Zen Planner</span></button>
+   <button type="button" onclick="cflBulkSetZenStatus('Confirmé')"><span class="cfl-action-title">↶ Revenir à « Confirmé »</span><span class="cfl-action-note">Le cours réapparaît dans les remplacements actifs</span></button></div>
+   <div class="cfl-bulk-state">Ce suivi ne réalise aucune modification dans Zen Planner : il enregistre uniquement la vérification faite par la gestionnaire.</div>
+   <div class="formactions"><button class="btn" onclick="cflBulkActionMenu()">Retour</button></div>`);
+ };
+ window.cflBulkSetZenStatus=function(status){
+  const rows=selected();if(rows.some(x=>!x.replacement||x.status==='À couvrir'))return alert('Sélection contenant un cours non attribué.');
+  rows.forEach(x=>x.status=status);
+  afterAction(`${rows.length} cours : ${status}`);
+ };
+ // Keep single-course editing available with the existing Modify button.
+ // Reuse the unified edit for individual selected entries through a direct action.
+ window.cflSingleCoverMenu=function(id){
+   const x=cdata.cover.find(y=>y.id===id);if(!x)return;
+   const current=window.cflGetSelectedCoverIds?.()||[];
+   if(!current.includes(id)){
+     // Preserve the original selection if any; the one-course edit remains available via ccoverEdit.
+     window.ccoverEdit(id);return;
+   }
+   window.cflBulkActionMenu();
+ };
+})();
+</script>
+
+<style id="cfl-v2537-demandes-style">
+.cfl-request-open{cursor:pointer;transition:border-color .15s,background .15s}
+.cfl-request-open:hover{border-color:#d65764!important;background:#24232b}
+.cfl-request-open:focus-visible{outline:2px solid #ff7280;outline-offset:3px}
+.cfl-request-details{display:grid;gap:14px;margin:19px 0}
+.cfl-request-detail{padding:15px 17px;background:#242832;border:1px solid #3f4654;border-radius:12px}
+.cfl-request-detail label{display:block;color:#aebacd;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px}
+.cfl-request-detail p{margin:0;color:#f5f6fc;font-size:14px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.cfl-request-file{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #485063;border-radius:10px;color:#f5f6fc;text-decoration:none}
+.cfl-request-file:hover{border-color:#ea6875}
+.cfl-request-open .t-request-person{flex:1}
+body[data-cfl-theme="light"] .cfl-request-open:hover{background:#f7e9ec!important}
+body[data-cfl-theme="light"] .cfl-request-detail{background:#f7f9fc;border-color:#d6dfeb}
+body[data-cfl-theme="light"] .cfl-request-detail label{color:#4c596b}
+body[data-cfl-theme="light"] .cfl-request-detail p{color:#202838}
+</style>
+<script id="cfl-v2537-demandes-script">
+(function(){
+ function submittedDate(value){
+   if(!value)return 'Date non renseignée';
+   const d=new Date(value);
+   return Number.isNaN(d.getTime())?esc(value):d.toLocaleString('fr-CH',{dateStyle:'medium',timeStyle:'short'});
+ }
+ function safeAttachment(r){
+   // A future secure backend can provide a validated URL or a local file data URI.
+   const raw=r.attachmentData||r.attachmentUrl||r.justificatifData||'';
+   if(typeof raw!=='string'||!raw)return '';
+   if(!/^data:(application\/pdf|image\/png|image\/jpeg|image\/webp);base64,[a-z0-9+/=\s]+$/i.test(raw))return '';
+   return `<a class="cfl-request-file" href="${raw}" download="${esc(r.attachmentName||'justificatif')}" title="Télécharger le justificatif">📎 ${esc(r.attachmentName||'Afficher le justificatif')}</a>`;
+ }
+ window.openAbsenceDetail=function(id){
+   const r=cdata.requests.find(x=>x.id===id);if(!r)return;
+   const file=safeAttachment(r);
+   const motif=String(r.reason||r.motif||'').trim();
+   const note=String(r.note||r.comment||r.commentaire||'').trim();
+   const state=r.status==='En attente'?'pending':'archived';
+   copen(`<h2>Demande de ${esc(cname(r.coach))}</h2>
+     <p class="sub">${esc(r.type||'Absence')} · <span class="t-status ${state}">${esc(r.status||'En attente')}</span></p>
+     <div class="slot-edit-facts">
+       <div class="fact"><small>Du</small><strong>${cfmt(r.start)}</strong></div>
+       <div class="fact"><small>Au</small><strong>${cfmt(r.end)}</strong></div>
+       <div class="fact"><small>Soumise le</small><strong>${submittedDate(r.submittedAt||r.createdAt)}</strong></div>
+       <div class="fact"><small>Décision</small><strong>${r.status==='Validée'?submittedDate(r.validatedAt||r.approvedAt):r.status==='Refusée'?'Refusée':'En attente'}</strong></div>
+     </div>
+     <div class="cfl-request-details">
+       <div class="cfl-request-detail"><label>Motif</label><p>${motif?esc(motif):'Aucun motif précisé'}</p></div>
+       <div class="cfl-request-detail"><label>Commentaire</label><p>${note?esc(note):'Aucun commentaire ajouté'}</p></div>
+       <div class="cfl-request-detail"><label>Justificatif</label>${file||'<p>Aucun justificatif joint à cette demande.</p>'}</div>
+     </div>
+     <div class="formactions">
+       <button type="button" class="btn" onclick="closeModal()">Fermer</button>
+       <button type="button" class="btn" onclick="cformRequest('${r.id}')">Modifier</button>
+       ${r.status==='En attente'?`<button type="button" class="btn" onclick="cvalidate('${r.id}','Refusée');closeModal()">Refuser</button><button type="button" class="btn primary" onclick="cvalidate('${r.id}','Validée');closeModal()">Valider la demande</button>`:''}
+     </div>`);
+ };
+})();
+</script>
+<style id="cfl-v2538-style">
+.cfl-waiting-tag{background:#46391e;color:#ffd68d;border:1px solid #94703d;border-radius:9px;padding:5px 9px;font-size:11px;font-weight:750}
+.cfl-bulk-menu button[disabled]{opacity:.35;cursor:not-allowed;pointer-events:none}
+.cfl-bulk-summary{overflow-wrap:anywhere}
+body[data-cfl-theme="light"] .cfl-waiting-tag{background:#fff4dd;color:#85520b}
+</style>
+<script id="cfl-v2538-pending-flow">
+(function(){
+const STORE='cfl_coach_replacement_offers_v1';
+const offers=()=>{try{return JSON.parse(localStorage.getItem(STORE)||'[]')||[]}catch{return []}};
+window.cflPendingFor=function(cover){return offers().find(o=>o.coverId===cover.id&&o.status==='Proposé')||null};
+window.cflPendingName=function(cover){const offer=cflPendingFor(cover);return offer?(cdata.coaches.find(c=>c.id===offer.coachId)?.name||'coach inconnu'):'—'};
+const selected=()=>{const ids=window.cflGetSelectedCoverIds?.()||[];return cdata.cover.filter(x=>ids.includes(x.id))};
+const item=x=>`${cfmt(x.date)} · ${esc(x.time)} · ${esc(x.course)} — ${esc(x.room)}`;
+window.cflBulkActionMenu=function(){
+ const rows=selected();if(!rows.length){notice('Sélectionnez au moins un cours');return;}
+ const waiting=rows.filter(x=>!!cflPendingFor(x)), open=rows.filter(x=>x.status==='À couvrir'&&!cflPendingFor(x)), confirmed=rows.filter(x=>x.status==='Confirmé'&&!!x.replacement), synced=rows.filter(x=>x.status==='Zen Planner mis à jour');
+ const allConfirmed=confirmed.length===rows.length, allOpen=open.length===rows.length;
+ copen(`<h2>${rows.length} cours sélectionné${rows.length>1?'s':''}</h2><p class="sub">${allConfirmed?'Cours confirmés : modifier l’attribution ou valider le suivi Zen Planner.':allOpen?'Cours à couvrir : attribuer, proposer, fusionner ou annuler.':'Sélection mixte : les actions disponibles dépendent des statuts.'}</p>
+  <div class="cfl-status-chips"><span>À couvrir : <b>${open.length}</b></span><span>En attente de réponse : <b>${waiting.length}</b></span><span>Confirmés : <b>${confirmed.length}</b></span><span>Zen Planner : <b>${synced.length}</b></span></div>
+  <div class="cfl-bulk-summary">${rows.map(x=>item(x)+' · '+esc(cflPendingFor(x)?'En attente de '+cflPendingName(x):x.status)+(x.replacement?' · '+esc(cdata.coaches.find(c=>c.id===x.replacement)?.name||''):'')).join('<br>')}</div>
+  <div class="cfl-bulk-menu">
+   <button onclick="cflBulkChangeCoach()"><span class="cfl-action-title">✎ ${allConfirmed?'Modifier l’attribution':'Attribuer / modifier le coach'}</span><span class="cfl-action-note">${allConfirmed?'Changer le coach directement ou reprendre une attribution':'Attribuer directement les cours sélectionnés'}</span></button>
+   <button ${rows.every(x=>!!x.replacement&&['Confirmé','Zen Planner mis à jour'].includes(x.status))?'':'disabled title="Réservé aux cours attribués et confirmés"'} onclick="cflBulkUnassignCoach()"><span class="cfl-action-title">↶ Retirer le coach attribué</span><span class="cfl-action-note">Libérer tous les cours sélectionnés et les remettre à couvrir</span></button>
+   <button ${allConfirmed?'':'disabled title="Disponible uniquement pour les cours confirmés"'} onclick="cflBulkSetZenStatus('Zen Planner mis à jour')"><span class="cfl-action-title">✓ Zen Planner mis à jour</span><span class="cfl-action-note">${allConfirmed?'Cocher après mise à jour manuelle':'Disponible uniquement après confirmation'}</span></button>
+   <button ${allOpen?'':'disabled'} onclick="cflBulkPropose()"><span class="cfl-action-title">✉ Proposer à un coach</span><span class="cfl-action-note">Uniquement pour les cours à couvrir sans proposition active</span></button>
+   <button ${waiting.length===rows.length?'':'disabled'} onclick="cflBulkWithdrawOffer()"><span class="cfl-action-title">↶ Retirer une proposition</span><span class="cfl-action-note">Remettre les cours « à couvrir »</span></button>
+   <button onclick="cflBulkMergeLessons()"><span class="cfl-action-title">⇄ Fusionner</span><span class="cfl-action-note">Fusionner les cours concernés</span></button>
+   <button class="danger" onclick="cflBulkCancelLessons()"><span class="cfl-action-title">✕ Annuler</span><span class="cfl-action-note">Annuler les cours à ces dates</span></button>
+  </div><div class="formactions"><button class="btn" onclick="closeModal()">Fermer</button></div>`);
+};
+window.cflBulkWithdrawOffer=function(){
+ const rows=selected();if(!rows.length||rows.some(x=>!cflPendingFor(x)))return;
+ if(!confirm('Retirer les propositions envoyées sur ces cours ?'))return;
+ const ids=new Set(rows.map(x=>x.id)),all=offers();all.forEach(o=>{if(ids.has(o.coverId)&&o.status==='Proposé'){o.status='Retiré';o.respondedAt=new Date().toISOString()}});
+ localStorage.setItem(STORE,JSON.stringify(all));closeModal();window.clearCoverSelection?.();render();notice('Propositions retirées : cours de nouveau à couvrir');
+};
+// Ensure pending proposals are cancelled when a replacement is directly re-assigned.
+const priorChange=window.cflBulkChangeCoach;
+window.cflBulkChangeCoach=function(){
+ const rows=selected();if(rows.some(x=>!!cflPendingFor(x))&&!confirm('Certains cours attendent une réponse. Modifier l’attribution annulera leurs propositions en attente. Continuer ?'))return;
+ priorChange();const f=document.getElementById('cflChangeCoachesForm');if(!f)return;
+ f.addEventListener('submit',()=>{const ids=new Set(rows.map(x=>x.id)),all=offers();all.forEach(o=>{if(ids.has(o.coverId)&&o.status==='Proposé'){o.status='Retiré';o.respondedAt=new Date().toISOString()}});localStorage.setItem(STORE,JSON.stringify(all));}, {capture:true});
+};
+// Refresh after returning from the coach portal, so waiting labels reflect accept/refuse.
+window.addEventListener('focus',()=>{if(typeof page!=='undefined'&&page==='coaches')render()});
+})();
+</script><style id="cfl-v2538-week-pending-style">
+.cweekly-slot.awaiting-coach,.cweekly-slot.awaiting-coach:hover,.slot-clickable.awaiting-coach{border-color:#b18b47!important;background:repeating-linear-gradient(135deg,#5b461e44 0 7px,#242024 7px 14px)!important}
+.slot-awaiting-label{display:block;color:#f1c978;font-size:11px;font-weight:800;white-space:normal;line-height:1.3;margin-top:5px}
+body[data-cfl-theme="light"] .slot-clickable.awaiting-coach{background:repeating-linear-gradient(135deg,#fff4dd 0 7px,#fffaf0 7px 14px)!important}
+body[data-cfl-theme="light"] .slot-awaiting-label{color:#835109!important}
+</style>
+<script id="cfl-v2538-week-pending-script">
+(function(){
+ const previous=window.cflRenderedWeekSlot;
+ if(typeof previous!=='function')return;
+ window.cflRenderedWeekSlot=function(slot,date){
+   const html=previous(slot,date);
+   const cover=typeof ccoverForSlot==='function'?ccoverForSlot(slot,date):null;
+   if(!cover||!window.cflPendingFor||!cflPendingFor(cover)||cover.status!=='À couvrir')return html;
+   const label='En attente de '+cflPendingName(cover);
+   return html.replace(/class="([^"]*slot-clickable[^"]*)"/,(_,classes)=>`class="${classes} awaiting-coach"`)
+     .replace(/<span class="slot-alert">À couvrir<\/span>/,'')
+     .replace(/<span class="slot-coach">[^<]*<\/span>/,`<span class="slot-coach">${esc(label)}</span>`)
+     .replace(/<\/button>$/,`<span class="slot-awaiting-label">Proposition envoyée · réponse attendue</span></button>`);
+ };
+})();
+</script>
+<style id="cfl-v2539-layout-pending-orange">
+/* Pending proposal is orange, distinct from uncovered red and confirmed dark. */
+.cweekly-panel .slot-clickable.awaiting-coach,
+.cweekly-panel .cweekly-slot.awaiting-coach,
+.cweekly-panel .slot-clickable.awaiting-coach:hover{
+  background:linear-gradient(145deg,rgba(214,130,32,.31),rgba(112,63,19,.36))!important;
+  border:1px solid #e29b43!important;
+  box-shadow:inset 3px 0 0 #f5ae55!important;
+}
+.cweekly-panel .slot-clickable.awaiting-coach .slot-coach,
+.cweekly-panel .slot-clickable.awaiting-coach .slot-awaiting-label{
+  color:#ffd79b!important;
+}
+.cover-day-content .coach-cover-row{
+  display:grid!important;
+  grid-template-columns:22px minmax(240px,1fr) minmax(125px,max-content) max-content max-content!important;
+  align-items:center!important;
+  column-gap:12px!important;
+  row-gap:0!important;
+  min-width:0;
+  padding:14px 12px!important;
+}
+.cover-day-content .coach-cover-row>input.coach-cover-check{grid-column:1;justify-self:center}
+.cover-day-content .coach-cover-row>div{grid-column:2;min-width:0}
+.cover-day-content .coach-cover-row>em{grid-column:3!important;justify-self:end;text-align:right;white-space:normal;max-width:220px}
+.cover-day-content .coach-cover-row>.btn{grid-row:1;justify-self:end;white-space:nowrap;grid-column:4!important}
+.cover-day-content .coach-cover-row>.btn:last-child{grid-column:5!important}
+.cover-day-content .coach-cover-row>.btn:only-of-type{grid-column:5!important}
+.cover-day-content .coach-cover-row.cfl-row-awaiting{
+  background:rgba(214,130,32,.075)!important;
+  border-left:3px solid #e6a34b!important;
+}
+.cover-day-content .coach-cover-row.cfl-row-awaiting>em{color:#ffca7d!important;font-weight:800}
+body[data-cfl-theme="light"] .cweekly-panel .slot-clickable.awaiting-coach{
+  background:#ffebcc!important;border-color:#cb8529!important;
+}
+body[data-cfl-theme="light"] .cweekly-panel .slot-clickable.awaiting-coach .slot-coach,
+body[data-cfl-theme="light"] .cweekly-panel .slot-clickable.awaiting-coach .slot-awaiting-label{color:#7b450b!important}
+body[data-cfl-theme="light"] .cover-day-content .coach-cover-row.cfl-row-awaiting{background:#fff5e6!important}
+body[data-cfl-theme="light"] .cover-day-content .coach-cover-row.cfl-row-awaiting>em{color:#92520b!important}
+@media(max-width:950px){
+ .cover-day-content .coach-cover-row{grid-template-columns:22px minmax(0,1fr) auto auto!important;row-gap:9px!important}
+ .cover-day-content .coach-cover-row>em{grid-column:3 / 5!important;grid-row:1}
+ .cover-day-content .coach-cover-row>.btn{grid-row:2!important;grid-column:3!important}
+ .cover-day-content .coach-cover-row>.btn:last-child,
+ .cover-day-content .coach-cover-row>.btn:only-of-type{grid-column:4!important}
+}
+@media(max-width:550px){
+ .cover-day-content .coach-cover-row{grid-template-columns:22px minmax(0,1fr) auto!important}
+ .cover-day-content .coach-cover-row>em{grid-column:2 / 4!important;grid-row:2!important;justify-self:start}
+ .cover-day-content .coach-cover-row>.btn{grid-row:3!important;grid-column:2!important}
+ .cover-day-content .coach-cover-row>.btn:last-child,
+ .cover-day-content .coach-cover-row>.btn:only-of-type{grid-column:3!important}
+}
+</style>
+
+<style id="cfl-v2540-orange-unassign">
+/* Orange cards outrank the urgent-red to-cover palette while an offer is pending. */
+.cweekly-panel button.awaiting-coach,
+.cweekly-panel button.awaiting-coach.to-cover,
+.cweekly-panel button.awaiting-coach[class*="to-cover"],
+.cweekly-panel .slot-clickable.awaiting-coach{
+ background:#55351b!important;
+ background-image:linear-gradient(135deg,#68421f,#4b3023)!important;
+ border:2px solid #f4a73e!important;
+ box-shadow:inset 4px 0 0 #f5ae55!important;
+ color:#fff0d8!important;
+}
+.cweekly-panel button.awaiting-coach .slot-alert{display:none!important}
+.cweekly-panel button.awaiting-coach .slot-coach,
+.cweekly-panel button.awaiting-coach .slot-awaiting-label{color:#ffda9d!important}
+body[data-cfl-theme="light"] .cweekly-panel button.awaiting-coach{
+ background:#ffe7c6!important;background-image:none!important;
+ border-color:#d88317!important;color:#613808!important;
+}
+</style>
+<script id="cfl-v2540-orange-unassign-script">
+(function(){
+ // Ensure inline visuals win even when old red classes have more specific CSS rules.
+ const previous=window.cflRenderedWeekSlot;
+ if(typeof previous==='function'){
+  window.cflRenderedWeekSlot=function(slot,date){
+   let html=previous(slot,date);
+   const cover=typeof ccoverForSlot==='function'?ccoverForSlot(slot,date):null;
+   if(!cover||cover.status!=='À couvrir'||!window.cflPendingFor?.(cover))return html;
+   html=html.replace(/class="([^"]*slot-clickable[^"]*)"/,(_,cls)=>`class="${cls.includes('awaiting-coach')?cls:cls+' awaiting-coach'}"`);
+   // Put a highly visible orange fill right on the calendar button.
+   return html.replace(/(<button\b[^>]*class="[^"]*awaiting-coach[^"]*")/, '$1 style="background:#55351b!important;background-image:linear-gradient(135deg,#68421f,#4b3023)!important;border:2px solid #f4a73e!important;box-shadow:inset 4px 0 0 #f5ae55!important;color:#fff0d8!important"');
+  };
+ }
+ window.cflBulkUnassignCoach=function(){
+  const ids=window.cflGetSelectedCoverIds?.()||[];
+  const rows=cdata.cover.filter(x=>ids.includes(x.id));
+  if(!rows.length)return;
+  if(rows.some(x=>!x.replacement||!['Confirmé','Zen Planner mis à jour'].includes(x.status))){
+   alert('Sélectionnez seulement des cours déjà attribués et confirmés.');return;
+  }
+  const named=[...new Set(rows.map(x=>cdata.coaches.find(c=>c.id===x.replacement)?.name||'Coach'))].join(', ');
+  if(!confirm(`Retirer l’attribution de ${rows.length} cours à ${named} ?\n\nLes cours redeviendront « À couvrir ». Cette opération ne modifie pas Zen Planner automatiquement.`))return;
+  const offersKey='cfl_coach_replacement_offers_v1';
+  let offers=[];try{offers=JSON.parse(localStorage.getItem(offersKey)||'[]')||[]}catch{}
+  const changed=new Set(rows.map(x=>x.id));
+  for(const o of offers){if(changed.has(o.coverId)&&o.status==='Proposé'){o.status='Retiré';o.respondedAt=new Date().toISOString();}}
+  try{localStorage.setItem(offersKey,JSON.stringify(offers));}catch{}
+  for(const x of rows){x.replacement='';x.status='À couvrir';}
+  csave();closeModal();window.clearCoverSelection?.();render();notice(`${rows.length} cours remis à couvrir`);
  };
 })();
 </script>

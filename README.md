@@ -1,21 +1,21 @@
-# CFL CONTROL — Démo de présentation
+# CFL CONTROL — Démo Vercel (V2.5.40)
 
-Prototype interactif de gestion de CrossFit Léman, avec Dashboard, tâches hebdomadaires, BEYOND THE BOX. (Events), coachs / absences / remplacements.
+## Fichiers
+- `index.html` : administration CFL CONTROL V2.5.40
+- `coach.html` : portail coach premium V2.5.35
+- `vercel.json` : configuration statique Vercel (URL propre)
 
-## Publier sur GitHub Pages (sans commandes)
+## Déploiement Vercel
+1. Décompresser le ZIP.
+2. Déposer les fichiers à la **racine** d'un dépôt GitHub (par exemple `events_CFL`), puis importer ce dépôt dans Vercel, ou utiliser Vercel CLI (`vercel --prod`) depuis ce dossier.
+3. Framework preset : **Other** ; Build Command : **aucune** ; Output Directory : **racine (`.`)**.
+4. Accès : `/` pour l'administration, `/coach` ou `/coach.html` pour le portail coach.
 
-1. Sur GitHub, créer un dépôt **public** (ex. `cfl-control-demo`). Ne pas y déposer de données personnelles sensibles.
-2. **Décompresser le ZIP**, puis cliquer sur **Add file → Upload files** et déposer `index.html`, `.nojekyll` et `README.md` **à la racine du dépôt**, pas dans un sous-dossier.
-3. Cliquer sur **Commit changes**.
-4. Aller dans **Settings → Pages → Build and deployment** ; choisir **Deploy from a branch**, branche **main**, dossier **/(root)** ; enregistrer.
-5. Ouvrir l'adresse affichée par GitHub Pages, normalement `https://VOTRE-PSEUDO.github.io/cfl-control-demo/`.
+## Limites de la démo
+- L'interface est statique : aucune API/backend ni aucun compte sécurisé n'est fourni.
+- Les données (demandes, remplacements, réponses) utilisent `localStorage` : elles ne se synchronisent **pas entre appareils ou navigateurs** ; les deux pages communiquent uniquement sur la même origine et dans le même navigateur.
+- **Aucun véritable e-mail ou notification push n'est envoyé.**
+- L'état « Zen Planner mis à jour » est un **suivi manuel**, sans intégration Zen Planner.
+- Le portail permet de choisir librement un profil coach : **ne pas utiliser pour de vraies données personnelles ou des opérations de production**, et limiter l'accès à la démo si nécessaire.
 
-## IMPORTANT — maquette, pas une application en production
-
-- Les tâches, affectations et absences sont conservées uniquement dans le **stockage local du navigateur**. Un autre navigateur ou appareil ne retrouve pas les mêmes données ; pas de sauvegarde serveur.
-- Les identifiants ou droits d'accès réels ne sont pas mis en œuvre. Un dépôt GitHub Pages public rend la démo accessible à toute personne connaissant le lien.
-- BEYOND THE BOX. est intégré à la page et sa liaison locale avec le planning des coachs doit être testée sur l'URL publiée avant la présentation. Aucune synchronisation avec Zen Planner ou le site Events public.
-- N'utiliser que des données de démonstration ; ne pas saisir d'informations RH confidentielles dans cette version.
-- Pour mettre à jour la démo, remplacer simplement `index.html` sur la branche `main`.
-
-**Version de base :** CFL CONTROL V2.5.29 (HTML autonome). Aucun build ni installation de dépendances.
+Avant une utilisation réelle, prévoir une authentification, des autorisations et une base partagée côté serveur (par exemple Supabase).
