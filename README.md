@@ -1,4 +1,4 @@
-# CFL CONTROL — Landing Admin / Agenda / TV (V3, environnement de test)
+# CFL CONTROL — Landing Admin / Agenda / TV (V4, environnement de test)
 
 ## Navigation sur Vercel
 - `/` : **landing page CFL CONTROL**, deux grandes entrées (Agenda CFL / CFL TV) et accès à la vue membres.
@@ -20,3 +20,13 @@ Déployer le contenu du ZIP sur le dépôt relié à Vercel, en remplaçant les 
 - Connexion Trello : non active.
 - BTWB : simulations uniquement, modules officiels non connectés.
 - Le nom public `events.crossfitleman.ch` devrait ensuite pointer vers l'agenda membres, et non vers cette landing admin. La landing admin sera déplacée sur une URL d'administration distincte avec authentification.
+
+
+## V4 : Diffusion CFL TV /diaporama.html
+- Studio `/tv.html` : bouton **Préparer la publication** télécharge un `diaporama.html` autonome contenant les slides courantes, leurs durées, images/affiches et QR.
+- Remplacer le fichier `diaporama.html` à la racine du dépôt puis déployer sur Vercel.
+- Lien à partager avec les écrans TV : `https://VOTRE-DOMAINE-VERCEL/diaporama.html` (ou `.../diaporama` avec cleanUrls).
+- Ce n'est pas encore une publication directe côté serveur : sans backend/auth, le bouton prépare le fichier mais ne peut pas modifier Vercel lui-même.
+- Le fichier initial du pack est une page d'attente tant que vous n'avez pas généré et déployé votre premier diaporama.
+- La vue mensuelle utilise **une seule colonne**, avec affiches miniatures en **object-fit: contain**, sans recadrage.
+- Attention : ce prototype ne synchronise pas encore automatiquement les modifications postérieures à l'export. Pour actualiser, exporter à nouveau puis déployer.
