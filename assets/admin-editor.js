@@ -21,6 +21,7 @@
  .cfl-v10-actions button{padding:12px 20px;border-radius:9px;border:1px solid #6e7687;color:white;background:#273449;font:700 14px system-ui;cursor:pointer}
  .cfl-v10-actions .primary{background:#a82a4c;border-color:#e66183}.cfl-v10-actions .danger{margin-right:auto;background:#45212b}
  #cfl-v10-dialog .error{color:#ffbdc7;font-weight:750;margin-top:10px}#cfl-v10-dialog .hint{font-size:12px;color:#bec6d7;margin-top:5px}
+ #cfl-v10-dialog .choice-buttons{display:flex;gap:7px;flex-wrap:wrap}#cfl-v10-dialog .choice-buttons button{border:1px solid #66758f;border-radius:9px;background:#1d2b42;color:#fff;font:700 13px system-ui;padding:10px 13px;cursor:pointer}#cfl-v10-dialog .choice-buttons button[aria-pressed=true]{border-color:#f27c9c;background:#803047;box-shadow:0 0 0 1px #f27c9c}#cfl-v10-dialog .visual-bank{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;max-height:275px;overflow:auto;padding:8px;border:1px solid #48536a;border-radius:12px}#cfl-v10-dialog .visual-choice{border:2px solid transparent;background:#263246;border-radius:10px;padding:6px;cursor:pointer;color:white;text-align:left}#cfl-v10-dialog .visual-choice[aria-pressed=true]{border-color:#fb8ba8}#cfl-v10-dialog .visual-choice img{width:100%;height:82px;object-fit:contain;margin:0 auto 5px}#cfl-v10-dialog .visual-choice span{display:block;font:11px system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
  #cfl-v10-dialog img{max-height:140px;max-width:200px;object-fit:contain;display:block;margin-top:8px;border-radius:8px}
  @media(max-width:580px){.cfl-v10-fields{grid-template-columns:1fr}.cfl-v10-wide{grid-column:auto}}
  `;
@@ -33,13 +34,26 @@
   if(!client)return;
   const {data:{user},error:ue}=await client.auth.getUser();if(ue||!user)return;
   const {data:role,error:re}=await client.from('app_admins').select('user_id').eq('user_id',user.id).maybeSingle();if(re||!role)return;
-  document.body.prepend(toolbar);document.body.append(overlay);const status=document.getElementById('v10-status');status.textContent='Édition Supabase active';
+  document.body.prepend(toolbar);document.body.append(overlay);document.body.classList.add('cfl-unified-admin');const status=document.getElementById('v10-status');status.textContent='Édition Supabase active';
   const dialog=document.getElementById('cfl-v10-dialog');let rows=[];
   const notify=(message)=>status.textContent=message;
   const load=async()=>{const {data,error}=await client.from('events').select('*').order('start_date',{ascending:true});if(error)throw error;rows=data||[];return rows};
   const categories=()=>typeof CATS!=='undefined'?CATS.map(x=>x[0]):['Compétitions / Challenges','Community Events','Événements','Workshops / Formations','Soirées & convivialité'];
   const safeDate=(d)=>/^\d{4}-\d{2}-\d{2}$/.test(d||'')?d:new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Zurich'});
   const close=()=>{overlay.classList.remove('open');dialog.innerHTML=''};
+  function optionsGroup(name,items,selected){return `<input type="hidden" name="${name}" value="${esc(selected||items[0][0])}"><div class="choice-buttons" data-choice-name="${name}">${items.map(([v,label])=>`<button type="button" data-val="${esc(v)}" aria-pressed="${v===(selected||items[0][0])}">${esc(label)}</button>`).join('')}</div>`}
+  function bindChoiceGroups(){dialog.querySelectorAll('[data-choice-name]').forEach(g=>g.addEventListener('click',ev=>{const btn=ev.target.closest('[data-val]');if(!btn)return;const name=g.dataset.choiceName;g.parentElement.querySelector(`input[name="${name}"]`).value=btn.dataset.val;g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)))}))}
+  async function fillImageBank(current){
+   const root=dialog.querySelector('#v12-gallery');if(!root)return;
+   let items=[];const visual=window.CFL_CAL_VISUALS||{};
+   for(const [key,data] of Object.entries(visual)){if(typeof data==='string'&&data.startsWith('data:image/'))items.push({key,url:data,name:key,kind:'legacy'});}
+   for(const row of rows){if(row.image_url&&!items.some(v=>v.url===row.image_url))items.push({key:row.image_url,url:row.image_url,name:row.title,kind:'remote'});}
+   try{const {data}=await client.storage.from('cfl-events').list('events',{limit:100,sortBy:{column:'created_at',order:'desc'}});for(const f of data||[]){if(!f.name||f.name.startsWith('.'))continue;const url=client.storage.from('cfl-events').getPublicUrl('events/'+f.name).data.publicUrl;if(!items.some(v=>v.url===url))items.push({key:url,url,name:f.name,kind:'remote'});}}catch(_e){}
+   const selectedKey=current.image_url||current.legacy_visual_key||'';
+   root.innerHTML=items.length?items.slice(0,120).map(v=>`<button type="button" class="visual-choice" data-kind="${v.kind}" data-key="${esc(v.key)}" aria-pressed="${v.key===selectedKey}"><img loading="lazy" src="${esc(v.url)}" alt=""><span>${esc(v.name)}</span></button>`).join(''):'<span class="hint">Aucune image enregistrée pour le moment.</span>';
+   root.addEventListener('click',ev=>{const b=ev.target.closest('button[data-kind]');if(!b)return;root.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));const url=dialog.querySelector('[name=image_url]');const legacy=dialog.querySelector('[name=legacy_visual_key]');if(b.dataset.kind==='legacy'){legacy.value=b.dataset.key;url.value='';}else{url.value=b.dataset.key;legacy.value='';}const prev=dialog.querySelector('#v12-chosen-image');prev.src=b.querySelector('img').src;prev.hidden=false;});
+  }
+
   function edit(row=null,selectedDate=null){
    const r=row||{};const d=safeDate(selectedDate);const id=r.id||'';
    dialog.innerHTML=`<h2>${id?'Modifier l’événement':'Créer un événement'}</h2><form id="v10-event-form"><div class="cfl-v10-fields">
@@ -48,14 +62,14 @@
    <label>Catégorie<select name="category">${categories().map(c=>`<option ${c===r.category?'selected':''}>${esc(c)}</option>`).join('')}</select></label>
    <label>Début<input type="date" required name="start_date" value="${esc(r.start_date||d)}"></label>
    <label>Fin<input type="date" required name="end_date" value="${esc(r.end_date||d)}"></label>
-   <label>Publication<select name="status"><option value="draft" ${r.status!=='published'?'selected':''}>Brouillon</option><option value="published" ${r.status==='published'?'selected':''}>Publié</option></select></label>
-   <label>Participation / tarif<input name="price_label" value="${esc(r.price_label||'')}"></label>
-   <label class="cfl-v10-wide">Public concerné<input name="audience" value="${esc(r.audience||'')}"></label>
+   <label class="cfl-v10-wide">Publication ${optionsGroup('status',[['draft','Brouillon'],['published','Publié']],r.status||'draft')}</label>
+   <label class="cfl-v10-wide">Tarif ${optionsGroup('price_label',[['À confirmer','À confirmer'],['Gratuit','Gratuit'],['Payant','Payant']],r.price_label||'À confirmer')}</label>
+   <label class="cfl-v10-wide">Public concerné ${optionsGroup('audience',[['À définir','À définir'],['Membres CFL','Membres CFL'],['Membres CFL et sur invitation','Membres CFL et sur invitation'],['Ouvert au public','Ouvert au public']],r.audience||'À définir')}</label>
    <label class="cfl-v10-wide">Lien officiel<input name="link_url" type="url" placeholder="https://…" value="${esc(r.link_url||'')}"></label>
    <label class="cfl-v10-wide">Description<textarea name="description">${esc(r.description||'')}</textarea></label>
-   <label class="cfl-v10-wide">Affiche / image <input name="poster" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><span class="hint">Importer une image la stocke sur Supabase et la rend disponible dans l’agenda et CFL TV.</span><input type="hidden" name="image_url" value="${esc(r.image_url||'')}">${r.image_url?`<img src="${esc(r.image_url)}" alt="Affiche actuelle">`:''}</label>
+   <div class="cfl-v10-wide"><label>Banque d'images déjà enregistrées</label><div id="v12-gallery" class="visual-bank"><span class="hint">Chargement de la galerie…</span></div><p class="hint">Sélectionne une image existante ou importe-en une nouvelle.</p><img id="v12-chosen-image" src="${esc(r.image_url||'')}" alt="Image sélectionnée" ${r.image_url?'':'hidden'}><label>Nouvelle affiche <input name="poster" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label><input type="hidden" name="image_url" value="${esc(r.image_url||'')}"><input type="hidden" name="legacy_visual_key" value="${esc(r.legacy_visual_key||'')}"></div>
    </div><div class="error" id="v10-form-error" role="status"></div><div class="cfl-v10-actions">${id?'<button type="button" class="danger" id="v10-delete">Supprimer</button>':''}<button type="button" id="v10-cancel">Annuler</button><button type="submit" class="primary" id="v10-save">Enregistrer dans Supabase</button></div></form>`;
-   overlay.classList.add('open');dialog.querySelector('#v10-cancel').onclick=close;
+   overlay.classList.add('open');bindChoiceGroups();fillImageBank(r).catch(console.error);dialog.querySelector('#v10-cancel').onclick=close;
    dialog.querySelector('#v10-delete')?.addEventListener('click',async()=>{
     if(!confirm('Supprimer définitivement cet événement de l’agenda ?'))return;
     try{const {error}=await client.from('events').delete().eq('id',id);if(error)throw error;close();notify('Événement supprimé');location.reload()}catch(e){dialog.querySelector('#v10-form-error').textContent=e.message}
@@ -67,7 +81,7 @@
      let image_url=String(fd.get('image_url')||'')||null;const file=fd.get('poster');
      if(file instanceof File&&file.size){if(file.size>10*1024*1024)throw Error('Affiche limitée à 10 Mo.');if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type))throw Error('Format JPG, PNG, WebP ou GIF uniquement.');const ext=file.name.split('.').pop().toLowerCase();const path='events/'+crypto.randomUUID()+'.'+ext;const upload=await client.storage.from('cfl-events').upload(path,file,{contentType:file.type});if(upload.error)throw upload.error;image_url=client.storage.from('cfl-events').getPublicUrl(path).data.publicUrl;}
      const title=String(fd.get('title')).trim();if(!title)throw Error('Titre obligatoire.');const description=String(fd.get('description')||'');
-     const payload={id:id||'cfl-'+crypto.randomUUID(),title,short_title:String(fd.get('short_title')||'').trim()||title,category:String(fd.get('category')),start_date:start,end_date:end,status:String(fd.get('status')),description,summary:description.slice(0,280),price_label:String(fd.get('price_label')||''),audience:String(fd.get('audience')||''),link_url:String(fd.get('link_url')||''),image_url,legacy_visual_key:r.legacy_visual_key||''};
+     const payload={id:id||'cfl-'+crypto.randomUUID(),title,short_title:String(fd.get('short_title')||'').trim()||title,category:String(fd.get('category')),start_date:start,end_date:end,status:String(fd.get('status')),description,summary:description.slice(0,280),price_label:String(fd.get('price_label')||''),audience:String(fd.get('audience')||''),link_url:String(fd.get('link_url')||''),image_url,legacy_visual_key:String(fd.get('legacy_visual_key')||'')};
      const {error}=await client.from('events').upsert(payload);if(error)throw error;close();notify('Événement enregistré dans Supabase ✓');location.reload();
     }catch(e){errorEl.textContent='Enregistrement impossible : '+e.message;saveBtn.disabled=false;saveBtn.textContent='Enregistrer dans Supabase'}
    };
