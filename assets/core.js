@@ -28,12 +28,12 @@ function textFit(art){
  const desc=art.querySelector('.tv-description'); if(!desc)return;
  const copy=art.querySelector('.tv-copy'); const title=copy?.querySelector('.tv-title');
  if(!copy||!title)return;
- let font=36, titleFont=88, gap=24, qr=145;
- for(let n=0;n<18;n++){
+ let font=44, titleFont=83, gap=22, qr=145;
+ for(let n=0;n<24;n++){
   desc.style.fontSize=font+'px';title.style.fontSize=titleFont+'px';copy.style.gap=gap+'px';
   const q=copy.querySelector('.tv-qr');if(q){q.style.width=qr+'px';q.style.height=qr+'px'}
   if(copy.scrollHeight<=copy.clientHeight+1 && title.scrollHeight<=title.clientHeight+1)break;
-  font=Math.max(16,font-1.4);titleFont=Math.max(45,titleFont-2.1);gap=Math.max(9,gap-.9);qr=Math.max(95,qr-3);
+  font=Math.max(25,font-1.1);titleFont=Math.max(48,titleFont-1.7);gap=Math.max(9,gap-.9);qr=Math.max(95,qr-3);
  }
  const over=copy.scrollHeight>copy.clientHeight+1;
  art.dataset.overflow=over?'true':'false';
