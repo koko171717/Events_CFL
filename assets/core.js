@@ -47,15 +47,24 @@ function artRender(frame,slide,events){
   const m=opts.month || '2027-03';const candidates=events.filter(x=>x.start_date<=m+'-31'&&x.end_date>=m+'-01').slice(0,Number(opts.count||6));
   const monthText=new Intl.DateTimeFormat('fr-CH',{month:'long',year:'numeric'}).format(new Date(m+'-01T12:00:00'));
   body=`<div style="display:flex;flex-direction:column;height:100%;width:100%"><h1 class="month-title">Événements du mois</h1><div style="font-size:32px;color:#ffb5c3">${esc(monthText)}</div><div class="month-list" style="grid-template-rows:repeat(${Math.max(candidates.length,1)},minmax(0,1fr))">${candidates.map(x=>`<div class="month-row"><div class="month-image">${imgMarkup(x)}</div><div style="flex:1;min-width:0"><b>${esc(x.short_title||x.title)}</b><small>${esc(period(x))}</small><span class="month-summary">${esc(x.summary||x.description||'')}</span></div></div>`).join('')||'<div class="month-row">Aucun événement publié.</div>'}</div></div>`;
+ }else if(type==='custom'&&opts.view==='annual'){
+  const y=Math.min(2100,Math.max(2025,Number(opts.year)||new Date().getFullYear()));
+  const monthLabels=['JAN','FÉV','MAR','AVR','MAI','JUIN','JUIL','AOÛ','SEP','OCT','NOV','DÉC'];
+  const publicEvents=events.filter(e=>e.status==='published');
+  body=`<div class="annual-slide"><div class="annual-slide-top"><h1>AGENDA ${y}</h1><span>ÉVÉNEMENTS CROSSFIT LÉMAN</span></div><div class="annual-slide-grid">${monthLabels.map((label,m)=>{
+   const start=`${y}-${String(m+1).padStart(2,'0')}-01`;const end=`${y}-${String(m+1).padStart(2,'0')}-31`;
+   const items=publicEvents.filter(e=>e.start_date<=end&&e.end_date>=start).sort((a,b)=>a.start_date.localeCompare(b.start_date));
+   return `<section class="annual-slide-month"><header><span>${String(m+1).padStart(2,'0')}</span>${label}</header><div class="annual-slide-items">${items.slice(0,5).map(e=>`<div class="annual-slide-item"><b>${esc(e.start_date.slice(8,10))}</b><span>${esc(e.short_title||e.title)}</span></div>`).join('')||'<span class="annual-slide-empty">—</span>'}${items.length>5?`<small>+${items.length-5} événements</small>`:''}</div></section>`;
+  }).join('')}</div></div>`;
  }else if(type==='btwb'){
   const mainId=String(opts.trackId||'84043');const trainId=String(opts.trainTrackId||'');
-  const safeId=/^\d+$/.test(mainId)?mainId:'84043';const safeTrain=/^\d+$/.test(trainId)&&trainId!==safeId?trainId:'';
+  const safeId=/^\d+$/.test(mainId)?mainId:'84043';const safeTrain=/^\d+$/.test(trainId)&&trainId!==safeId?trainId:'';const trackNames={'84043':'CROSSFIT LÉMAN PROGRAM','1237036':'HWPO FOCUS','1237037':'HWPO AFFILIATE','1237038':'HWPO AFFILIATE — COACHES NOTES','1237039':'HWPO SWEAT','1237040':'HWPO ACCESSORY','1237041':'HWPO EMOM 40','1237042':'HWPO HYROX','1237043':'HWPO BODYBUILDING'};const titleFor=id=>trackNames[id]||'PROGRAMMATION BTWB';
   // The official widget owns its DOM and layout; do not parse/rewrite private BTWB responses.
   // Refreshes when returning to the slide, at minimum every 5 minutes, and after midnight.
   const currentDay=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Zurich',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const revision=Math.floor(Date.now()/300000);
-  const widgetFrame=(id,label)=>`<section class="btwb-pane"><h2>${label}</h2><iframe class="btwb-embed" title="BTWB ${label}" loading="eager" src="/api/btwb-widget?track=${id}&v=${revision}&day=${currentDay}" referrerpolicy="same-origin"></iframe></section>`;
-  body=`<div class="btwb-screen"><div class="btwb-date">SÉANCE DU JOUR · ${esc(new Intl.DateTimeFormat('fr-CH',{timeZone:'Europe/Zurich',weekday:'long',day:'numeric',month:'long'}).format(new Date()))}</div><div class="btwb-panes ${safeTrain?'two':''}">${widgetFrame(safeId,safeTrain?'WOD / RX':'WOD · VARIANTES')}${safeTrain?widgetFrame(safeTrain,'TRAIN'):''}</div><p class="btwb-note">Source : programmation officielle BTWB · Section Main</p></div>`;
+  const widgetFrame=(id,label)=>`<section class="btwb-pane"><h2>${esc(titleFor(id))}${label?` <small>· ${esc(label)}</small>`:""}</h2><iframe class="btwb-embed" title="BTWB ${label}" loading="eager" src="/api/btwb-widget?track=${id}&v=${revision}&day=${currentDay}" referrerpolicy="same-origin"></iframe></section>`;
+  body=`<div class="btwb-screen"><div class="btwb-date"><strong>${esc(titleFor(safeId))}${safeTrain?" + "+esc(titleFor(safeTrain)):""}</strong><span>SÉANCE DU JOUR · ${esc(new Intl.DateTimeFormat('fr-CH',{timeZone:'Europe/Zurich',weekday:'long',day:'numeric',month:'long'}).format(new Date()))}</span></div><div class="btwb-panes ${safeTrain?'two':''}">${widgetFrame(safeId,safeTrain?'WOD / RX':'WOD · VARIANTES')}${safeTrain?widgetFrame(safeTrain,'TRAIN'):''}</div><p class="btwb-note">Source : programmation officielle BTWB · Section Main</p></div>`;
  }else{
   const title=opts.title || e.title || 'Événement CFL';const description=String(opts.description||'').trim() || e.description || ''; 
   const date=opts.showDate!==false ? `<div class="tv-meta">${esc(opts.dateLabel||period(e))}</div>`:'';
@@ -66,7 +75,7 @@ function artRender(frame,slide,events){
   const copy=`<div class="tv-copy"><div class="tv-tag">${esc(e.category||'Événement')}</div><h1 class="tv-title">${esc(title)}</h1>${opts.showDesc!==false?`<div class="tv-description">${esc(description)}</div>`:''}${date}${price}<div class="tv-footer"><div class="url">${esc(opts.qrUrl||e.link_url||'')}</div>${qr}</div></div>`;
   body=opts.layout==='poster-left'?poster+copy:copy+poster;
  }
- frame.innerHTML=`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Léman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='month'?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
+ frame.innerHTML=`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Léman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
  scaleArtwork(frame);textFit(frame.querySelector('.tv-art'));
  const qrEl=frame.querySelector('.qr-target');
  if(qrEl && window.QRCode){

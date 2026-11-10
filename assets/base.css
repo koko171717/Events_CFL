@@ -59,3 +59,13 @@
 .btwb-pane h2{margin:0;padding:18px 25px 14px;background:#171f2d;color:white;font-size:35px;line-height:1.1}
 .btwb-embed{flex:1;min-height:0;width:100%;border:0;background:#fff}
 .btwb-note{font-size:22px;color:#a4b1c7;margin:0;line-height:1.15}
+
+/* V10: annual calendar and track headers */
+.annual-slide{width:100%;height:100%;display:flex;flex-direction:column;gap:22px;min-height:0}
+.annual-slide-top{display:flex;align-items:end;justify-content:space-between;border-bottom:3px solid #a93d56;padding-bottom:10px}.annual-slide-top h1{font-size:73px;line-height:1;margin:0;letter-spacing:-.04em}.annual-slide-top>span{font-size:22px;color:#f5b2c4;letter-spacing:.08em;font-weight:800}
+.annual-slide-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:14px;flex:1;min-height:0}
+.annual-slide-month{min-height:0;border:1px solid #66708466;background:linear-gradient(150deg,#263042bb,#111a2cc4);border-radius:16px;overflow:hidden}
+.annual-slide-month header{padding:10px 15px;background:#63293b66;color:#fff;font-size:29px;font-weight:900;display:flex;gap:15px;align-items:center}.annual-slide-month header span{color:#f5adc0;font-size:23px}
+.annual-slide-items{padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-height:0}.annual-slide-item{display:flex;gap:11px;align-items:baseline;color:#f5f6fa;font-size:22px;line-height:1.08;min-width:0}.annual-slide-item b{color:#ffb5c5;font-size:20px}.annual-slide-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.annual-slide-items small{color:#ffb5c5}.annual-slide-empty{color:#7e899b}
+.btwb-date{display:flex;justify-content:space-between;align-items:center;gap:22px;flex-wrap:wrap;font-size:28px}.btwb-date strong{color:white;font-size:43px;letter-spacing:.025em}.btwb-date span{color:#f2a4b8}.btwb-pane h2{font-size:33px}.btwb-pane h2 small{font-size:23px;color:#ffafc0}
+.slide-type-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}
