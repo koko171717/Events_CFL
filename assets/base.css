@@ -69,3 +69,28 @@
 .annual-slide-items{padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-height:0}.annual-slide-item{display:flex;gap:11px;align-items:baseline;color:#f5f6fa;font-size:22px;line-height:1.08;min-width:0}.annual-slide-item b{color:#ffb5c5;font-size:20px}.annual-slide-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.annual-slide-items small{color:#ffb5c5}.annual-slide-empty{color:#7e899b}
 .btwb-date{display:flex;justify-content:space-between;align-items:center;gap:22px;flex-wrap:wrap;font-size:28px}.btwb-date strong{color:white;font-size:43px;letter-spacing:.025em}.btwb-date span{color:#f2a4b8}.btwb-pane h2{font-size:33px}.btwb-pane h2 small{font-size:23px;color:#ffafc0}
 .slide-type-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* V13 - calendar display parity */
+.calendar-view-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.calendar-view-btn{border:1px solid #506078;border-radius:10px;background:#202b3d;color:#f1f4fa;font:700 12px system-ui;padding:12px 6px;cursor:pointer}
+.calendar-view-btn.active{border-color:#f27b9a;background:#713147;color:white}
+.cfl-tv-calendar{width:100%;height:100%;display:flex;flex-direction:column;gap:16px;min-height:0}
+.cfl-tv-calendar-heading{border-bottom:3px solid #bd516b;display:flex;align-items:end;justify-content:space-between;padding-bottom:9px}
+.cfl-tv-calendar-heading h1{font-size:70px;line-height:1;margin:0;font-weight:950}
+.cfl-tv-calendar-heading span{color:#f9adc0;font-weight:850;font-size:25px;letter-spacing:.1em}
+.cfl-tv-year-grid{display:grid;grid-template-columns:66px repeat(12,minmax(0,1fr));gap:5px;flex:1;min-height:0}
+.cfl-tv-day-numbers,.cfl-tv-year-month{display:grid;grid-template-rows:36px repeat(31,minmax(0,1fr));gap:2px;min-height:0}
+.cfl-tv-day-numbers header,.cfl-tv-year-month header{text-align:center;padding:5px 0;border-radius:6px;background:#4d2940;font-size:18px;font-weight:850}
+.cfl-tv-day-numbers>div{font-size:15px;color:#aeb6c8;text-align:center;display:grid;place-items:center}
+.cfl-tv-year-day{background:#ffffff0b;border:1px solid #ffffff0c;border-radius:3px;overflow:hidden;display:flex;align-items:center;min-width:0}
+.cfl-tv-year-day.empty{background:#00000019;border:0}
+.cfl-tv-year-day.has-event{background:#b3375d;box-shadow:inset 0 0 0 1px #fc8baa55}
+.cfl-tv-year-day span{display:block;width:100%;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;text-align:center;font-size:12px;font-weight:850;padding:0 2px}
+.cfl-tv-year-day b{font-size:11px;color:#ffeaec}
+.cfl-tv-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;text-align:center;color:#ffd1db;font-size:24px;font-weight:850}
+.cfl-tv-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:repeat(6,minmax(0,1fr));gap:8px;flex:1;min-height:0}
+.cfl-tv-month-day{background:#202b3b;border:1px solid #4e5b7080;border-radius:10px;padding:9px 11px;overflow:hidden}
+.cfl-tv-month-day.outside{background:#11172170;border-color:transparent}
+.cfl-tv-month-day>b{display:block;color:#ffd0da;font-size:25px;margin-bottom:6px}
+.cfl-tv-month-event{font-size:16px;line-height:1.12;font-weight:750;border-left:4px solid #e56e88;background:#9e3c5744;margin:3px 0;padding:5px 7px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cfl-tv-month-day small{font-size:14px;color:#fbb8c9}

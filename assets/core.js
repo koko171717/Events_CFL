@@ -38,6 +38,33 @@ function textFit(art){
  const over=copy.scrollHeight>copy.clientHeight+1;
  art.dataset.overflow=over?'true':'false';
 }
+function cflDateUTC(y,m,d){return new Date(Date.UTC(y,m,d))}
+function cflInMonth(e,y,m){const a=`${y}-${String(m+1).padStart(2,'0')}-01`,b=`${y}-${String(m+1).padStart(2,'0')}-31`;return e.start_date<=b&&e.end_date>=a}
+const cflMonths=['JAN','FÉV','MAR','AVR','MAI','JUIN','JUIL','AOÛ','SEP','OCT','NOV','DÉC'];
+function renderCflAnnualGrid(y,events){
+ const months=cflMonths.map((name,m)=>{
+  const count=new Date(y,m+1,0).getDate();const items=events.filter(e=>cflInMonth(e,y,m));
+  let days='';for(let d=1;d<=31;d++){
+   const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+   const todays=items.filter(e=>e.start_date<=iso&&e.end_date>=iso);const one=todays[0];
+   days+=`<div class="cfl-tv-year-day ${d>count?'empty':one?'has-event':''}" title="${one?esc(one.title):''}">${one?`<span>${esc(one.short_title||one.title)}</span>`:d<=count?'<i></i>':''}${todays.length>1?`<b>+${todays.length-1}</b>`:''}</div>`;
+  }
+  return `<section class="cfl-tv-year-month"><header>${esc(name)}</header>${days}</section>`;
+ }).join('');
+ return `<div class="cfl-tv-calendar cfl-tv-calendar-year"><div class="cfl-tv-calendar-heading"><h1>AGENDA ${y}</h1><span>GRILLE ANNUELLE</span></div><div class="cfl-tv-year-grid"><div class="cfl-tv-day-numbers"><header>JOUR</header>${Array.from({length:31},(_,i)=>`<div>${String(i+1).padStart(2,'0')}</div>`).join('')}</div>${months}</div></div>`
+}
+function renderCflMonthGrid(y,m,events){
+ const count=new Date(y,m+1,0).getDate(),start=(cflDateUTC(y,m,1).getUTCDay()+6)%7;
+ const items=events.filter(e=>cflInMonth(e,y,m));let cells='';
+ for(let i=0;i<42;i++){
+  const day=i-start+1;
+  if(day<1||day>count){cells+='<div class="cfl-tv-month-day outside"></div>';continue}
+  const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  const evs=items.filter(e=>e.start_date<=iso&&e.end_date>=iso);
+  cells+=`<div class="cfl-tv-month-day"><b>${String(day).padStart(2,'0')}</b>${evs.slice(0,3).map(e=>`<div class="cfl-tv-month-event">${esc(e.short_title||e.title)}</div>`).join('')}${evs.length>3?`<small>+${evs.length-3}</small>`:''}</div>`;
+ }
+ return `<div class="cfl-tv-calendar cfl-tv-calendar-month"><div class="cfl-tv-calendar-heading"><h1>${cflMonths[m]} ${y}</h1><span>VUE MENSUELLE</span></div><div class="cfl-tv-weekdays">${['LUN','MAR','MER','JEU','VEN','SAM','DIM'].map(v=>`<span>${v}</span>`).join('')}</div><div class="cfl-tv-month-grid">${cells}</div></div>`
+}
 function artRender(frame,slide,events){
  const e=events.find(x=>x.id===slide.event_id) || slide.event_snapshot || {};
  const opts=slide.settings||{};
@@ -51,7 +78,11 @@ function artRender(frame,slide,events){
   const y=Math.min(2100,Math.max(2025,Number(opts.year)||new Date().getFullYear()));
   const monthLabels=['JAN','FÉV','MAR','AVR','MAI','JUIN','JUIL','AOÛ','SEP','OCT','NOV','DÉC'];
   const publicEvents=events.filter(e=>e.status==='published');
-  body=`<div class="annual-slide"><div class="annual-slide-top"><h1>AGENDA ${y}</h1><span>ÉVÉNEMENTS CROSSFIT LÉMAN</span></div><div class="annual-slide-grid">${monthLabels.map((label,m)=>{
+  const calendarView=['grid','overview','month'].includes(opts.calendarView)?opts.calendarView:'overview';
+  const monthIndex=Math.max(0,Math.min(11,(Number(opts.month)||1)-1));
+  if(calendarView==='grid') body=renderCflAnnualGrid(y,publicEvents);
+  else if(calendarView==='month') body=renderCflMonthGrid(y,monthIndex,publicEvents);
+  else body=`<div class="annual-slide"><div class="annual-slide-top"><h1>AGENDA ${y}</h1><span>ÉVÉNEMENTS CROSSFIT LÉMAN</span></div><div class="annual-slide-grid">${monthLabels.map((label,m)=>{
    const start=`${y}-${String(m+1).padStart(2,'0')}-01`;const end=`${y}-${String(m+1).padStart(2,'0')}-31`;
    const items=publicEvents.filter(e=>e.start_date<=end&&e.end_date>=start).sort((a,b)=>a.start_date.localeCompare(b.start_date));
    return `<section class="annual-slide-month"><header><span>${String(m+1).padStart(2,'0')}</span>${label}</header><div class="annual-slide-items">${items.slice(0,5).map(e=>`<div class="annual-slide-item"><b>${esc(e.start_date.slice(8,10))}</b><span>${esc(e.short_title||e.title)}</span></div>`).join('')||'<span class="annual-slide-empty">—</span>'}${items.length>5?`<small>+${items.length-5} événements</small>`:''}</div></section>`;
