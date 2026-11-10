@@ -47,7 +47,7 @@ function renderCflAnnualGrid(y,events){
   let days='';for(let d=1;d<=31;d++){
    const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
    const todays=items.filter(e=>e.start_date<=iso&&e.end_date>=iso);const one=todays[0];const weekend=d<=count&&[0,6].includes(cflDateUTC(y,m,d).getUTCDay());const ref=d<=count?(window.CFL_VAUD_REF?.(iso)||{}):{};
-   days+=`<div class="cfl-tv-year-day ${d>count?'empty':one?'has-event':''} ${weekend?'weekend':''} ${ref.vacation?'vacation':''} ${ref.holiday?'holiday':''}" title="${esc([one?.title,ref.vacation,ref.holiday].filter(Boolean).join(' · '))}">${one?`<span>${esc(one.short_title||one.title)}</span>`:d<=count?'<i></i>':''}${todays.length>1?`<b>+${todays.length-1}</b>`:''}</div>`;
+   days+=`<div class="cfl-tv-year-day ${d>count?'empty':one?'has-event':''} ${weekend?'weekend':''} ${ref.holiday?'holiday':''}" title="${esc([one?.title,ref.holiday].filter(Boolean).join(' · '))}">${one?`<span>${esc(one.short_title||one.title)}</span>`:d<=count?'<i></i>':''}${todays.length>1?`<b>+${todays.length-1}</b>`:''}</div>`;
   }
   return `<section class="cfl-tv-year-month"><header>${esc(name)}</header>${days}</section>`;
  }).join('');
@@ -61,7 +61,7 @@ function renderCflMonthGrid(y,m,events){
   if(day<1||day>count){cells+='<div class="cfl-tv-month-day outside"></div>';continue}
   const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
   const evs=items.filter(e=>e.start_date<=iso&&e.end_date>=iso);const weekend=[0,6].includes(cflDateUTC(y,m,day).getUTCDay());const ref=window.CFL_VAUD_REF?.(iso)||{};
-  cells+=`<div class="cfl-tv-month-day ${weekend?'weekend':''} ${ref.vacation?'vacation':''} ${ref.holiday?'holiday':''}" title="${esc([ref.vacation,ref.holiday].filter(Boolean).join(' · '))}"><b>${String(day).padStart(2,'0')}</b>${evs.slice(0,3).map(e=>`<div class="cfl-tv-month-event">${esc(e.short_title||e.title)}</div>`).join('')}${evs.length>3?`<small>+${evs.length-3}</small>`:''}</div>`;
+  cells+=`<div class="cfl-tv-month-day ${weekend?'weekend':''} ${ref.holiday?'holiday':''}" title="${esc([ref.holiday].filter(Boolean).join(' · '))}"><b>${String(day).padStart(2,'0')}</b>${evs.slice(0,3).map(e=>`<div class="cfl-tv-month-event">${esc(e.short_title||e.title)}</div>`).join('')}${evs.length>3?`<small>+${evs.length-3}</small>`:''}</div>`;
  }
  return `<div class="cfl-tv-calendar cfl-tv-calendar-month"><div class="cfl-tv-calendar-heading"><h1>${cflMonths[m]} ${y}</h1><span>VUE MENSUELLE</span></div><div class="cfl-tv-weekdays">${['LUN','MAR','MER','JEU','VEN','SAM','DIM'].map(v=>`<span>${v}</span>`).join('')}</div><div class="cfl-tv-month-grid">${cells}</div></div>`
 }

@@ -522,6 +522,19 @@ body:not(.cfl-public) .day.vacation{background:#32506a!important;box-shadow:inse
 body:not(.cfl-public) .month-week-day.vacation{background:#2a465b!important;border-color:#73aed0!important}
 .vacation-glyph{position:absolute;bottom:2px;left:3px;color:#8cdfff;font-size:8px}
 body:not(.cfl-public) .monthly-list-event.draft{border:2px dashed #ffc073!important}
+</style><style id="cfl-v17-admin-vacation-style">
+.cfl-v17-vacations{margin:0 0 18px;border:1px solid #5c8aab;background:linear-gradient(105deg,#1e3345,#182431);border-radius:13px;padding:14px 16px;color:#f0f9ff;box-shadow:inset 4px 0 0 #75c3ef,0 7px 20px #0004}
+.cfl-v17-vac-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:11px;font-size:13px}
+.cfl-v17-vac-head>span:first-child{color:#92d7ff;font-size:20px}.cfl-v17-vac-sub{margin-left:auto;font-size:11px;color:#bad0e0}
+.cfl-v17-vac-list{display:flex;flex-wrap:wrap;gap:8px}
+.cfl-v17-vac-pill{display:flex;align-items:center;gap:7px;background:#254861;color:#f9fdff;border:1px solid #679bc0;border-radius:9px;padding:7px 10px;font-size:12px;font-weight:600}
+.cfl-v17-vac-pill small{color:#d0e9fa;font-size:11px;padding-left:5px;white-space:nowrap}
+.cfl-v17-vac-dot{width:8px;height:8px;flex:none;background:#8fddff;border-radius:3px}
+.cfl-v17-vac-empty{font-size:12px;color:#c0d4e4}
+body.cfl-unified-admin .overview-admin-ref{display:flex!important;gap:6px;flex-wrap:wrap;align-items:center;border:0!important;background:transparent!important;padding:1px 0!important;margin:2px 0 0!important}
+.cfl-v17-overview-vac{display:inline-flex;align-items:center;gap:5px;background:#254e6a;border:1px solid #6ea4c8;border-radius:7px;padding:5px 7px;color:#e9f8ff;font-size:11px;font-weight:850}
+.cfl-v17-overview-holiday{display:inline-flex;align-items:center;color:#e9c886;font-size:10px;padding:5px 3px}
+@media(max-width:700px){.cfl-v17-vac-sub{margin-left:0;width:100%}.cfl-v17-vac-pill{flex-wrap:wrap}}
 </style></head><body><main class="shell"><header class="top"><div class="brand"><div class="logo"><svg width="100" height="47" viewBox="0 0 100 47" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_738_3)">
 <path d="M30.4757 28.3086H12.4375V34.5371H30.4757V28.3086Z" fill="white"/>
@@ -656,7 +669,23 @@ const intersects=(e,m)=>e.start<=date(year,m,days(year,m))&&e.end>=date(year,m,1
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(){return window.CFL_CALENDAR_SAVE ? window.CFL_CALENDAR_SAVE() : Promise.resolve()}
 function filters(){ $('filters').innerHTML=CATS.map(([name,c])=>`<button class="pill category-pill ${visible.has(name)?'':'off'} ${(visible.size===1&&visible.has(name))?'solo':''}" data-cat="${esc(name)}" style="--cat-color:${c};"><span class="icon-badge">${categoryIcon(name)}</span><span class="pill-label">${esc(name)}</span></button>`).join('');$('filters').querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=b.dataset.cat;if(!filterTouched){visible=new Set([c]);filterTouched=true;}else if(visible.has(c)){visible.delete(c);if(visible.size===0){visible=new Set(CATS.map(x=>x[0]));filterTouched=false;}}else{visible.add(c);if(visible.size===CATS.length)filterTouched=false;}render()})}
-function render(){document.body.classList.toggle('admin-editing',editing);updateRefButtons();updateRefSource();filters();$('yearLabel').textContent=year;$('addBtn').classList.toggle('hidden',!editing);$('editToggle').classList.toggle('active',editing);$('editToggle').innerHTML=`<span class="btn-glyph">✦</span>${editing?'Quitter édition':'Mode édition'}`;$('addBtn').innerHTML=`<span class="btn-glyph">＋</span>Event`;$('editNotice').hidden=!editing;const dateWrap=$('directDateWrap'),createAt=$('createOnDate');if(dateWrap)dateWrap.hidden=!editing;if(createAt)createAt.hidden=!editing;document.querySelector('.reference-legend').classList.toggle('hidden',!(editing||window.CFL_CALENDAR_ADMIN===true));$('monthNav').classList.toggle('hidden',view!=='month');$('toolbar').classList.add('hidden');$('contextActions').classList.toggle('hidden',!editing||(view==='annual'&&annualMode==='grid'));for(const [id,on] of [['gridMode',view==='annual'&&annualMode==='grid'],['overviewMode',view==='annual'&&annualMode==='overview'],['monthListMode',view==='month'&&monthlyMode==='list']]){$(id).classList.toggle('on',on);$(id).setAttribute('aria-pressed',String(on));}$('viewTitle').textContent='Vue annuelle';$('viewSubtitle').textContent=annualMode==='overview'?'Les événements essentiels de l’année, mois par mois':'12 mois côte à côte · cliquez sur un mois pour zoomer';if(view==='annual')annual();else monthlyList()}
+function render(){document.body.classList.toggle('admin-editing',editing);updateRefButtons();updateRefSource();filters();$('yearLabel').textContent=year;$('addBtn').classList.toggle('hidden',!editing);$('editToggle').classList.toggle('active',editing);$('editToggle').innerHTML=`<span class="btn-glyph">✦</span>${editing?'Quitter édition':'Mode édition'}`;$('addBtn').innerHTML=`<span class="btn-glyph">＋</span>Event`;$('editNotice').hidden=!editing;const dateWrap=$('directDateWrap'),createAt=$('createOnDate');if(dateWrap)dateWrap.hidden=!editing;if(createAt)createAt.hidden=!editing;document.querySelector('.reference-legend').classList.toggle('hidden',!(editing||window.CFL_CALENDAR_ADMIN===true));$('monthNav').classList.toggle('hidden',view!=='month');$('toolbar').classList.add('hidden');$('contextActions').classList.toggle('hidden',!editing||(view==='annual'&&annualMode==='grid'));for(const [id,on] of [['gridMode',view==='annual'&&annualMode==='grid'],['overviewMode',view==='annual'&&annualMode==='overview'],['monthListMode',view==='month'&&monthlyMode==='list']]){$(id).classList.toggle('on',on);$(id).setAttribute('aria-pressed',String(on));}$('viewTitle').textContent='Vue annuelle';$('viewSubtitle').textContent=annualMode==='overview'?'Les événements essentiels de l’année, mois par mois':'12 mois côte à côte · cliquez sur un mois pour zoomer';if(view==='annual')annual();else monthlyList();renderAdminVacationPanel()}
+// V17 — Repères vacances, toujours au premier plan dans les vues Admin.
+// Ce bandeau ne dépend ni des filtres d'événements, ni des couches SVG/HTML.
+function renderAdminVacationPanel(){
+ const old=document.getElementById('cfl-v17-vacations');
+ if(old)old.remove();
+ if(!window.CFL_CALENDAR_ADMIN||!showVacations)return;
+ const ranges=SCHOOL_VACATIONS.filter(([a,b])=>a.slice(0,4)<=String(year)&&b.slice(0,4)>=String(year));
+ const visibleRanges=(view==='month')?ranges.filter(([a,b])=>a<=date(year,month,days(year,month))&&b>=date(year,month,1)):ranges;
+ const host=document.getElementById('calendar');
+ if(!host)return;
+ const panel=document.createElement('section');
+ panel.id='cfl-v17-vacations';panel.className='cfl-v17-vacations';
+ const rangeText=(a,b)=>{const lo=a<`${year}-01-01`?`${year}-01-01`:a,hi=b>`${year}-12-31`?`${year}-12-31`:b;return `${lo.slice(8,10)}.${lo.slice(5,7)} – ${hi.slice(8,10)}.${hi.slice(5,7)}`};
+ panel.innerHTML=`<div class="cfl-v17-vac-head"><span aria-hidden="true">▦</span><strong>Vacances scolaires vaudoises · ${year}</strong><span class="cfl-v17-vac-sub">${view==='month'?MONTHS[month]:'Toutes les périodes de l’année'}</span></div><div class="cfl-v17-vac-list">${visibleRanges.length?visibleRanges.map(([a,b,name])=>`<span class="cfl-v17-vac-pill"><span class="cfl-v17-vac-dot"></span><b>${esc(name)}</b><small>${rangeText(a,b)}</small></span>`).join(''):'<span class="cfl-v17-vac-empty">Aucune période de vacances sur cette vue</span>'}</div>`;
+ host.before(panel);
+}
 function annual(){if(annualMode==='grid')annualGrid();else annualOverview()}
 function annualOverview(){
  const monthsShort=['JAN','FÉV','MAR','AVR','MAI','JUIN','JUIL','AOÛ','SEP','OCT','NOV','DÉC'];
@@ -679,7 +708,9 @@ function annualOverview(){
      if(active){
        const monthRefs=[];
        for(let d=1;d<=days(year,m);d++){const r=reference(date(year,m,d));for(const name of [r.vacation,r.holiday])if(name&&!monthRefs.includes(name))monthRefs.push(name)}
-       html+=`<div class="overview-admin-ref"><span class="overview-refmark">✦</span> ${monthRefs.map(x=>esc(x)).join(' · ')}</div>`;
+       const vacRefs=monthRefs.filter(name=>SCHOOL_VACATIONS.some(([a,b,n])=>n===name&&a<=date(year,m,days(year,m))&&b>=date(year,m,1)));
+       const holidayRefs=monthRefs.filter(name=>!vacRefs.includes(name));
+       html+=`<div class="overview-admin-ref">${vacRefs.map(name=>`<span class="cfl-v17-overview-vac"><span>▦</span> ${esc(name)}</span>`).join('')}${holidayRefs.length?`<span class="cfl-v17-overview-holiday">✦ ${holidayRefs.map(x=>esc(x)).join(' · ')}</span>`:''}</div>`;
       }
    }
    if(editing||window.CFL_CALENDAR_ADMIN===true)html+=`<button type="button" class="inline-event-add overview-add" data-add-month="${m}"><span aria-hidden="true">＋</span> Ajouter un event</button>`;

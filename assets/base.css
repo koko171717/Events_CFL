@@ -108,3 +108,6 @@
 .cfl-tv-year-day.holiday,.cfl-tv-month-day.holiday{box-shadow:inset 5px 0 0 #ffd083!important;border-left-color:#ffd083;background-color:#62513d}
 .cfl-tv-year-day.has-event.vacation,.cfl-tv-year-day.has-event.holiday{background-color:#974466}
 .cfl-tv-year-day.empty{opacity:.35}
+
+/* V17: vacances scolaires réservées à Agenda Admin, jamais aux slides TV */
+.tv-art .cfl-tv-year-day.vacation,.tv-art .cfl-tv-month-day.vacation{box-shadow:none!important;border-left-color:inherit!important;background-color:inherit!important}
