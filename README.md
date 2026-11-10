@@ -25,3 +25,7 @@ Décompresser puis remplacer les fichiers à la racine du dépôt GitHub existan
 4. Ouvrir `/diaporama.html` sur un autre appareil et vérifier le rafraîchissement.
 
 Note : les descriptions très longues peuvent encore devenir denses sur un écran 16:9. Préférer une présentation éditoriale courte destinée à la télévision. BTWB reste simulé.
+
+
+## V15 : Activité et Leaderboard BTWB
+Voir `README_V15_BTWB_ACTIVITY_LEADERBOARD.md`.

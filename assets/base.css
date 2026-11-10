@@ -94,3 +94,9 @@
 .cfl-tv-month-day>b{display:block;color:#ffd0da;font-size:25px;margin-bottom:6px}
 .cfl-tv-month-event{font-size:16px;line-height:1.12;font-weight:750;border-left:4px solid #e56e88;background:#9e3c5744;margin:3px 0;padding:5px 7px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cfl-tv-month-day small{font-size:14px;color:#fbb8c9}
+
+/* CFL V15: choix directs des modules BTWB */
+.btwb-widget-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:7px}
+.btwb-widget-btn{border:1px solid #40506a;background:#202d3d;color:#f7f8fd;border-radius:12px;padding:13px 8px;min-height:54px;font:700 13px system-ui,sans-serif;cursor:pointer}
+.btwb-widget-btn.active,.btwb-widget-btn:hover{background:#653044;border-color:#f16a89;color:white}
+.btwb-no-workout{padding:38px;color:#fff;font-size:26px;font-weight:700}
