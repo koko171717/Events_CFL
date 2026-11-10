@@ -28,12 +28,12 @@ function textFit(art){
  const desc=art.querySelector('.tv-description'); if(!desc)return;
  const copy=art.querySelector('.tv-copy'); const title=copy?.querySelector('.tv-title');
  if(!copy||!title)return;
- let font=44, titleFont=83, gap=22, qr=145;
- for(let n=0;n<24;n++){
+ let font=62, titleFont=76, gap=19, qr=116;
+ for(let n=0;n<45;n++){
   desc.style.fontSize=font+'px';title.style.fontSize=titleFont+'px';copy.style.gap=gap+'px';
   const q=copy.querySelector('.tv-qr');if(q){q.style.width=qr+'px';q.style.height=qr+'px'}
   if(copy.scrollHeight<=copy.clientHeight+1 && title.scrollHeight<=title.clientHeight+1)break;
-  font=Math.max(25,font-1.1);titleFont=Math.max(48,titleFont-1.7);gap=Math.max(9,gap-.9);qr=Math.max(95,qr-3);
+  font=Math.max(30,font-1.0);titleFont=Math.max(49,titleFont-0.7);gap=Math.max(8,gap-.35);qr=Math.max(86,qr-.5);
  }
  const over=copy.scrollHeight>copy.clientHeight+1;
  art.dataset.overflow=over?'true':'false';
@@ -48,8 +48,14 @@ function artRender(frame,slide,events){
   const monthText=new Intl.DateTimeFormat('fr-CH',{month:'long',year:'numeric'}).format(new Date(m+'-01T12:00:00'));
   body=`<div style="display:flex;flex-direction:column;height:100%;width:100%"><h1 class="month-title">Événements du mois</h1><div style="font-size:32px;color:#ffb5c3">${esc(monthText)}</div><div class="month-list" style="grid-template-rows:repeat(${Math.max(candidates.length,1)},minmax(0,1fr))">${candidates.map(x=>`<div class="month-row"><div class="month-image">${imgMarkup(x)}</div><div style="flex:1;min-width:0"><b>${esc(x.short_title||x.title)}</b><small>${esc(period(x))}</small><span class="month-summary">${esc(x.summary||x.description||'')}</span></div></div>`).join('')||'<div class="month-row">Aucun événement publié.</div>'}</div></div>`;
  }else if(type==='btwb'){
-  const labels={wod:'WOD DU JOUR',leaderboard:'LEADERBOARD',activity:'ACTIVITÉ DES MEMBRES'};
-  body=`<div class="btwb-preview" style="width:100%;height:100%"><b>${esc(labels[opts.widget]||'BTWB')}</b><p>Module BTWB : aperçu de conception. Connexion officielle à réaliser après déploiement de l’agenda.</p></div>`;
+  const mainId=String(opts.trackId||'84043');const trainId=String(opts.trainTrackId||'');
+  const safeId=/^\d+$/.test(mainId)?mainId:'84043';const safeTrain=/^\d+$/.test(trainId)&&trainId!==safeId?trainId:'';
+  // The official widget owns its DOM and layout; do not parse/rewrite private BTWB responses.
+  // Refreshes when returning to the slide, at minimum every 5 minutes, and after midnight.
+  const currentDay=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Zurich',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  const revision=Math.floor(Date.now()/300000);
+  const widgetFrame=(id,label)=>`<section class="btwb-pane"><h2>${label}</h2><iframe class="btwb-embed" title="BTWB ${label}" loading="eager" src="/api/btwb-widget?track=${id}&v=${revision}&day=${currentDay}" referrerpolicy="same-origin"></iframe></section>`;
+  body=`<div class="btwb-screen"><div class="btwb-date">SÉANCE DU JOUR · ${esc(new Intl.DateTimeFormat('fr-CH',{timeZone:'Europe/Zurich',weekday:'long',day:'numeric',month:'long'}).format(new Date()))}</div><div class="btwb-panes ${safeTrain?'two':''}">${widgetFrame(safeId,safeTrain?'WOD / RX':'WOD · VARIANTES')}${safeTrain?widgetFrame(safeTrain,'TRAIN'):''}</div><p class="btwb-note">Source : programmation officielle BTWB · Section Main</p></div>`;
  }else{
   const title=opts.title || e.title || 'Événement CFL';const description=String(opts.description||'').trim() || e.description || ''; 
   const date=opts.showDate!==false ? `<div class="tv-meta">${esc(opts.dateLabel||period(e))}</div>`:'';

@@ -36,3 +36,26 @@
 .month-row .month-image{width:150px;flex-basis:150px;max-height:144px;aspect-ratio:1}
 .cfl-public-link{background:#1a3140!important;border-color:#5b7892!important}
 @media(max-width:600px){.slide-type-buttons{gap:5px}.type-button{font-size:11px;min-height:72px}.tv-thumbnails{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* V8 — TV readable typography: priority to event description, not empty space */
+.tv-art-body{gap:44px;top:155px;bottom:57px}
+.tv-poster{width:600px;flex-basis:600px}
+.tv-copy{gap:19px}
+.tv-tag{font-size:25px}
+.tv-title{font-size:76px;line-height:1.035}
+.tv-description{font-size:62px;line-height:1.20;font-weight:730;color:#fff;padding:16px 18px 18px 23px;background:linear-gradient(90deg,#ffffff10,#ffffff04 85%);border-left:7px solid #f16b82;text-wrap:pretty}
+.tv-meta{font-size:31px;padding:10px 15px}
+.tv-footer{min-height:76px;gap:16px}
+.tv-footer .url{font-size:21px;max-width:520px}
+.tv-qr{width:116px;height:116px;padding:6px}
+.month-row .month-summary{font-size:30px;line-height:1.19}
+
+/* CFL V9 — BTWB official Webwidgets in isolated TV frames */
+.btwb-screen{display:flex;flex-direction:column;gap:14px;width:100%;height:100%;overflow:hidden}
+.btwb-date{flex:none;font-size:38px;font-weight:900;letter-spacing:.05em;color:#f3a6b7;text-transform:uppercase}
+.btwb-panes{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;flex:1;min-height:0}
+.btwb-panes.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.btwb-pane{display:flex;flex-direction:column;min-height:0;overflow:hidden;border:2px solid #425064;border-radius:22px;background:white;color:#17212e}
+.btwb-pane h2{margin:0;padding:18px 25px 14px;background:#171f2d;color:white;font-size:35px;line-height:1.1}
+.btwb-embed{flex:1;min-height:0;width:100%;border:0;background:#fff}
+.btwb-note{font-size:22px;color:#a4b1c7;margin:0;line-height:1.15}
