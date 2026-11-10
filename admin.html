@@ -501,7 +501,19 @@ body:not(.cfl-public) .overview-event.draft,body:not(.cfl-public) .monthly-list-
 .cfl-return{position:fixed;right:18px;bottom:18px;z-index:2500;background:#241923;color:#fff;padding:11px 17px;border:1px solid #b54a67;border-radius:14px;font-weight:800;text-decoration:none;box-shadow:0 6px 24px #0009}
 .cfl-sync-status{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:2900;background:#211c27;border:1px solid #ad526d;color:#fff;border-radius:12px;padding:10px 16px;max-width:90vw;box-shadow:0 8px 28px #0009;display:none}
 body.cfl-public #editToggle,body.cfl-public #addBtn,body.cfl-public #editNotice,body.cfl-public #contextActions{display:none!important}
-</style><style>body.cfl-unified-admin .admin-cluster,body.cfl-unified-admin #editNotice{display:none!important}body.cfl-unified-admin .reference-legend{display:flex!important}body.cfl-unified-admin #cfl-v10-toolbar{position:sticky;top:0}</style></head><body><main class="shell"><header class="top"><div class="brand"><div class="logo"><svg width="100" height="47" viewBox="0 0 100 47" fill="none" xmlns="http://www.w3.org/2000/svg">
+</style><style>body.cfl-unified-admin .admin-cluster,body.cfl-unified-admin #editNotice{display:none!important}body.cfl-unified-admin .reference-legend{display:flex!important}body.cfl-unified-admin #cfl-v10-toolbar{position:sticky;top:0}</style><style>
+#cfl-v14-draft-indicator{display:flex;align-items:center;flex-wrap:wrap;gap:9px;padding:12px 14px;margin:10px 0 16px;border:1px solid #687890;border-radius:12px;background:#192433;color:#eff5ff;font-size:12px}
+#cfl-v14-draft-indicator strong{font-size:13px}
+#cfl-v14-draft-indicator .cfl-v14-years{display:flex;gap:6px;flex-wrap:wrap}
+#cfl-v14-draft-indicator button{background:#5a3543;color:#fff;border:1px solid #e59c64;border-radius:8px;font-weight:750;padding:7px 10px;cursor:pointer}
+#cfl-v14-draft-indicator button:hover{background:#80435a}
+#cfl-v14-draft-indicator .cfl-v14-refs{color:#c1d4e8}
+body:not(.cfl-public) .overview-admin-ref{background:#263548;border-radius:7px;border:1px solid #52708d;color:#edf5ff;font-weight:700;font-size:11px;padding:8px;margin-top:8px}
+body:not(.cfl-public) .day.vacation{background:#32506a!important;box-shadow:inset 3px 0 0 #8ed8ff}
+body:not(.cfl-public) .month-week-day.vacation{background:#2a465b!important;border-color:#73aed0!important}
+.vacation-glyph{position:absolute;bottom:2px;left:3px;color:#8cdfff;font-size:8px}
+body:not(.cfl-public) .monthly-list-event.draft{border:2px dashed #ffc073!important}
+</style></head><body><main class="shell"><header class="top"><div class="brand"><div class="logo"><svg width="100" height="47" viewBox="0 0 100 47" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_738_3)">
 <path d="M30.4757 28.3086H12.4375V34.5371H30.4757V28.3086Z" fill="white"/>
 <path d="M54.4202 15.8474V47.0001H48.2007V24.618L39.3617 33.4739L27.9884 22.0759H12.4375V15.8474H21.7719L21.769 15.8445H30.5683L39.3617 24.6533L48.1537 15.8445L48.2007 15.8901V15.8474H54.4202Z" fill="white"/>
@@ -564,6 +576,13 @@ const pad=n=>String(n).padStart(2,'0'),date=(y,m,d)=>`${y}-${pad(m+1)}-${pad(d)}
 // Vacances officielles vaudoises publiées, 2027 à 2031.
 // Les années sans calendrier officiel restent volontairement sans vacances supposées.
 const SCHOOL_VACATIONS=[
+  // Calendrier officiel VD 2026 ; les années 2027–2031 suivent ci-dessous.
+  ['2025-12-20','2026-01-04','Vacances d’hiver'],
+  ['2026-02-14','2026-02-22','Relâches'],
+  ['2026-04-03','2026-04-19','Vacances de Pâques'],
+  ['2026-05-14','2026-05-17','Pont de l’Ascension'],
+  ['2026-06-27','2026-08-16','Vacances d’été'],
+  ['2026-10-10','2026-10-25','Vacances d’automne'],
  ['2026-12-24','2027-01-10','Vacances d’hiver'],['2027-02-06','2027-02-14','Relâches'],
  ['2027-03-26','2027-04-11','Vacances de Pâques'],['2027-05-06','2027-05-09','Pont de l’Ascension'],
  ['2027-07-03','2027-08-22','Vacances d’été'],['2027-10-09','2027-10-24','Vacances d’automne'],
@@ -615,7 +634,7 @@ function updateRefSource(){
  const link=document.getElementById('vaudSource');if(!link)return;
  link.href=(year>=2026&&year<=2031)?`https://www.vd.ch/formation/jours-feries-et-vacances-scolaires/jours-feries-et-vacances-scolaires-${year}`:'https://www.vd.ch/formation/jours-feries-et-vacances-scolaires';
  const info=document.getElementById('refYearNote');
- if(info)info.textContent=(year>2031||year<2027)?'Vacances scolaires : dates non renseignées pour cette année (hors périodes officielles déjà enregistrées).':'Vacances officielles du canton de Vaud · 2027–2031';
+ if(info)info.textContent=(year>2031||year<2026)?'Vacances scolaires : dates non renseignées pour cette année (hors périodes officielles déjà enregistrées).':'Vacances officielles du canton de Vaud · 2026–2031';
 }
 
 const toDate=s=>new Date(s+'T12:00:00'),days=(y,m)=>new Date(y,m+1,0).getDate(),color=c=>CATS.find(x=>x[0]===c)?.[1]||'#666';
@@ -648,7 +667,11 @@ function annualOverview(){
    if(editing||window.CFL_CALENDAR_ADMIN===true){
      const refs=[];let active=false;
      for(let d=1;d<=days(year,m);d++){let r=reference(date(year,m,d));if(r.vacation||r.holiday){active=true;if(r.holiday&&!refs.includes(r.holiday))refs.push(r.holiday)}}
-     if(active)html+=`<div class="overview-admin-ref"><span class="overview-refmark">✦</span> Vacances / jours fériés${refs.length?` · ${esc(refs.slice(0,1).join(''))}`:''}</div>`;
+     if(active){
+       const monthRefs=[];
+       for(let d=1;d<=days(year,m);d++){const r=reference(date(year,m,d));for(const name of [r.vacation,r.holiday])if(name&&!monthRefs.includes(name))monthRefs.push(name)}
+       html+=`<div class="overview-admin-ref"><span class="overview-refmark">✦</span> ${monthRefs.map(x=>esc(x)).join(' · ')}</div>`;
+      }
    }
    if(editing||window.CFL_CALENDAR_ADMIN===true)html+=`<button type="button" class="inline-event-add overview-add" data-add-month="${m}"><span aria-hidden="true">＋</span> Ajouter un event</button>`;
    html+='</div></section>';
@@ -662,13 +685,13 @@ function annualOverview(){
 function annualGrid(){let str=`<div class="scroller"><div class="annual"><div class="datecol"><div class="monthhead">JOUR</div><div class="monthbody">`;
 for(let d=1;d<=31;d++)str+=`<div class="day"><span class="daylabel">${pad(d)}</span></div>`;str+='</div></div>';
 for(let m=0;m<12;m++){str+=`<div class="monthcol"><button class="monthhead click" data-month="${m}">${['JAN','FÉV','MAR','AVR','MAI','JUIN','JUIL','AOÛ','SEP','OCT','NOV','DÉC'][m]}</button><div class="monthbody">`;
-for(let d=1;d<=31;d++){let valid=d<=days(year,m),weekend=valid&&[0,6].includes(new Date(year,m,d).getDay());let ref=valid&&(editing||window.CFL_CALENDAR_ADMIN===true)?reference(date(year,m,d)):{holiday:'',vacation:''};str+=`<div class="day ${valid?'':'invalid'} ${weekend?'weekend':''} ${ref.vacation?'vacation':''} ${ref.holiday?'holiday':''}" title="${esc([ref.holiday,ref.vacation].filter(Boolean).join(' · '))}" data-date="${valid?date(year,m,d):''}">${ref.holiday?`<span class="holiday-glyph" aria-label="${esc(ref.holiday)}">✦</span>`:''}</div>`}
+for(let d=1;d<=31;d++){let valid=d<=days(year,m),weekend=valid&&[0,6].includes(new Date(year,m,d).getDay());let ref=valid&&(editing||window.CFL_CALENDAR_ADMIN===true)?reference(date(year,m,d)):{holiday:'',vacation:''};str+=`<div class="day ${valid?'':'invalid'} ${weekend?'weekend':''} ${ref.vacation?'vacation':''} ${ref.holiday?'holiday':''}" title="${esc([ref.holiday,ref.vacation].filter(Boolean).join(' · '))}" data-date="${valid?date(year,m,d):''}">${ref.holiday?`<span class="holiday-glyph" aria-label="${esc(ref.holiday)}">✦</span>`:''}${ref.vacation?`<span class="vacation-glyph" title="${esc(ref.vacation)}">●</span>`:''}</div>`}
 let ev=all.filter(e=>shown(e)&&intersects(e,m)).sort((a,b)=>a.start.localeCompare(b.start)||a.id.localeCompare(b.id));
 let groups=[];for(let e of ev){let first=Math.max(Number(e.start.slice(8)),e.start.slice(0,7)===date(year,m,1).slice(0,7)?Number(e.start.slice(8)):1),last=Math.min(e.end.slice(0,7)===date(year,m,1).slice(0,7)?Number(e.end.slice(8)):31,days(year,m));if(e.start<date(year,m,1))first=1;if(e.end>date(year,m,days(year,m)))last=days(year,m);if(first>last)continue;groups.push({e,first,last})}
 // Keep the main event as one uninterrupted full-width vertical bubble.
 // On an overlapping date, add the second event OVER its right half.
 const daily=[];
-for(let d=1;d<=days(year,m);d++)daily[d]=groups.filter(g=>g.first<=d&&g.last>=d).sort((a,b)=>a.e.start.localeCompare(b.e.start)||a.e.id.localeCompare(b.e.id));
+for(let d=1;d<=days(year,m);d++)daily[d]=groups.filter(g=>g.first<=d&&g.last>=d).sort((a,b)=>(a.e.status==='Brouillon'?-1:0)-(b.e.status==='Brouillon'?-1:0)||a.e.start.localeCompare(b.e.start)||a.e.id.localeCompare(b.e.id));
 const block=(e,first,last,overlay=false,count=0,shiftDays=0)=>{
   const top=(first-1)*31+1;
   const height=(last-first+1)*31-3;
@@ -716,7 +739,7 @@ function monthlyList(){
   const catColor=color(e.category);
   const dateLabel=start===end?niceDate(start):`${niceDate(start)} — ${niceDate(end)}`;
   const aud=e.audience||'Public à définir';
-  html+=`<button type="button" class="monthly-list-event" data-event="${esc(e.id)}" style="--list-color:${catColor}"><span class="monthly-list-icon">${categoryIcon(e.category)}</span><span class="monthly-list-main"><span class="monthly-list-name">${esc(e.title)}</span><span class="monthly-list-sub">${esc(e.category)} <span class="monthly-list-sep">·</span> ${esc(aud)}</span></span><span class="monthly-list-date">${esc(dateLabel)}</span><span class="monthly-list-chevron">›</span></button>`;
+  html+=`<button type="button" class="monthly-list-event ${e.status==='Brouillon'?'draft':''}" data-event="${esc(e.id)}" style="--list-color:${catColor}"><span class="monthly-list-icon">${categoryIcon(e.category)}</span><span class="monthly-list-main"><span class="monthly-list-name">${esc(e.title)}${e.status==='Brouillon'?'<small class="cfl-draft-chip">BROUILLON</small>':''}</span><span class="monthly-list-sub">${esc(e.category)} <span class="monthly-list-sep">·</span> ${esc(aud)}</span></span><span class="monthly-list-date">${esc(dateLabel)}</span><span class="monthly-list-chevron">›</span></button>`;
  }
  if(editing)html+=`<button type="button" class="inline-event-add monthly-add" id="monthInlineAdd"><span aria-hidden="true">＋</span> Ajouter un event</button>`;
  html+='</div>';
@@ -837,7 +860,7 @@ $('overlay').onclick=e=>{if(e.target===$('overlay'))close()};document.addEventLi
  let prior=new Map(),saving=false;
  try{
   if(!db)throw Error('Configuration Supabase manquante');
-  if(isAdmin){if(!await checkAdmin())return;window.CFL_CALENDAR_ADMIN=true;editing=true;}
+  if(isAdmin){if(!await checkAdmin())return;window.CFL_CALENDAR_ADMIN=true;editing=true;annualMode='overview';}
   const rows=await fetchEvents(isAdmin);
   all=rows.map(mapRecord);
   for(const e of rows)if(e.image_url){const key='remote_'+e.id;VISUAL_ASSETS[key]=e.image_url;customVisuals[key]={name:e.title,data:e.image_url};}
@@ -870,8 +893,18 @@ $('overlay').onclick=e=>{if(e.target===$('overlay'))close()};document.addEventLi
    }catch(err){announce('Import impossible : '+err.message,true)}
   };
   if(!isAdmin){document.getElementById('editToggle').style.display='none';document.getElementById('editNotice').style.display='none'}
-  render();
- }catch(err){announce('Chargement Supabase impossible : '+err.message,true);console.error(err)}
+   // Accès direct aux brouillons, quel que soit le millésime affiché.
+   if(isAdmin){
+     const draftRows=rows.filter(x=>x.status!=='published');
+     const perYear={};
+     for(const e of draftRows){for(let y=Number(e.start_date.slice(0,4));y<=Math.min(Number(e.end_date.slice(0,4)),Number(e.start_date.slice(0,4))+3);y++){(perYear[y]??=[]).push(e)}}
+     let anchor=document.getElementById('cfl-v14-draft-indicator');
+     if(!anchor){anchor=document.createElement('div');anchor.id='cfl-v14-draft-indicator';const toolbar=document.getElementById('cfl-v10-toolbar');(toolbar?.parentNode||document.querySelector('.shell')).insertBefore(anchor,toolbar?.nextSibling||null)}
+     anchor.innerHTML=`<strong>Agenda Admin · ${draftRows.length} brouillon(s) enregistré(s)</strong><span> Affichage des brouillons dans le calendrier à leur date.</span> <span class="cfl-v14-years">${Object.entries(perYear).sort(([a],[b])=>a-b).map(([y,evs])=>`<button type="button" data-go-year="${y}">${y} · ${evs.length} brouillon(s)</button>`).join('')}</span><span class="cfl-v14-refs">Repères VD : vacances en bleu · jours fériés en or</span>`;
+     anchor.querySelectorAll('[data-go-year]').forEach(btn=>btn.addEventListener('click',()=>{year=Number(btn.dataset.goYear);view='annual';annualMode='overview';render()}));
+   }
+   render();
+  }catch(err){announce('Chargement Supabase impossible : '+err.message,true);console.error(err)}
 })();
 </script>
 <script src="/assets/admin-editor.js"></script>
