@@ -492,6 +492,11 @@ body{background:radial-gradient(ellipse 65% 17% at 50% 0%,#221015 0%,#0d0d11 66%
 .admin-editing .overview-event,.admin-editing .eventblock,.admin-editing .monthly-list-event{cursor:pointer}
 .admin-editing .overview-event:hover,.admin-editing .monthly-list-event:hover{outline:2px solid #ff7288;outline-offset:2px}
 .admin-editing .eventblock:hover{outline:2px solid #ff879e;outline-offset:2px}
+
+/* CFL V11: brouillons lisibles et identifiables dans toutes les vues Admin */
+body:not(.cfl-public) .eventblock.draft,body:not(.cfl-public) .month-ribbon.draft{opacity:1!important;outline:2px dashed #ffc073!important;outline-offset:-2px;filter:none!important;box-shadow:0 0 0 1px #0008,0 3px 12px #0005!important}
+body:not(.cfl-public) .overview-event.draft,body:not(.cfl-public) .monthly-list-event.draft,body:not(.cfl-public) .tiny-event.draft{opacity:1!important;border:2px dashed #ffc073!important;filter:none!important}
+.cfl-draft-chip{display:inline-block;margin-left:7px;color:#1c1512;background:#ffc073;border-radius:5px;padding:2px 5px;font:800 9px system-ui;vertical-align:middle;letter-spacing:.04em}
 </style><style id="cfl-integration-styles">
 .cfl-return{position:fixed;right:18px;bottom:18px;z-index:2500;background:#241923;color:#fff;padding:11px 17px;border:1px solid #b54a67;border-radius:14px;font-weight:800;text-decoration:none;box-shadow:0 6px 24px #0009}
 .cfl-sync-status{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:2900;background:#211c27;border:1px solid #ad526d;color:#fff;border-radius:12px;padding:10px 16px;max-width:90vw;box-shadow:0 8px 28px #0009;display:none}
@@ -618,7 +623,7 @@ const categoryIcon=c=>CAT_ICONS[c]||'';
 const dotStyle=c=>'';
 const eventSkin=c=>'background:'+color(c);
 const modalAccent=c=>'border-left:5px solid '+color(c)+';background:#222228';
-const shown=e=>visible.has(e.category)&&(editing||e.status==='Publié');
+const shown=e=>visible.has(e.category)&&(window.CFL_CALENDAR_ADMIN===true || editing || e.status==='Publié');
 const intersects=(e,m)=>e.start<=date(year,m,days(year,m))&&e.end>=date(year,m,1);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(){return window.CFL_CALENDAR_SAVE ? window.CFL_CALENDAR_SAVE() : Promise.resolve()}
@@ -637,7 +642,7 @@ function annualOverview(){
        const begin=e.start.slice(0,7)===date(year,m,1).slice(0,7)?Number(e.start.slice(8)):1;
        const end=e.end.slice(0,7)===date(year,m,1).slice(0,7)?Number(e.end.slice(8)):days(year,m);
        let d=pad(begin)+(end!==begin?'–'+pad(end):'');
-       html+=`<button class="overview-event" data-ids="${esc(e.id)}" style="--evt-color:${color(e.category)}" title="${esc(e.title)}"><span class="overview-evt-date">${d}</span><span class="overview-evt-icon">${categoryIcon(e.category)}</span><span class="overview-evt-title">${esc(e.short||e.title)}</span><span class="overview-evt-chevron">›</span></button>`;
+       html+=`<button class="overview-event ${e.status==='Brouillon'?'draft':''}" data-ids="${esc(e.id)}" style="--evt-color:${color(e.category)}" title="${esc(e.title)}"><span class="overview-evt-date">${d}</span><span class="overview-evt-icon">${categoryIcon(e.category)}</span><span class="overview-evt-title">${esc(e.short||e.title)}${e.status==='Brouillon'?' <small class="cfl-draft-chip">BROUILLON</small>':''}</span><span class="overview-evt-chevron">›</span></button>`;
      }
    }else{html+='<div class="overview-empty"><span class="overview-empty-dot"></span>Aucun événement prévu</div>'}
    if(editing){

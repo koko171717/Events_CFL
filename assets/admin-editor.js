@@ -5,6 +5,10 @@
  #cfl-v10-toolbar button,#cfl-v10-toolbar a{border:1px solid #ffffff38;background:#202b3d;color:#fff;border-radius:10px;padding:11px 16px;font:700 14px system-ui;cursor:pointer;text-decoration:none}
  #cfl-v10-toolbar .primary{background:#9f2949;border-color:#d55576}#cfl-v10-toolbar .spacer{flex:1}
  #cfl-v10-toolbar .status{font:13px system-ui;color:#c9d1dd}
+ #cfl-v10-toolbar #v11-drafts{border-color:#efb56d;background:#473325}
+ #cfl-v10-dialog .v11-draft-row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 10px;border:1px dashed #bd935a;background:#1a2433;border-radius:10px;margin:8px 0}
+ #cfl-v10-dialog .v11-draft-row button{background:#9f2949;border:0;border-radius:8px;color:white;padding:9px 12px;cursor:pointer;font-weight:700}
+ #cfl-v10-dialog .v11-draft-row small{color:#b7c5d8;display:block;margin-top:4px}
  #cfl-v10-overlay{position:fixed;inset:0;z-index:5000;background:#02050bca;display:none;align-items:center;justify-content:center;padding:18px}
  #cfl-v10-overlay.open{display:flex}
  #cfl-v10-dialog{width:min(790px,100%);max-height:95vh;overflow:auto;background:#121b2a;color:#f8f8fa;border:1px solid #ff9baf55;border-radius:18px;padding:24px;box-shadow:0 25px 80px #000b;font:15px system-ui}
@@ -23,7 +27,7 @@
  const style=document.createElement('style');style.textContent=css;document.head.append(style);
  const client=window.supabase?.createClient(window.CFL_CONFIG?.SUPABASE_URL,window.CFL_CONFIG?.SUPABASE_PUBLISHABLE_KEY);
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const toolbar=document.createElement('div');toolbar.id='cfl-v10-toolbar';toolbar.innerHTML='<button type="button" class="primary" id="v10-new">＋ Nouvel événement</button><button type="button" id="v10-choose">✎ Modifier un événement</button><span class="spacer"></span><a href="/agenda.html" target="_blank" rel="noopener">↗ Voir l’agenda public</a><span id="v10-status" class="status">Vérification des droits…</span>';
+ const toolbar=document.createElement('div');toolbar.id='cfl-v10-toolbar';toolbar.innerHTML='<button type="button" class="primary" id="v10-new">＋ Nouvel événement</button><button type="button" id="v10-choose">✎ Modifier un événement</button><button type="button" id="v11-drafts">◌ Brouillons</button><span class="spacer"></span><a href="/agenda.html" target="_blank" rel="noopener">↗ Voir l’agenda public</a><span id="v10-status" class="status">Vérification des droits…</span>';
  const overlay=document.createElement('div');overlay.id='cfl-v10-overlay';overlay.innerHTML='<div id="cfl-v10-dialog" role="dialog" aria-modal="true" aria-label="Édition de l’événement"></div>';
  const start=async()=>{
   if(!client)return;
@@ -68,6 +72,15 @@
     }catch(e){errorEl.textContent='Enregistrement impossible : '+e.message;saveBtn.disabled=false;saveBtn.textContent='Enregistrer dans Supabase'}
    };
   }
+  async function showDrafts(){
+   try{
+    await load();const drafts=rows.filter(r=>r.status==='draft');
+    dialog.innerHTML=`<h2>Brouillons enregistrés (${drafts.length})</h2><p class="hint">Ces événements sont conservés dans Supabase, visibles ici dans l'administration et invisibles dans l'agenda public tant qu'ils ne sont pas publiés.</p>${drafts.length?drafts.map(r=>`<div class="v11-draft-row"><div><strong>${esc(r.title)}</strong><small>${esc(r.start_date)} · ${esc(r.category)}</small></div><button type="button" data-draft-id="${esc(r.id)}">Modifier</button></div>`).join(''):'<p>Aucun brouillon enregistré.</p>'}<div class="cfl-v10-actions"><button type="button" id="v11-close-drafts">Fermer</button></div>`;
+    overlay.classList.add('open');dialog.querySelector('#v11-close-drafts').onclick=close;
+    dialog.querySelectorAll('[data-draft-id]').forEach(btn=>btn.onclick=()=>edit(drafts.find(r=>r.id===btn.dataset.draftId)));
+   }catch(e){notify('Erreur de chargement des brouillons : '+e.message)}
+  }
+  toolbar.querySelector('#v11-drafts').onclick=showDrafts;
   toolbar.querySelector('#v10-new').onclick=()=>edit(null,document.getElementById('directDate')?.value||null);
   toolbar.querySelector('#v10-choose').onclick=async()=>{try{await load();dialog.innerHTML=`<h2>Modifier un événement</h2><label>Choisir l’événement<select id="v10-event-choice">${rows.map(r=>`<option value="${esc(r.id)}">${esc(r.start_date.slice(0,4))} — ${esc(r.title)} · ${esc(r.start_date)}</option>`).join('')}</select></label><div class="cfl-v10-actions"><button id="v10-choose-cancel">Annuler</button><button class="primary" id="v10-choose-open">Modifier</button></div>`;overlay.classList.add('open');dialog.querySelector('#v10-choose-cancel').onclick=close;dialog.querySelector('#v10-choose-open').onclick=()=>edit(rows.find(x=>x.id===dialog.querySelector('#v10-event-choice').value))}catch(e){notify('Erreur : '+e.message)}};
   overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
