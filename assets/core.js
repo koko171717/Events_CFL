@@ -46,21 +46,21 @@ function artRender(frame,slide,events){
  if(type==='month'){
   const m=opts.month || '2027-03';const candidates=events.filter(x=>x.start_date<=m+'-31'&&x.end_date>=m+'-01').slice(0,Number(opts.count||6));
   const monthText=new Intl.DateTimeFormat('fr-CH',{month:'long',year:'numeric'}).format(new Date(m+'-01T12:00:00'));
-  body=`<div style="display:flex;flex-direction:column;height:100%;width:100%"><h1 class="month-title">Événements du mois</h1><div style="font-size:32px;color:#ffb5c3">${esc(monthText)}</div><div class="month-list" style="grid-template-rows:repeat(${Math.max(candidates.length,1)},minmax(0,1fr))">${candidates.map(x=>`<div class="month-row"><div class="month-image">${imgMarkup(x)}</div><div style="flex:1;min-width:0"><b>${esc(x.short_title||x.title)}</b><small>${esc(period(x))}</small></div></div>`).join('')||'<div class="month-row">Aucun événement publié.</div>'}</div></div>`;
+  body=`<div style="display:flex;flex-direction:column;height:100%;width:100%"><h1 class="month-title">Événements du mois</h1><div style="font-size:32px;color:#ffb5c3">${esc(monthText)}</div><div class="month-list" style="grid-template-rows:repeat(${Math.max(candidates.length,1)},minmax(0,1fr))">${candidates.map(x=>`<div class="month-row"><div class="month-image">${imgMarkup(x)}</div><div style="flex:1;min-width:0"><b>${esc(x.short_title||x.title)}</b><small>${esc(period(x))}</small><span class="month-summary">${esc(x.summary||x.description||'')}</span></div></div>`).join('')||'<div class="month-row">Aucun événement publié.</div>'}</div></div>`;
  }else if(type==='btwb'){
   const labels={wod:'WOD DU JOUR',leaderboard:'LEADERBOARD',activity:'ACTIVITÉ DES MEMBRES'};
   body=`<div class="btwb-preview" style="width:100%;height:100%"><b>${esc(labels[opts.widget]||'BTWB')}</b><p>Module BTWB : aperçu de conception. Connexion officielle à réaliser après déploiement de l’agenda.</p></div>`;
  }else{
-  const title=opts.title || e.title || 'Événement CFL';const description=opts.description??e.description??'';
+  const title=opts.title || e.title || 'Événement CFL';const description=String(opts.description||'').trim() || e.description || ''; 
   const date=opts.showDate!==false ? `<div class="tv-meta">${esc(opts.dateLabel||period(e))}</div>`:'';
   const price=opts.showPrice===true && e.price_label?`<div class="tv-meta">${esc(e.price_label)}</div>`:'';
   const qrLink=opts.qrUrl||e.link_url||'';const qr=opts.showQR!==false && /^https?:\/\//.test(qrLink) ? `<div class="tv-qr qr-target" data-qr="${esc(qrLink)}"></div>`:'';
   const media=opts.posterOverride||imgUrl(e);
   const poster=`<div class="tv-poster ${media?'':'empty'}" style="--poster:url('${esc(media)}')">${media?`<img src="${esc(media)}" alt="Affiche de l’événement">`:''}</div>`;
-  const copy=`<div class="tv-copy"><div class="tv-tag">${esc(e.category||'Événement')}</div><h1 class="tv-title">${esc(title)}</h1>${opts.showDesc!==false?`<div class="tv-description">${esc(description)}</div>`:''}${date}${price}<div class="tv-footer"><div class="url">${esc(opts.qrUrl||e.link_url||'events.crossfitleman.ch')}</div>${qr}</div></div>`;
+  const copy=`<div class="tv-copy"><div class="tv-tag">${esc(e.category||'Événement')}</div><h1 class="tv-title">${esc(title)}</h1>${opts.showDesc!==false?`<div class="tv-description">${esc(description)}</div>`:''}${date}${price}<div class="tv-footer"><div class="url">${esc(opts.qrUrl||e.link_url||'')}</div>${qr}</div></div>`;
   body=opts.layout==='poster-left'?poster+copy:copy+poster;
  }
- frame.innerHTML=`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand">CROSSFIT <span style="color:#ff667e">LÉMAN</span></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='month'?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
+ frame.innerHTML=`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Léman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='month'?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
  scaleArtwork(frame);textFit(frame.querySelector('.tv-art'));
  const qrEl=frame.querySelector('.qr-target');
  if(qrEl && window.QRCode){
