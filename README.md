@@ -1,21 +1,22 @@
-# CFL CONTROL — Démo Vercel (V2.5.40)
+# CFL CONTROL — Landing Admin / Agenda / TV (V3, environnement de test)
 
-## Fichiers
-- `index.html` : administration CFL CONTROL V2.5.40
-- `coach.html` : portail coach premium V2.5.35
-- `vercel.json` : configuration statique Vercel (URL propre)
+## Navigation sur Vercel
+- `/` : **landing page CFL CONTROL**, deux grandes entrées (Agenda CFL / CFL TV) et accès à la vue membres.
+- `/admin.html` : éditeur de l'Agenda CFL.
+- `/tv.html` : constructeur de slides CFL TV.
+- `/agenda.html` : aperçu de l'agenda visible par les membres (snapshot public autonome, **non synchronisé automatiquement** avec l'éditeur).
+- `/assets/calendar-visuals.js` : ressources visuelles de l'agenda.
 
-## Déploiement Vercel
-1. Décompresser le ZIP.
-2. Déposer les fichiers à la **racine** d'un dépôt GitHub (par exemple `events_CFL`), puis importer ce dépôt dans Vercel, ou utiliser Vercel CLI (`vercel --prod`) depuis ce dossier.
-3. Framework preset : **Other** ; Build Command : **aucune** ; Output Directory : **racine (`.`)**.
-4. Accès : `/` pour l'administration, `/coach` ou `/coach.html` pour le portail coach.
+Un lien flottant « ← CFL Control » est ajouté à l'éditeur, à la TV et à l'aperçu membres.
 
-## Limites de la démo
-- L'interface est statique : aucune API/backend ni aucun compte sécurisé n'est fourni.
-- Les données (demandes, remplacements, réponses) utilisent `localStorage` : elles ne se synchronisent **pas entre appareils ou navigateurs** ; les deux pages communiquent uniquement sur la même origine et dans le même navigateur.
-- **Aucun véritable e-mail ou notification push n'est envoyé.**
-- L'état « Zen Planner mis à jour » est un **suivi manuel**, sans intégration Zen Planner.
-- Le portail permet de choisir librement un profil coach : **ne pas utiliser pour de vraies données personnelles ou des opérations de production**, et limiter l'accès à la démo si nécessaire.
+## Mise en ligne
+Déployer le contenu du ZIP sur le dépôt relié à Vercel, en remplaçant les fichiers de cette version de staging. Framework = Other ; aucune compilation.
 
-Avant une utilisation réelle, prévoir une authentification, des autorisations et une base partagée côté serveur (par exemple Supabase).
+**Sécurité : ce pack n'est PAS destiné à être publié librement.** La landing page ne fournit pas de connexion/authentification. Activer la Deployment Protection Vercel pour l'intégralité du déploiement de test et ne pas l'associer à `events.crossfitleman.ch`.
+
+## Données et intégrations
+- L'agenda admin et CFL TV partagent provisoirement les données via le stockage du même navigateur et la même origine. Aucun stockage partagé entre appareils : Supabase (ou autre backend) et authentification resteront à mettre en place avant publication.
+- `/agenda.html` est une version publique figée de l'agenda. Les changements dans `/admin.html` ne s'y publient pas automatiquement.
+- Connexion Trello : non active.
+- BTWB : simulations uniquement, modules officiels non connectés.
+- Le nom public `events.crossfitleman.ch` devrait ensuite pointer vers l'agenda membres, et non vers cette landing admin. La landing admin sera déplacée sur une URL d'administration distincte avec authentification.
