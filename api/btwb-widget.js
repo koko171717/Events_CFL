@@ -12,6 +12,9 @@ module.exports = function handler(req,res){
   const count=Math.max(1,Math.min(kind==='activity'?30:20,Number.parseInt(get('count'),10)||5));
   const workoutId=/^[1-9]\d{0,9}$/.test(String(get('workout')||''))?String(get('workout')):'';
   const compact=String(get('compact')||'')==='1';
+  // Readable TV presets, independent for single and two-column layouts.
+  const size=['compact','balanced','large'].includes(String(get('size')))?String(get('size')):'balanced';
+  const typography={compact:{body:compact?16:19,small:compact?14:16,h1:compact?25:30,h2:compact?23:27,h3:compact?21:24},balanced:{body:compact?20:24,small:compact?16:19,h1:compact?29:37,h2:compact?27:33,h3:compact?24:29},large:{body:compact?25:32,small:compact?20:25,h1:compact?35:47,h2:compact?31:41,h3:compact?28:35}}[size];
   const key=process.env.BTWB_WEBWIDGET_KEY;
   res.setHeader('Cache-Control','no-store, max-age=0');
   res.setHeader('Content-Type','text/html; charset=utf-8');
@@ -27,16 +30,16 @@ module.exports = function handler(req,res){
   // Keep an accessible scroll fallback when a large WOD cannot fit a single screen.
   const presentationCss = `
     :root{color-scheme:light}html,body{min-height:100%;height:auto;background:#f5f7fb;color:#172238}
-    body{padding:22px 27px 26px;margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:${compact?"25px":"32px"};line-height:1.36}
+    body{padding:22px 27px 26px;margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:${typography.body}px;line-height:1.36}
     /* V30: CSS sits after BTWB stylesheet, with scoped type overrides. */
-    .btwb_webwidget{max-width:100%;margin:0 auto;color:#172238;line-height:1.36;font-size:${compact?"25px":"32px"}!important}
+    .btwb_webwidget{max-width:100%;margin:0 auto;color:#172238;line-height:1.36;font-size:${typography.body}px!important}
     .btwb_webwidget p,.btwb_webwidget li,.btwb_webwidget td,.btwb_webwidget th,.btwb_webwidget label,.btwb_webwidget .description,.btwb_webwidget .text,.btwb_webwidget .workout-description{font-size:inherit!important;line-height:1.34!important}
-    .btwb_webwidget small,.btwb_webwidget .small,.btwb_webwidget .muted,.btwb_webwidget .date{font-size:${compact?"20px":"25px"}!important;line-height:1.3!important}
+    .btwb_webwidget small,.btwb_webwidget .small,.btwb_webwidget .muted,.btwb_webwidget .date{font-size:${typography.small}px!important;line-height:1.3!important}
     .btwb_webwidget strong,.btwb_webwidget b{font-weight:800}
-    .btwb_webwidget h1{font-size:${compact?"35px":"47px"}!important}
-    .btwb_webwidget h2{font-size:${compact?"31px":"41px"}!important}
-    .btwb_webwidget h3,.btwb_webwidget h4{font-size:${compact?"28px":"35px"}!important}
-    .btwb_webwidget .btn,.btwb_webwidget button{font-size:${compact?"20px":"25px"}!important}
+    .btwb_webwidget h1{font-size:${typography.h1}px!important}
+    .btwb_webwidget h2{font-size:${typography.h2}px!important}
+    .btwb_webwidget h3,.btwb_webwidget h4{font-size:${typography.h3}px!important}
+    .btwb_webwidget .btn,.btwb_webwidget button{font-size:${typography.small}px!important}
     .btwb_webwidget table{font-size:inherit!important}
     .btwb_webwidget table td,.btwb_webwidget table th{white-space:normal}
     
