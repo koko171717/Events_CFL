@@ -130,14 +130,14 @@ function artRender(frame,slide,events){
   const count=Math.max(1,Math.min(mode==='activity'?30:20,Number(opts.count)||5));
   const currentDay=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Zurich',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const revision=Math.floor(Date.now()/300000);
-  const widgetFrame=(id,label,kind)=>{const params=new URLSearchParams({type:kind,track:id,count:String(count),v:String(revision),day:currentDay});if(kind==='leaderboard'&&workoutId)params.set('workout',workoutId);return `<section class="btwb-pane"><h2>${esc(label)}</h2><iframe class="btwb-embed" title="BTWB ${esc(label)}" loading="eager" src="/api/btwb-widget?${params.toString()}" referrerpolicy="same-origin"></iframe></section>`};
+  const widgetFrame=(id,label,kind)=>{const params=new URLSearchParams({type:kind,track:id,count:String(count),v:String(revision),day:currentDay});if(kind==='leaderboard'&&workoutId)params.set('workout',workoutId);return `<section class="btwb-pane"><div class="btwb-pane-label">${esc(label)}</div><iframe class="btwb-embed" title="BTWB ${esc(label)}" loading="eager" src="/api/btwb-widget?${params.toString()}" referrerpolicy="same-origin"></iframe></section>`};
   const dateStr=new Intl.DateTimeFormat('fr-CH',{timeZone:'Europe/Zurich',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
   let title='',pane='';
-  if(mode==='activity'){title='ACTIVITÉ DES MEMBRES';pane=widgetFrame(safeId,'DERNIÈRES ACTIVITÉS','activity')}
-  else if(mode==='leaderboard'){title='CLASSEMENT BTWB';pane=workoutId?widgetFrame(safeId,'CLASSEMENT · WORKOUT '+workoutId,'leaderboard'):'<div class="btwb-no-workout">Sélectionne un identifiant de workout BTWB dans le Studio pour afficher son classement.</div>'}
-  else if(mode==='daily-leaderboard'){title='CLASSEMENT DU JOUR · '+(trackNames[safeId]||'BTWB');pane=widgetFrame(safeId,'WOD & CLASSEMENT DU JOUR','daily-leaderboard')}
-  else{title=trackNames[safeId]||'PROGRAMMATION BTWB';pane=widgetFrame(safeId,safeTrain?'WOD PRINCIPAL':'SÉANCE & VARIANTES','wod')+(safeTrain?widgetFrame(safeTrain,'TRAIN · '+(trackNames[safeTrain]||'BTWB'),'wod'):'')}
-  body=`<div class="btwb-screen"><div class="btwb-date"><strong>${esc(title)}</strong><span>${esc(dateStr)}</span></div><div class="btwb-panes ${safeTrain?'two':''}">${pane}</div><p class="btwb-note">Données BTWB · actualisation automatique</p></div>`;
+  if(mode==='activity'){title='ACTIVITÉ DES MEMBRES';pane=widgetFrame(safeId,'PERFORMANCES RÉCENTES','activity')}
+  else if(mode==='leaderboard'){title='CLASSEMENT BTWB';pane=workoutId?widgetFrame(safeId,'WORKOUT #'+workoutId,'leaderboard'):'<div class="btwb-no-workout">Sélectionne un identifiant de workout BTWB dans le Studio pour afficher son classement.</div>'}
+  else if(mode==='daily-leaderboard'){title='CLASSEMENT DU JOUR · '+(trackNames[safeId]||'BTWB');pane=widgetFrame(safeId,'WOD + RÉSULTATS','daily-leaderboard')}
+  else{title=trackNames[safeId]||'PROGRAMMATION BTWB';pane=widgetFrame(safeId,safeTrain?'WOD PRINCIPAL':'PROGRAMMATION DU JOUR','wod')+(safeTrain?widgetFrame(safeTrain,'TRAIN · '+(trackNames[safeTrain]||'BTWB'),'wod'):'')}
+  body=`<div class="btwb-screen"><div class="btwb-date"><strong>${esc(title)}</strong><span>${esc(dateStr)}</span></div><div class="btwb-panes ${safeTrain?'two':''}">${pane}</div><p class="btwb-note">BTWB · données actualisées à chaque diffusion</p></div>`;
  }else{
   const title=opts.title || e.title || 'Événement CFL';const description=String(opts.description||'').trim() || e.description || ''; 
   const date=opts.showDate!==false ? `<div class="tv-meta">${esc(opts.dateLabel||period(e))}</div>`:'';

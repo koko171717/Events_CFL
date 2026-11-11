@@ -161,3 +161,19 @@
 
 /* V27: outil explicite de suppression des textes de l’affiche */
 .spotlight-text-tools{display:flex;flex-direction:column;align-items:flex-start;gap:7px;margin:8px 0 12px}
+
+/* CFL V29 · BTWB studio/TV. Scoped to BTWB — keeps Agenda and Spotlights intact. */
+.tv-art:has(.btwb-screen){background:radial-gradient(ellipse at 90% 0%,#6b243858,transparent 58%),linear-gradient(120deg,#0c1422,#121a2a 52%,#070b15)}
+.tv-art:has(.btwb-screen) .tv-art-body{top:153px;bottom:45px;left:72px;right:72px}
+.tv-art:has(.btwb-screen) .tv-art-head{top:44px;left:75px;right:75px}
+.tv-art:has(.btwb-screen) .tv-art-kicker{font-size:18px;letter-spacing:.16em;color:#f3a9b8}
+.btwb-screen{gap:15px}
+.btwb-date{padding:4px 3px 19px;margin-bottom:2px;border-bottom:1px solid #ffffff25}
+.btwb-date strong{font-size:49px;line-height:1.05;letter-spacing:-.025em;max-width:70%}
+.btwb-date span{font-size:27px;color:#ccd4e2;font-weight:650;letter-spacing:0}
+.btwb-panes{gap:18px}
+.btwb-pane{position:relative;border:1px solid #566479;background:#f5f7fb;border-radius:19px;box-shadow:0 12px 28px #0005}
+.btwb-pane-label{background:#242f43;color:#f4f7fc;min-height:50px;padding:11px 22px;font-size:26px;line-height:1.1;font-weight:850;letter-spacing:.045em;border-bottom:3px solid #b74b65}
+.btwb-pane:has(.btwb-embed) .btwb-embed{background:#f5f7fb}
+.btwb-note{font-size:18px;color:#91a1b6;text-align:right;line-height:1.1;flex:0 0 auto}
+.btwb-no-workout{background:#243044;border-radius:16px;border:1px solid #52637a}
