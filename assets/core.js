@@ -91,14 +91,17 @@ function artRender(frame,slide,events){
   body=`<div class="welcome-design" style="--welcome-overlay:${overlay};--welcome-position:${position}"><img class="welcome-background" src="${esc(safeImage)}" alt="Photo de la communaute CrossFit Leman"><div class="welcome-shade"></div><div class="welcome-diagonal top"></div><div class="welcome-diagonal bottom"></div><div class="welcome-content"><div class="welcome-logo"><img src="/assets/logo-crossfit-leman.svg" alt="Logo officiel CrossFit Leman"></div>${opts.badge!==''?`<div class="welcome-badge">${esc(opts.badge??'CFL COMMUNITY')}</div>`:''}<h1 class="welcome-title">${esc(title)}</h1>${subtitle?`<p class="welcome-subtitle">${esc(subtitle)}</p>`:''}${opts.website!==''?`<div class="welcome-website">${esc(opts.website??'crossfitleman.ch')}</div>`:''}</div></div>`;
  }else if(type==='spotlight'){
   const mode=opts.template==='performance'?'performance':'member';
-  const title=opts.title||(mode==='performance'?'À L’HONNEUR':'MEMBRE DU MOIS');
+  const photoOnly=opts.photoOnly===true;
+  const title=String(opts.title??'').trim();
+  const name=String(opts.name??'').trim();
+  const subtitle=String(opts.subtitle??'').trim();
+  const quote=String(opts.highlight??'').trim();
+  const about=String(opts.description??'').trim();
   const img=String(opts.imageUrl||'');
-  const image=img&&/^(https:\/\/|blob:)/i.test(img)?`<img src="${esc(img)}" alt="Portrait">`:'<span class="spotlight-photo-empty">PHOTO CFL</span>';
-  const quote=String(opts.highlight||'').trim();
-  const about=String(opts.description||'').trim();
+  const image=img&&/^(https:\/\/|blob:)/i.test(img)?`<img src="${esc(img)}" alt="Photo CFL">`:'<span class="spotlight-photo-empty">AJOUTER UNE PHOTO</span>';
   const photo=`<div class="spotlight-photo">${image}</div>`;
-  const info=`<div class="spotlight-content"><div class="spotlight-eyebrow">${esc(mode==='performance'?'PERFORMANCE · COMMUNAUTÉ':'PORTRAIT · COMMUNAUTÉ')}</div><h1 class="spotlight-headline">${esc(title)}</h1><div class="spotlight-person">${esc(opts.name||'Nouveau portrait')}</div>${opts.subtitle?`<div class="spotlight-subtitle">${esc(opts.subtitle)}</div>`:''}${quote?`<div class="spotlight-highlight">${esc(quote)}</div>`:''}${about?`<div class="spotlight-about">${esc(about)}</div>`:''}<div class="spotlight-signature">CROSSFIT LÉMAN · BEYOND THE BOX.</div></div>`;
-  body=`<div class="spotlight-layout ${mode} ${opts.imageSide==='right'?'picture-right':''}">${photo}${info}</div>`;
+  const info=`<div class="spotlight-content">${title?`<h1 class="spotlight-headline">${esc(title)}</h1>`:''}${name?`<div class="spotlight-person">${esc(name)}</div>`:''}${subtitle?`<div class="spotlight-subtitle">${esc(subtitle)}</div>`:''}${quote?`<div class="spotlight-highlight">${esc(quote)}</div>`:''}${about?`<div class="spotlight-about">${esc(about)}</div>`:''}</div>`;
+  body=photoOnly?`<div class="spotlight-layout photo-only">${photo}</div>`:`<div class="spotlight-layout ${mode} ${opts.imageSide==='right'?'picture-right':''}">${photo}${info}</div>`;
  }else if(type==='month'){
 
   const m=opts.month || '2027-03';const candidates=events.filter(x=>x.start_date<=m+'-31'&&x.end_date>=m+'-01').slice(0,Number(opts.count||6));
@@ -144,7 +147,7 @@ function artRender(frame,slide,events){
   const copy=`<div class="tv-copy"><div class="tv-tag">${esc(e.category||'Événement')}</div><h1 class="tv-title">${esc(title)}</h1>${opts.showDesc!==false?`<div class="tv-description">${esc(description)}</div>`:''}${date}${price}<div class="tv-footer"><div class="url">${esc(opts.qrUrl||e.link_url||'')}</div>${qr}</div></div>`;
   body=opts.layout==='poster-left'?poster+copy:copy+poster;
  }
- frame.innerHTML=type==='welcome'?`<div class="tv-art welcome-art">${body}</div>`:`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Léman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='spotlight'?'CFL SPOTLIGHT':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
+ frame.innerHTML=(type==='welcome'||(type==='spotlight'&&opts.photoOnly===true))?`<div class="tv-art ${type==='welcome'?'welcome-art':'spotlight-photo-art'}">${body}</div>`:`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Léman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='spotlight'?'CFL SPOTLIGHT':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
  scaleArtwork(frame);textFit(frame.querySelector('.tv-art'));
  const qrEl=frame.querySelector('.qr-target');
  if(qrEl && window.QRCode){
