@@ -899,7 +899,10 @@ $('overlay').onclick=e=>{if(e.target===$('overlay'))close()};document.addEventLi
   if(!admin)q=q.eq("status","published");
   const {data,error}=await q;if(error)throw error;return data||[];
  }
- const isAdmin=location.pathname.endsWith('/admin.html');
+ // V18 — Le fichier admin.html est l'espace administrateur, quelle que soit
+ // l'URL affichée par Vercel (/admin, /admin.html ou réécriture).
+ // L'accès aux données reste contrôlé par checkAdmin() et les règles RLS Supabase.
+ const isAdmin=true;
  document.body.classList.toggle('cfl-public',!isAdmin);
  const status=document.getElementById('cfl-sync-status');
  const announce=(t,error=false)=>{status.textContent=t;status.style.display='block';status.style.borderColor=error?'#d75d5d':'#ad526d';setTimeout(()=>status.style.display='none',5000)};
@@ -918,6 +921,12 @@ $('overlay').onclick=e=>{if(e.target===$('overlay'))close()};document.addEventLi
   if(isAdmin){if(!await checkAdmin())return;window.CFL_CALENDAR_ADMIN=true;editing=true;annualMode='overview';}
   const rows=await fetchEvents(isAdmin);
   all=rows.map(mapRecord);
+  if(isAdmin){
+    console.info('[CFL V18] Mode Admin confirmé. URL :',location.pathname,
+      'Événements :',rows.length,
+      'Brouillons :',rows.filter(e=>e.status==='draft').length,
+      'À confirmer :',rows.filter(e=>e.status==='archived').length);
+  }
   for(const e of rows)if(e.image_url){const key='remote_'+e.id;VISUAL_ASSETS[key]=e.image_url;customVisuals[key]={name:e.title,data:e.image_url};}
   prior=new Map(all.map(x=>[x.id,JSON.stringify(toRow(x))]));
   window.CFL_CALENDAR_SAVE=async()=>{
