@@ -1,0 +1,135 @@
+:root{color-scheme:dark;--bg:#090c12;--panel:#141923;--card:#1b2230;--line:#343d50;--text:#f7f8fa;--muted:#a6b0c1;--red:#c7344b;--red2:#ee667b;--navy:#111b2b;font-family:Inter,system-ui,Arial,sans-serif}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 65% -10%,#3d142550,transparent 44%),var(--bg);color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}.hidden{display:none!important}.shell{max-width:1450px;margin:auto;padding:22px}.top{border-bottom:1px solid var(--line);background:#10141ddc;backdrop-filter:blur(10px)}.top-inner{display:flex;align-items:center;justify-content:space-between;gap:14px;max-width:1450px;margin:auto;padding:16px 22px;flex-wrap:wrap}.brand{font-size:22px;letter-spacing:-.07em;font-weight:950}.brand span{color:var(--red2)}.muted{color:var(--muted)}.tiny{font-size:12px}.btn{border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:#263043;color:white;font-weight:750;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:7px}.btn:hover{background:#344259}.btn.primary{background:linear-gradient(135deg,#e2445d,#af2239);border-color:#e65e72}.btn.flat{background:transparent}.btn.danger{background:#49202b;border-color:#80404c}.btn:disabled{opacity:.45;cursor:not-allowed}.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.panel{border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,#18202b,#121820);padding:22px}.layout{display:grid;grid-template-columns:minmax(330px,440px) minmax(0,1fr);gap:20px}.h1{font-size:28px;font-weight:900;letter-spacing:-.05em;margin:0 0 6px}.h2{font-size:18px;font-weight:850;margin:0 0 10px;letter-spacing:-.02em}.eyebrow{font-size:11px;letter-spacing:.16em;color:#ff9cae;font-weight:900;text-transform:uppercase}.field{display:grid;gap:6px;margin:12px 0}.field label{font-size:12px;font-weight:800;color:#dde3ee}.field input,.field textarea,.field select{width:100%;padding:11px 12px;color:white;background:#101722;border:1px solid #455066;border-radius:11px;min-height:43px}.field textarea{min-height:110px;resize:vertical;line-height:1.4}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.mutebar{border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:15px}.stack{display:grid;gap:9px}.entry{display:flex;text-align:left;gap:12px;align-items:center;padding:11px;background:#18202b;border:1px solid #303b4c;border-radius:13px;width:100%;color:white}.entry.active{background:#492634;border-color:#dc536d}.thumb{width:68px;height:64px;flex:0 0 68px;background:#10151e;border-radius:9px;display:grid;place-items:center;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:contain}.entry strong{display:block;font-size:13px}.entry small{color:#b2b9c8;font-size:11px}.pill{border-radius:99px;padding:5px 9px;background:#283448;font-size:11px;font-weight:800;display:inline-block}.pill.green{background:#214337;color:#a8f1cf}.pill.amber{background:#483a22;color:#ffe1a0}.sep{height:1px;background:var(--line);margin:18px 0}.notice{padding:12px 14px;border:1px solid #394b64;background:#192b3e;border-radius:12px;font-size:12px;line-height:1.5;color:#cbdced}.notice.error{border-color:#7f3c48;background:#3b1e27;color:#ffd3db}.notice.ok{border-color:#367055;background:#17362b;color:#baf6d6}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.checkline{display:flex;align-items:center;gap:8px;font-size:13px;margin:12px 0}.checkline input{accent-color:#e24a62}.content-title{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px}.clamp{overflow-wrap:anywhere}.panel.sticky{position:sticky;top:12px;max-height:calc(100vh - 25px);overflow:auto}.choice{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.choice button{border:1px solid #38465b;background:#263044;border-radius:12px;color:#fff;padding:12px 7px;font-size:12px;font-weight:800}.choice button.active{border-color:#e95e76;background:#5a2b38}.spinner{text-align:center;padding:50px;color:#aab4c5}@media(max-width:900px){.layout{grid-template-columns:1fr}.panel.sticky{position:static;max-height:none}.grid3{grid-template-columns:1fr 1fr}}@media(max-width:580px){.grid2,.grid3{grid-template-columns:1fr}.shell{padding:12px}.panel{padding:16px}.top-inner{padding:12px}}
+/* Fit a 1920x1080 artwork into any 16:9 frame without changing text geometry. */
+.tv-frame{position:relative;aspect-ratio:16/9;border:1px solid #40495b;border-radius:15px;background:#05070c;overflow:hidden;box-shadow:0 26px 65px #0008}.tv-art{position:absolute;inset:0;width:1920px;height:1080px;transform-origin:top left;background:radial-gradient(ellipse at 90% 0%,#6d263c6b,transparent 55%),linear-gradient(135deg,#111827,#070a11);overflow:hidden;color:white}.tv-art:before{content:'';position:absolute;inset:0 auto 0 0;width:14px;background:linear-gradient(#f66b80,#9e1930)}.tv-art-head{position:absolute;top:72px;left:95px;right:95px;display:flex;align-items:center;justify-content:space-between}.tv-art-brand{font-weight:950;font-size:30px;letter-spacing:-.05em}.tv-art-kicker{font-size:22px;letter-spacing:.15em;color:#ff9eac;font-weight:850}.tv-art-body{position:absolute;top:158px;bottom:72px;left:95px;right:95px;display:flex;gap:55px}.tv-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:24px;overflow:hidden}.tv-tag{font-size:22px;font-weight:900;letter-spacing:.11em;color:#ffc0cc;text-transform:uppercase}.tv-title{font-size:88px;letter-spacing:-.05em;line-height:1.02;font-weight:950;margin:0;overflow-wrap:anywhere}.tv-description{font-size:36px;line-height:1.28;color:#ecedf2;white-space:pre-wrap;overflow-wrap:anywhere}.tv-meta{font-size:28px;font-weight:800;color:#fff;background:#ffffff13;border:1px solid #ffffff19;padding:12px 18px;border-radius:15px;align-self:flex-start}.tv-footer{display:flex;gap:24px;align-items:end;justify-content:space-between;margin-top:auto;min-height:110px}.tv-footer .url{font-size:24px;color:#c6ccda;max-width:440px;overflow-wrap:anywhere}.tv-qr{height:145px;width:145px;object-fit:contain;background:white;padding:9px;border-radius:12px}.tv-poster{width:720px;flex:0 0 720px;position:relative;background:#111720;border-radius:24px;overflow:hidden;border:1px solid #ffffff22;display:grid;place-items:center}.tv-poster:before{content:'';position:absolute;inset:-30px;filter:blur(35px) brightness(.4);background:var(--poster) center/cover}.tv-poster img{position:relative;max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain}.tv-poster.empty:after{content:'VISUEL CFL';font-size:40px;font-weight:900;color:#6e778b;position:absolute}.month-title{font-size:84px;font-weight:950;letter-spacing:-.05em;margin:0}.month-list{margin-top:22px;flex:1;display:grid;grid-template-columns:1fr;gap:10px;min-height:0}.month-row{display:flex;align-items:center;gap:20px;background:#ffffff0d;border:1px solid #ffffff18;border-radius:16px;padding:9px 16px;min-height:0}.month-row .month-image{height:100%;max-height:125px;width:142px;flex:0 0 142px;display:grid;place-items:center;border-radius:10px;background:#121824;overflow:hidden}.month-row img{width:100%;height:100%;object-fit:contain}.month-row b{font-size:32px;display:block}.month-row small{font-size:24px;color:#d4dae5}.tv-art .btwb-preview{padding:55px;background:#ffffff0d;border:1px solid #ffffff19;border-radius:24px;font-size:38px}.tv-art .btwb-preview b{font-size:65px}.player-overlay{position:fixed;inset:0;background:#020306;z-index:80;display:grid;place-items:center}.player-overlay .tv-frame{width:min(100vw,177.77778vh);border:0;border-radius:0;box-shadow:none}.player-controls{position:absolute;right:16px;top:16px;z-index:90;opacity:.35}.player-controls:hover{opacity:1}
+.tv-qr img,.tv-qr canvas{width:100%!important;height:100%!important;object-fit:contain}
+
+.tv-art-brand img{height:70px;max-width:210px;width:auto;object-fit:contain;display:block}
+.month-row .month-summary{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;color:#cbd3df;font-size:18px;line-height:1.2;margin-top:8px}
+.month-row .month-image{width:132px;flex-basis:132px;max-height:125px;aspect-ratio:1 / 1}
+.month-row .month-image img{object-fit:contain!important;width:100%;height:100%}
+.slide-item{display:flex;gap:6px;align-items:stretch;padding:8px;border:1px solid #394252;background:#161e2b;border-radius:13px;margin-bottom:7px}
+.slide-item.selected{border-color:#e15e7d;background:#352334}
+.slide-handle{font-size:24px;cursor:grab;color:#c9a8b5;border:0;background:none;align-self:center;padding:3px}
+.slide-select{border:0;background:transparent;color:#fff;text-align:left;flex:1;min-width:0;cursor:pointer;padding:4px}
+.slide-select strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slide-select small{display:block;color:#afb8c7;font-size:11px;margin-top:4px}
+.slide-controls{display:flex;align-items:center;gap:3px}
+.slide-icon{cursor:pointer;background:#273246;border:1px solid #3c4c60;border-radius:8px;padding:6px 8px;color:#fff;font-size:14px}
+.slide-icon:hover{background:#513144}.slide-icon.remove{color:#ffafbc}
+.slide-item.dragging{opacity:.4}.slide-item.drop-target{outline:2px dashed #ee6382}
+@media(max-width:640px){.slide-controls{flex-wrap:wrap}.slide-icon{padding:5px}}
+
+/* V7 - visual slide controls and a clearer monthly information hierarchy */
+.slide-type-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.type-button{border:1px solid #465368;background:#1e2a3b;color:#f4f6fa;border-radius:14px;min-height:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:800;line-height:1.18;padding:10px 5px;cursor:pointer}
+.type-symbol{font-size:25px;line-height:1}.type-button.active,.type-button[aria-pressed="true"]{background:#633042;border:2px solid #ff758e;box-shadow:inset 0 0 0 1px #ffffff20}.type-button:hover{background:#38445a}
+.tv-thumbnails{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:11px;margin-top:14px}
+.tv-thumb{border:2px solid #394353;background:#18202d;color:#f5f7fb;border-radius:14px;text-align:left;padding:7px;cursor:pointer;min-width:0;transition:transform .12s,border-color .12s}
+.tv-thumb.active{border-color:#fc7891;background:#43263a}.tv-thumb:hover{transform:translateY(-2px);border-color:#f28ca0}
+.tv-thumb-preview{height:78px;border-radius:9px;background:linear-gradient(140deg,#332638,#171d2a 65%);display:flex;justify-content:center;align-items:center;position:relative}
+.tv-thumb-number{position:absolute;top:6px;left:7px;font-size:10px;border-radius:5px;background:#101722c9;padding:3px 6px}.tv-thumb-symbol{font-size:34px;color:#f4b4c5}.tv-thumb-name{font-size:12px;line-height:1.25;font-weight:800;margin:8px 0 3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.tv-thumb small{font-size:11px;color:#bcc5d2}
+.tv-description{font-size:44px;line-height:1.25;font-weight:600;color:#f4f5f8;background:linear-gradient(90deg,#ffffff08,transparent);border-left:5px solid #e15b75;padding:16px 18px;border-radius:0 12px 12px 0}
+.tv-copy{gap:22px}.tv-title{font-size:83px}.tv-poster{width:620px;flex-basis:620px}
+.month-row{gap:25px;padding:12px 18px;background:linear-gradient(90deg,#ffffff13,#ffffff07)}
+.month-row b{font-size:37px;line-height:1.12}.month-row small{display:block;font-size:27px;color:#ffc0cc;margin-top:5px;font-weight:750}
+.month-row .month-summary{font-size:27px;line-height:1.22;color:#f2f3f8;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin-top:8px;font-weight:500}
+.month-row .month-image{width:150px;flex-basis:150px;max-height:144px;aspect-ratio:1}
+.cfl-public-link{background:#1a3140!important;border-color:#5b7892!important}
+@media(max-width:600px){.slide-type-buttons{gap:5px}.type-button{font-size:11px;min-height:72px}.tv-thumbnails{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* V8 — TV readable typography: priority to event description, not empty space */
+.tv-art-body{gap:44px;top:155px;bottom:57px}
+.tv-poster{width:600px;flex-basis:600px}
+.tv-copy{gap:19px}
+.tv-tag{font-size:25px}
+.tv-title{font-size:76px;line-height:1.035}
+.tv-description{font-size:62px;line-height:1.20;font-weight:730;color:#fff;padding:16px 18px 18px 23px;background:linear-gradient(90deg,#ffffff10,#ffffff04 85%);border-left:7px solid #f16b82;text-wrap:pretty}
+.tv-meta{font-size:31px;padding:10px 15px}
+.tv-footer{min-height:76px;gap:16px}
+.tv-footer .url{font-size:21px;max-width:520px}
+.tv-qr{width:116px;height:116px;padding:6px}
+.month-row .month-summary{font-size:30px;line-height:1.19}
+
+/* CFL V9 — BTWB official Webwidgets in isolated TV frames */
+.btwb-screen{display:flex;flex-direction:column;gap:14px;width:100%;height:100%;overflow:hidden}
+.btwb-date{flex:none;font-size:38px;font-weight:900;letter-spacing:.05em;color:#f3a6b7;text-transform:uppercase}
+.btwb-panes{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;flex:1;min-height:0}
+.btwb-panes.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.btwb-pane{display:flex;flex-direction:column;min-height:0;overflow:hidden;border:2px solid #425064;border-radius:22px;background:white;color:#17212e}
+.btwb-pane h2{margin:0;padding:18px 25px 14px;background:#171f2d;color:white;font-size:35px;line-height:1.1}
+.btwb-embed{flex:1;min-height:0;width:100%;border:0;background:#fff}
+.btwb-note{font-size:22px;color:#a4b1c7;margin:0;line-height:1.15}
+
+/* V10: annual calendar and track headers */
+.annual-slide{width:100%;height:100%;display:flex;flex-direction:column;gap:22px;min-height:0}
+.annual-slide-top{display:flex;align-items:end;justify-content:space-between;border-bottom:3px solid #a93d56;padding-bottom:10px}.annual-slide-top h1{font-size:73px;line-height:1;margin:0;letter-spacing:-.04em}.annual-slide-top>span{font-size:22px;color:#f5b2c4;letter-spacing:.08em;font-weight:800}
+.annual-slide-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:14px;flex:1;min-height:0}
+.annual-slide-month{min-height:0;border:1px solid #66708466;background:linear-gradient(150deg,#263042bb,#111a2cc4);border-radius:16px;overflow:hidden}
+.annual-slide-month header{padding:10px 15px;background:#63293b66;color:#fff;font-size:29px;font-weight:900;display:flex;gap:15px;align-items:center}.annual-slide-month header span{color:#f5adc0;font-size:23px}
+.annual-slide-items{padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-height:0}.annual-slide-item{display:flex;gap:11px;align-items:baseline;color:#f5f6fa;font-size:22px;line-height:1.08;min-width:0}.annual-slide-item b{color:#ffb5c5;font-size:20px}.annual-slide-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.annual-slide-items small{color:#ffb5c5}.annual-slide-empty{color:#7e899b}
+.btwb-date{display:flex;justify-content:space-between;align-items:center;gap:22px;flex-wrap:wrap;font-size:28px}.btwb-date strong{color:white;font-size:43px;letter-spacing:.025em}.btwb-date span{color:#f2a4b8}.btwb-pane h2{font-size:33px}.btwb-pane h2 small{font-size:23px;color:#ffafc0}
+.slide-type-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* V13 - calendar display parity */
+.calendar-view-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.calendar-view-btn{border:1px solid #506078;border-radius:10px;background:#202b3d;color:#f1f4fa;font:700 12px system-ui;padding:12px 6px;cursor:pointer}
+.calendar-view-btn.active{border-color:#f27b9a;background:#713147;color:white}
+.cfl-tv-calendar{width:100%;height:100%;display:flex;flex-direction:column;gap:16px;min-height:0}
+.cfl-tv-calendar-heading{border-bottom:3px solid #bd516b;display:flex;align-items:end;justify-content:space-between;padding-bottom:9px}
+.cfl-tv-calendar-heading h1{font-size:70px;line-height:1;margin:0;font-weight:950}
+.cfl-tv-calendar-heading span{color:#f9adc0;font-weight:850;font-size:25px;letter-spacing:.1em}
+.cfl-tv-year-grid{display:grid;grid-template-columns:66px repeat(12,minmax(0,1fr));gap:5px;flex:1;min-height:0}
+.cfl-tv-day-numbers,.cfl-tv-year-month{display:grid;grid-template-rows:36px repeat(31,minmax(0,1fr));gap:2px;min-height:0}
+.cfl-tv-day-numbers header,.cfl-tv-year-month header{text-align:center;padding:5px 0;border-radius:6px;background:#4d2940;font-size:18px;font-weight:850}
+.cfl-tv-day-numbers>div{font-size:15px;color:#aeb6c8;text-align:center;display:grid;place-items:center}
+.cfl-tv-year-day{background:#ffffff0b;border:1px solid #ffffff0c;border-radius:3px;overflow:hidden;display:flex;align-items:center;min-width:0}
+.cfl-tv-year-day.empty{background:#00000019;border:0}
+.cfl-tv-year-day.has-event{background:#b3375d;box-shadow:inset 0 0 0 1px #fc8baa55}
+.cfl-tv-year-day span{display:block;width:100%;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;text-align:center;font-size:12px;font-weight:850;padding:0 2px}
+.cfl-tv-year-day b{font-size:11px;color:#ffeaec}
+.cfl-tv-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;text-align:center;color:#ffd1db;font-size:24px;font-weight:850}
+.cfl-tv-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:repeat(6,minmax(0,1fr));gap:8px;flex:1;min-height:0}
+.cfl-tv-month-day{background:#202b3b;border:1px solid #4e5b7080;border-radius:10px;padding:9px 11px;overflow:hidden}
+.cfl-tv-month-day.outside{background:#11172170;border-color:transparent}
+.cfl-tv-month-day>b{display:block;color:#ffd0da;font-size:25px;margin-bottom:6px}
+.cfl-tv-month-event{font-size:16px;line-height:1.12;font-weight:750;border-left:4px solid #e56e88;background:#9e3c5744;margin:3px 0;padding:5px 7px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cfl-tv-month-day small{font-size:14px;color:#fbb8c9}
+
+/* CFL V15: choix directs des modules BTWB */
+.btwb-widget-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:7px}
+.btwb-widget-btn{border:1px solid #40506a;background:#202d3d;color:#f7f8fd;border-radius:12px;padding:13px 8px;min-height:54px;font:700 13px system-ui,sans-serif;cursor:pointer}
+.btwb-widget-btn.active,.btwb-widget-btn:hover{background:#653044;border-color:#f16a89;color:white}
+.btwb-no-workout{padding:38px;color:#fff;font-size:26px;font-weight:700}
+
+/* V16: calendar TV mirrors Admin weekday + VD reference cues; visible even with events. */
+.cfl-tv-year-day.weekend,.cfl-tv-month-day.weekend{background-color:#3d414e;border-color:#69738780}
+.cfl-tv-year-day.has-event.weekend{background:#a54165;box-shadow:inset 0 0 0 2px #ffcad7}
+.cfl-tv-year-day.vacation,.cfl-tv-month-day.vacation{box-shadow:inset 5px 0 0 #74b9e5!important;border-left-color:#74b9e5;background-color:#304b65}
+.cfl-tv-year-day.holiday,.cfl-tv-month-day.holiday{box-shadow:inset 5px 0 0 #ffd083!important;border-left-color:#ffd083;background-color:#62513d}
+.cfl-tv-year-day.has-event.vacation,.cfl-tv-year-day.has-event.holiday{background-color:#974466}
+.cfl-tv-year-day.empty{opacity:.35}
+
+/* V17: vacances scolaires réservées à Agenda Admin, jamais aux slides TV */
+.tv-art .cfl-tv-year-day.vacation,.tv-art .cfl-tv-month-day.vacation{box-shadow:none!important;border-left-color:inherit!important;background-color:inherit!important}
+
+/* CFL TV V22 — Spotlight */
+.slide-type-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}
+.spotlight-form-intro{font-size:13px;color:#c7d0dd;background:#1d2c3c;border:1px solid #385066;padding:12px;border-radius:12px;margin:12px 0}
+.spotlight-models,.spotlight-sides{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.spotlight-model,.spotlight-side{min-height:42px;background:#202b3c;color:#edf2f9;border:1px solid #46556d;border-radius:10px;cursor:pointer;font:inherit;font-weight:700;padding:8px}
+.spotlight-model.active,.spotlight-side.active{background:#633047;border-color:#f36b89;box-shadow:inset 0 0 0 1px #f36b89}
+.spotlight-upload-status{font-size:12px;color:#aec4d7;padding:6px 0}
+.spotlight-layout{display:flex;width:100%;height:100%;gap:64px;min-width:0;align-items:stretch}
+.spotlight-layout.picture-right{flex-direction:row-reverse}
+.spotlight-photo{width:690px;flex:0 0 690px;min-height:0;border-radius:26px;overflow:hidden;border:1px solid #ffffff2e;background:linear-gradient(145deg,#27364b,#10151f);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 28px 50px #0005}
+.spotlight-photo img{width:100%;height:100%;object-fit:cover;object-position:center}
+.spotlight-photo-empty{font-size:48px;color:#768396;font-weight:900;letter-spacing:.1em}
+.spotlight-content{flex:1;display:flex;flex-direction:column;min-width:0;padding:16px 0;gap:20px;overflow:hidden}
+.spotlight-eyebrow{font-size:25px;font-weight:900;letter-spacing:.16em;color:#f3a7b5}
+.spotlight-headline{font-size:68px;font-weight:950;letter-spacing:-.05em;line-height:1.03;color:#fff;margin:0;overflow-wrap:anywhere}
+.spotlight-person{font-size:85px;font-weight:950;line-height:1.02;letter-spacing:-.06em;color:#fff;overflow-wrap:anywhere}
+.spotlight-subtitle{font-size:37px;line-height:1.13;font-weight:800;color:#fec9d1;overflow-wrap:anywhere}
+.spotlight-highlight{font-size:44px;line-height:1.2;font-weight:800;color:#fff;padding:20px 24px;background:#ffffff10;border-left:8px solid #f46b89;border-radius:0 16px 16px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.spotlight-about{font-size:30px;line-height:1.27;color:#e6eaf1;white-space:pre-wrap;overflow-wrap:anywhere}
+.spotlight-signature{margin-top:auto;font-size:19px;letter-spacing:.11em;color:#c3cbd7;font-weight:800}
+.spotlight-layout.performance .spotlight-highlight{background:#60233d75;border-left-color:#ff6d90}
