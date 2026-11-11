@@ -81,7 +81,15 @@ function artRender(frame,slide,events){
  const opts=slide.settings||{};
  const type=slide.slide_type||'event';
  let body='';
- if(type==='spotlight'){
+ if(type==='welcome'){
+  const img=String(opts.imageUrl||'/assets/welcome-group.jpg');
+  const safeImage=/^(https:\/\/|blob:|\/assets\/welcome-group\.jpg$)/i.test(img)?img:'/assets/welcome-group.jpg';
+  const overlay=Math.max(20,Math.min(85,Number(opts.overlay)||60))/100;
+  const position=['top','bottom'].includes(opts.imagePosition)?opts.imagePosition:'center';
+  const title=opts.title??'BIENVENUE A CROSSFIT LEMAN';
+  const subtitle=opts.subtitle??'Une communaute, du coaching, du fun et du depassement de soi.';
+  body=`<div class="welcome-design" style="--welcome-overlay:${overlay};--welcome-position:${position}"><img class="welcome-background" src="${esc(safeImage)}" alt="Photo de la communaute CrossFit Leman"><div class="welcome-shade"></div><div class="welcome-diagonal top"></div><div class="welcome-diagonal bottom"></div><div class="welcome-content"><div class="welcome-logo"><img src="/assets/logo-crossfit-leman.svg" alt="Logo officiel CrossFit Leman"></div>${opts.badge!==''?`<div class="welcome-badge">${esc(opts.badge??'CFL COMMUNITY')}</div>`:''}<h1 class="welcome-title">${esc(title)}</h1>${subtitle?`<p class="welcome-subtitle">${esc(subtitle)}</p>`:''}${opts.website!==''?`<div class="welcome-website">${esc(opts.website??'crossfitleman.ch')}</div>`:''}</div></div>`;
+ }else if(type==='spotlight'){
   const mode=opts.template==='performance'?'performance':'member';
   const title=opts.title||(mode==='performance'?'À L’HONNEUR':'MEMBRE DU MOIS');
   const img=String(opts.imageUrl||'');
@@ -136,7 +144,7 @@ function artRender(frame,slide,events){
   const copy=`<div class="tv-copy"><div class="tv-tag">${esc(e.category||'Événement')}</div><h1 class="tv-title">${esc(title)}</h1>${opts.showDesc!==false?`<div class="tv-description">${esc(description)}</div>`:''}${date}${price}<div class="tv-footer"><div class="url">${esc(opts.qrUrl||e.link_url||'')}</div>${qr}</div></div>`;
   body=opts.layout==='poster-left'?poster+copy:copy+poster;
  }
- frame.innerHTML=`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Léman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='spotlight'?'CFL SPOTLIGHT':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
+ frame.innerHTML=type==='welcome'?`<div class="tv-art welcome-art">${body}</div>`:`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Léman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='spotlight'?'CFL SPOTLIGHT':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
  scaleArtwork(frame);textFit(frame.querySelector('.tv-art'));
  const qrEl=frame.querySelector('.qr-target');
  if(qrEl && window.QRCode){
