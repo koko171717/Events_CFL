@@ -34,7 +34,10 @@
   if(!client)return;
   const {data:{user},error:ue}=await client.auth.getUser();if(ue||!user)return;
   const {data:role,error:re}=await client.from('app_admins').select('user_id').eq('user_id',user.id).maybeSingle();if(re||!role)return;
-  document.body.prepend(toolbar);document.body.append(overlay);document.body.classList.add('cfl-unified-admin');const status=document.getElementById('v10-status');status.textContent='Édition Supabase active';
+  const mainNavigation=document.querySelector('.cfl-admin-nav');
+  if(mainNavigation){mainNavigation.insertAdjacentElement('afterend',toolbar)}
+  else{document.body.prepend(toolbar)}
+  document.body.append(overlay);document.body.classList.add('cfl-unified-admin');const status=document.getElementById('v10-status');status.textContent='Édition Supabase active';
   const dialog=document.getElementById('cfl-v10-dialog');let rows=[];
   const notify=(message)=>status.textContent=message;
   const load=async()=>{const {data,error}=await client.from('events').select('*').order('start_date',{ascending:true});if(error)throw error;rows=data||[];return rows};
