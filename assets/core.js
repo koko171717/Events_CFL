@@ -25,6 +25,17 @@ function scaleArtwork(frame){if(!frame)return;const art=frame.querySelector('.tv
 function resizeFrames(){document.querySelectorAll('.tv-frame').forEach(scaleArtwork)}
 window.addEventListener('resize',resizeFrames);
 function textFit(art){
+ const spotlight=art.querySelector('.spotlight-content');
+ if(spotlight){
+  const title=spotlight.querySelector('.spotlight-headline'),name=spotlight.querySelector('.spotlight-person'),sub=spotlight.querySelector('.spotlight-subtitle'),quote=spotlight.querySelector('.spotlight-highlight'),about=spotlight.querySelector('.spotlight-about');
+  let step=0;
+  while(spotlight.scrollHeight>spotlight.clientHeight+1&&step<24){
+   step++;spotlight.style.gap=Math.max(8,20-step*.65)+'px';
+   for(const [el,initial,min] of [[title,68,38],[name,85,44],[sub,37,23],[quote,44,26],[about,30,21]])if(el)el.style.fontSize=Math.max(min,initial-step*1.5)+'px';
+  }
+  art.dataset.overflow=spotlight.scrollHeight>spotlight.clientHeight+1?'true':'false';
+  return;
+ }
  const desc=art.querySelector('.tv-description'); if(!desc)return;
  const copy=art.querySelector('.tv-copy'); const title=copy?.querySelector('.tv-title');
  if(!copy||!title)return;
@@ -70,7 +81,18 @@ function artRender(frame,slide,events){
  const opts=slide.settings||{};
  const type=slide.slide_type||'event';
  let body='';
- if(type==='month'){
+ if(type==='spotlight'){
+  const mode=opts.template==='performance'?'performance':'member';
+  const title=opts.title||(mode==='performance'?'À L’HONNEUR':'MEMBRE DU MOIS');
+  const img=String(opts.imageUrl||'');
+  const image=img&&/^(https:\/\/|blob:)/i.test(img)?`<img src="${esc(img)}" alt="Portrait">`:'<span class="spotlight-photo-empty">PHOTO CFL</span>';
+  const quote=String(opts.highlight||'').trim();
+  const about=String(opts.description||'').trim();
+  const photo=`<div class="spotlight-photo">${image}</div>`;
+  const info=`<div class="spotlight-content"><div class="spotlight-eyebrow">${esc(mode==='performance'?'PERFORMANCE · COMMUNAUTÉ':'PORTRAIT · COMMUNAUTÉ')}</div><h1 class="spotlight-headline">${esc(title)}</h1><div class="spotlight-person">${esc(opts.name||'Nouveau portrait')}</div>${opts.subtitle?`<div class="spotlight-subtitle">${esc(opts.subtitle)}</div>`:''}${quote?`<div class="spotlight-highlight">${esc(quote)}</div>`:''}${about?`<div class="spotlight-about">${esc(about)}</div>`:''}<div class="spotlight-signature">CROSSFIT LÉMAN · BEYOND THE BOX.</div></div>`;
+  body=`<div class="spotlight-layout ${mode} ${opts.imageSide==='right'?'picture-right':''}">${photo}${info}</div>`;
+ }else if(type==='month'){
+
   const m=opts.month || '2027-03';const candidates=events.filter(x=>x.start_date<=m+'-31'&&x.end_date>=m+'-01').slice(0,Number(opts.count||6));
   const monthText=new Intl.DateTimeFormat('fr-CH',{month:'long',year:'numeric'}).format(new Date(m+'-01T12:00:00'));
   body=`<div style="display:flex;flex-direction:column;height:100%;width:100%"><h1 class="month-title">Événements du mois</h1><div style="font-size:32px;color:#ffb5c3">${esc(monthText)}</div><div class="month-list" style="grid-template-rows:repeat(${Math.max(candidates.length,1)},minmax(0,1fr))">${candidates.map(x=>`<div class="month-row"><div class="month-image">${imgMarkup(x)}</div><div style="flex:1;min-width:0"><b>${esc(x.short_title||x.title)}</b><small>${esc(period(x))}</small><span class="month-summary">${esc(x.summary||x.description||'')}</span></div></div>`).join('')||'<div class="month-row">Aucun événement publié.</div>'}</div></div>`;
@@ -114,7 +136,7 @@ function artRender(frame,slide,events){
   const copy=`<div class="tv-copy"><div class="tv-tag">${esc(e.category||'Événement')}</div><h1 class="tv-title">${esc(title)}</h1>${opts.showDesc!==false?`<div class="tv-description">${esc(description)}</div>`:''}${date}${price}<div class="tv-footer"><div class="url">${esc(opts.qrUrl||e.link_url||'')}</div>${qr}</div></div>`;
   body=opts.layout==='poster-left'?poster+copy:copy+poster;
  }
- frame.innerHTML=`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Léman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
+ frame.innerHTML=`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Léman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='spotlight'?'CFL SPOTLIGHT':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
  scaleArtwork(frame);textFit(frame.querySelector('.tv-art'));
  const qrEl=frame.querySelector('.qr-target');
  if(qrEl && window.QRCode){
