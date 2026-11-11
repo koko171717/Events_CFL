@@ -498,7 +498,12 @@ body:not(.cfl-public) .eventblock.draft,body:not(.cfl-public) .month-ribbon.draf
 body:not(.cfl-public) .overview-event.draft,body:not(.cfl-public) .monthly-list-event.draft,body:not(.cfl-public) .tiny-event.draft{opacity:1!important;border:2px dashed #ffc073!important;filter:none!important}
 .cfl-draft-chip{display:inline-block;margin-left:7px;color:#1c1512;background:#ffc073;border-radius:5px;padding:2px 5px;font:800 9px system-ui;vertical-align:middle;letter-spacing:.04em}
 </style><style id="cfl-integration-styles">
-.cfl-return{position:fixed;right:18px;bottom:18px;z-index:2500;background:#241923;color:#fff;padding:11px 17px;border:1px solid #b54a67;border-radius:14px;font-weight:800;text-decoration:none;box-shadow:0 6px 24px #0009}
+.cfl-admin-nav{width:100%;background:#10141d;border-bottom:1px solid #364052;position:relative;z-index:2500;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.cfl-admin-nav-inner{max-width:1450px;margin:0 auto;padding:16px 22px;min-height:65px;display:flex;align-items:center;box-sizing:border-box}
+.cfl-admin-nav-brand{font-size:22px;letter-spacing:-.07em;font-weight:950;color:#f4f6fa;text-decoration:none;line-height:1.1}
+.cfl-admin-nav-brand span{color:#e65b80}
+.cfl-admin-nav-brand:hover{color:white}
+@media(max-width:600px){.cfl-admin-nav-inner{padding:14px 18px}.cfl-admin-nav-brand{font-size:20px}}
 .cfl-sync-status{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:2900;background:#211c27;border:1px solid #ad526d;color:#fff;border-radius:12px;padding:10px 16px;max-width:90vw;box-shadow:0 8px 28px #0009;display:none}
 body.cfl-public #editToggle,body.cfl-public #addBtn,body.cfl-public #editNotice,body.cfl-public #contextActions{display:none!important}
 
@@ -535,7 +540,7 @@ body.cfl-unified-admin .overview-admin-ref{display:flex!important;gap:6px;flex-w
 .cfl-v17-overview-vac{display:inline-flex;align-items:center;gap:5px;background:#254e6a;border:1px solid #6ea4c8;border-radius:7px;padding:5px 7px;color:#e9f8ff;font-size:11px;font-weight:850}
 .cfl-v17-overview-holiday{display:inline-flex;align-items:center;color:#e9c886;font-size:10px;padding:5px 3px}
 @media(max-width:700px){.cfl-v17-vac-sub{margin-left:0;width:100%}.cfl-v17-vac-pill{flex-wrap:wrap}}
-</style></head><body><main class="shell"><header class="top"><div class="brand"><div class="logo"><svg width="100" height="47" viewBox="0 0 100 47" fill="none" xmlns="http://www.w3.org/2000/svg">
+</style></head><body><nav class="cfl-admin-nav" aria-label="Navigation CFL Control"><div class="cfl-admin-nav-inner"><a class="cfl-admin-nav-brand" href="/">← CFL <span>CONTROL</span></a></div></nav><main class="shell"><header class="top"><div class="brand"><div class="logo"><svg width="100" height="47" viewBox="0 0 100 47" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_738_3)">
 <path d="M30.4757 28.3086H12.4375V34.5371H30.4757V28.3086Z" fill="white"/>
 <path d="M54.4202 15.8474V47.0001H48.2007V24.618L39.3617 33.4739L27.9884 22.0759H12.4375V15.8474H21.7719L21.769 15.8445H30.5683L39.3617 24.6533L48.1537 15.8445L48.2007 15.8901V15.8474H54.4202Z" fill="white"/>
@@ -879,7 +884,7 @@ function form(e=null,ds=null){if(!editing)return;let obj=e||{title:'',short:'',c
  $('cancel').onclick=close;if(e)$('del').onclick=()=>{if(confirm('Supprimer cet événement ?')){all=all.filter(x=>x.id!==e.id);save();close();render()}};$('eventForm').onsubmit=evt=>{evt.preventDefault();let f=new FormData(evt.currentTarget),o=Object.fromEntries(f.entries());if(o.end<o.start){alert('La date de fin doit suivre la date de début.');return}if(/\b(?:level|lvl)\s*2\b/i.test(o.title||'') && !o.audience)o.audience='Ouvert au public';
 if(e)all=all.map(x=>x.id===e.id?{...e,...o}:x);else all.push({...o,id:'cfl'+Date.now()});save();close();render()}}
 $('overlay').onclick=e=>{if(e.target===$('overlay'))close()};document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});$('prevYear').onclick=()=>{year--;render()};$('nextYear').onclick=()=>{year++;render()};$('overviewMode').onclick=()=>{view='annual';annualMode='overview';render()};$('monthListMode').onclick=()=>{view='month';monthlyMode='list';render()};$('gridMode').onclick=()=>{view='annual';annualMode='grid';render()};$('prevMonth').onclick=()=>{month--;if(month<0){month=11;year--}render()};$('nextMonth').onclick=()=>{month++;if(month>11){month=0;year++}render()};$('editToggle').onclick=()=>{if(!window.CFL_CALENDAR_ADMIN)return;editing=!editing;render()};$('addBtn').onclick=()=>form(null,$('directDate').value||date(year,month,1));$('createOnDate').onclick=()=>form(null,$('directDate').value||date(year,month,1));$('contextAddEvent').onclick=()=>form(null,$('directDate').value||date(year,view==='month'?month:0,1));$('refVacations').onclick=()=>{showVacations=!showVacations;render()};$('refHolidays').onclick=()=>{showHolidays=!showHolidays;render()};render();
-</script><div id="cfl-sync-status" class="cfl-sync-status" role="status"></div><a class="cfl-return" href="/">← CFL Control</a>
+</script><div id="cfl-sync-status" class="cfl-sync-status" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/assets/config.js"></script>
 <script>
