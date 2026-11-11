@@ -100,8 +100,9 @@ function artRender(frame,slide,events){
   const img=String(opts.imageUrl||'');
   const image=img&&/^(https:\/\/|blob:)/i.test(img)?`<img src="${esc(img)}" alt="Photo CFL">`:'<span class="spotlight-photo-empty">AJOUTER UNE PHOTO</span>';
   const photo=`<div class="spotlight-photo">${image}</div>`;
+  const noText=![title,name,subtitle,quote,about].some(Boolean);
   const info=`<div class="spotlight-content">${title?`<h1 class="spotlight-headline">${esc(title)}</h1>`:''}${name?`<div class="spotlight-person">${esc(name)}</div>`:''}${subtitle?`<div class="spotlight-subtitle">${esc(subtitle)}</div>`:''}${quote?`<div class="spotlight-highlight">${esc(quote)}</div>`:''}${about?`<div class="spotlight-about">${esc(about)}</div>`:''}</div>`;
-  body=photoOnly?`<div class="spotlight-layout photo-only">${photo}</div>`:`<div class="spotlight-layout ${mode} ${opts.imageSide==='right'?'picture-right':''}">${photo}${info}</div>`;
+  body=(photoOnly||noText)?`<div class="spotlight-layout photo-only">${photo}</div>`:`<div class="spotlight-layout ${mode} ${opts.imageSide==='right'?'picture-right':''}">${photo}${info}</div>`;
  }else if(type==='month'){
 
   const m=opts.month || '2027-03';const candidates=events.filter(x=>x.start_date<=m+'-31'&&x.end_date>=m+'-01').slice(0,Number(opts.count||6));

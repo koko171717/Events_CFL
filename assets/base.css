@@ -158,3 +158,6 @@
 .tv-art.spotlight-photo-art .spotlight-layout.photo-only .spotlight-photo{width:100%;height:100%;flex:1 1 100%;border:0;border-radius:0;box-shadow:none;background:#121722}
 .tv-art.spotlight-photo-art .spotlight-layout.photo-only .spotlight-photo img{width:100%;height:100%;object-fit:contain}
 @media(max-width:550px){.cfl-quick-types{grid-template-columns:1fr}}
+
+/* V27: outil explicite de suppression des textes de l’affiche */
+.spotlight-text-tools{display:flex;flex-direction:column;align-items:flex-start;gap:7px;margin:8px 0 12px}
