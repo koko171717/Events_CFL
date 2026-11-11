@@ -130,7 +130,7 @@ function artRender(frame,slide,events){
   const count=Math.max(1,Math.min(mode==='activity'?30:20,Number(opts.count)||5));
   const currentDay=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Zurich',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const revision=Math.floor(Date.now()/300000);
-  const widgetFrame=(id,label,kind)=>{const params=new URLSearchParams({type:kind,track:id,count:String(count),v:String(revision),day:currentDay});if(kind==='leaderboard'&&workoutId)params.set('workout',workoutId);return `<section class="btwb-pane"><div class="btwb-pane-label">${esc(label)}</div><iframe class="btwb-embed" title="BTWB ${esc(label)}" loading="eager" src="/api/btwb-widget?${params.toString()}" referrerpolicy="same-origin"></iframe></section>`};
+  const widgetFrame=(id,label,kind)=>{const params=new URLSearchParams({type:kind,track:id,count:String(count),v:String(revision),day:currentDay,compact:safeTrain?'1':'0'});if(kind==='leaderboard'&&workoutId)params.set('workout',workoutId);return `<section class="btwb-pane"><div class="btwb-pane-label">${esc(label)}</div><iframe class="btwb-embed" title="BTWB ${esc(label)}" loading="eager" src="/api/btwb-widget?${params.toString()}" referrerpolicy="same-origin"></iframe></section>`};
   const dateStr=new Intl.DateTimeFormat('fr-CH',{timeZone:'Europe/Zurich',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
   let title='',pane='';
   if(mode==='activity'){title='ACTIVITÉ DES MEMBRES';pane=widgetFrame(safeId,'PERFORMANCES RÉCENTES','activity')}

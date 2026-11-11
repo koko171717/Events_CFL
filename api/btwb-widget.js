@@ -11,6 +11,7 @@ module.exports = function handler(req,res){
   const kind=['wod','activity','leaderboard','daily-leaderboard'].includes(String(get('type')))?String(get('type')):'wod';
   const count=Math.max(1,Math.min(kind==='activity'?30:20,Number.parseInt(get('count'),10)||5));
   const workoutId=/^[1-9]\d{0,9}$/.test(String(get('workout')||''))?String(get('workout')):'';
+  const compact=String(get('compact')||'')==='1';
   const key=process.env.BTWB_WEBWIDGET_KEY;
   res.setHeader('Cache-Control','no-store, max-age=0');
   res.setHeader('Content-Type','text/html; charset=utf-8');
@@ -26,8 +27,19 @@ module.exports = function handler(req,res){
   // Keep an accessible scroll fallback when a large WOD cannot fit a single screen.
   const presentationCss = `
     :root{color-scheme:light}html,body{min-height:100%;height:auto;background:#f5f7fb;color:#172238}
-    body{padding:16px 24px 22px;margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
-    .btwb_webwidget{max-width:100%;margin:0 auto;color:#172238;line-height:1.29}
+    body{padding:22px 27px 26px;margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:${compact?"25px":"32px"};line-height:1.36}
+    /* V30: CSS sits after BTWB stylesheet, with scoped type overrides. */
+    .btwb_webwidget{max-width:100%;margin:0 auto;color:#172238;line-height:1.36;font-size:${compact?"25px":"32px"}!important}
+    .btwb_webwidget p,.btwb_webwidget li,.btwb_webwidget td,.btwb_webwidget th,.btwb_webwidget label,.btwb_webwidget .description,.btwb_webwidget .text,.btwb_webwidget .workout-description{font-size:inherit!important;line-height:1.34!important}
+    .btwb_webwidget small,.btwb_webwidget .small,.btwb_webwidget .muted,.btwb_webwidget .date{font-size:${compact?"20px":"25px"}!important;line-height:1.3!important}
+    .btwb_webwidget strong,.btwb_webwidget b{font-weight:800}
+    .btwb_webwidget h1{font-size:${compact?"35px":"47px"}!important}
+    .btwb_webwidget h2{font-size:${compact?"31px":"41px"}!important}
+    .btwb_webwidget h3,.btwb_webwidget h4{font-size:${compact?"28px":"35px"}!important}
+    .btwb_webwidget .btn,.btwb_webwidget button{font-size:${compact?"20px":"25px"}!important}
+    .btwb_webwidget table{font-size:inherit!important}
+    .btwb_webwidget table td,.btwb_webwidget table th{white-space:normal}
+    
     .btwb_webwidget table{width:100%!important;border-collapse:separate;border-spacing:0;font-size:inherit}
     .btwb_webwidget td,.btwb_webwidget th{padding:9px 10px;vertical-align:middle}
     .btwb_webwidget img{max-width:100%;height:auto}
