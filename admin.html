@@ -932,7 +932,7 @@ $('overlay').onclick=e=>{if(e.target===$('overlay'))close()};document.addEventLi
  let prior=new Map(),saving=false;
  try{
   if(!db)throw Error('Configuration Supabase manquante');
-  if(isAdmin){if(!await checkAdmin())return;window.CFL_CALENDAR_ADMIN=true;editing=true;annualMode='overview';}
+  if(isAdmin){if(!await checkAdmin())return;window.CFL_CALENDAR_ADMIN=true;editing=true;view='annual';annualMode='grid';}
   const rows=await fetchEvents(isAdmin);
   all=rows.map(mapRecord);
   if(isAdmin){
@@ -980,7 +980,7 @@ $('overlay').onclick=e=>{if(e.target===$('overlay'))close()};document.addEventLi
      let anchor=document.getElementById('cfl-v14-draft-indicator');
      if(!anchor){anchor=document.createElement('div');anchor.id='cfl-v14-draft-indicator';const toolbar=document.getElementById('cfl-v10-toolbar');(toolbar?.parentNode||document.querySelector('.shell')).insertBefore(anchor,toolbar?.nextSibling||null)}
      anchor.innerHTML=`<strong>${draftRows.length} événement(s) non publié(s)</strong><span class="cfl-v14-years">${Object.entries(perYear).sort(([a],[b])=>a-b).map(([y,evs])=>`<button type="button" data-go-year="${y}">${y} · ${evs.length} brouillon(s)</button>`).join('')}</span>`;
-     anchor.querySelectorAll('[data-go-year]').forEach(btn=>btn.addEventListener('click',()=>{year=Number(btn.dataset.goYear);view='annual';annualMode='overview';render()}));
+     anchor.querySelectorAll('[data-go-year]').forEach(btn=>btn.addEventListener('click',()=>{year=Number(btn.dataset.goYear);view='annual';annualMode='grid';render()}));
    }
    render();
   }catch(err){announce('Chargement Supabase impossible : '+err.message,true);console.error(err)}
