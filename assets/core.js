@@ -116,7 +116,7 @@ function artRender(frame,slide,events){
   const monthIndex=Math.max(0,Math.min(11,(Number(opts.month)||1)-1));
   if(calendarView==='grid') body=renderCflAnnualGrid(y,publicEvents);
   else if(calendarView==='month') body=renderCflMonthGrid(y,monthIndex,publicEvents);
-  else body=`<div class="annual-slide"><div class="annual-slide-top"><h1>AGENDA ${y}</h1><span>ÉVÉNEMENTS CROSSFIT LÉMAN</span></div><div class="annual-slide-grid">${monthLabels.map((label,m)=>{
+  else body=`<div class="annual-slide"><div class="annual-slide-top"><h1>AGENDA ${y}</h1><span>ÉVÉNEMENTS CROSSFIT LEMAN</span></div><div class="annual-slide-grid">${monthLabels.map((label,m)=>{
    const start=`${y}-${String(m+1).padStart(2,'0')}-01`;const end=`${y}-${String(m+1).padStart(2,'0')}-31`;
    const items=publicEvents.filter(e=>e.start_date<=end&&e.end_date>=start).sort((a,b)=>a.start_date.localeCompare(b.start_date));
    return `<section class="annual-slide-month"><header><span>${String(m+1).padStart(2,'0')}</span>${label}</header><div class="annual-slide-items">${items.slice(0,5).map(e=>`<div class="annual-slide-item"><b>${esc(e.start_date.slice(8,10))}</b><span>${esc(e.short_title||e.title)}</span></div>`).join('')||'<span class="annual-slide-empty">—</span>'}${items.length>5?`<small>+${items.length-5} événements</small>`:''}</div></section>`;
@@ -125,7 +125,7 @@ function artRender(frame,slide,events){
   const mode=['wod','activity','leaderboard','daily-leaderboard'].includes(opts.widget)?opts.widget:'wod';
   const mainId=String(opts.trackId||'84043');const trainId=String(opts.trainTrackId||'');
   const safeId=/^\d+$/.test(mainId)?mainId:'84043';const safeTrain=mode==='wod'&&/^\d+$/.test(trainId)&&trainId!==safeId?trainId:'';
-  const trackNames={'84043':'CROSSFIT LÉMAN PROGRAM','1237036':'HWPO FOCUS','1237037':'HWPO AFFILIATE','1237038':'HWPO AFFILIATE — COACHES NOTES','1237039':'HWPO SWEAT','1237040':'HWPO ACCESSORY','1237041':'HWPO EMOM 40','1237042':'HWPO HYROX','1237043':'HWPO BODYBUILDING'};
+  const trackNames={'84043':'CROSSFIT LEMAN PROGRAM','1237036':'HWPO FOCUS','1237037':'HWPO AFFILIATE','1237038':'HWPO AFFILIATE — COACHES NOTES','1237039':'HWPO SWEAT','1237040':'HWPO ACCESSORY','1237041':'HWPO EMOM 40','1237042':'HWPO HYROX','1237043':'HWPO BODYBUILDING'};
   const workoutId=/^[1-9]\d{0,9}$/.test(String(opts.workoutId||''))?String(opts.workoutId):'';
   const count=Math.max(1,Math.min(mode==='activity'?30:20,Number(opts.count)||5));
   const textSize=['compact','balanced','large'].includes(opts.textSize)?opts.textSize:'balanced';
@@ -149,7 +149,7 @@ function artRender(frame,slide,events){
   const copy=`<div class="tv-copy"><div class="tv-tag">${esc(e.category||'Événement')}</div><h1 class="tv-title">${esc(title)}</h1>${opts.showDesc!==false?`<div class="tv-description">${esc(description)}</div>`:''}${date}${price}<div class="tv-footer"><div class="url">${esc(opts.qrUrl||e.link_url||'')}</div>${qr}</div></div>`;
   body=opts.layout==='poster-left'?poster+copy:copy+poster;
  }
- frame.innerHTML=(type==='welcome'||(type==='spotlight'&&opts.photoOnly===true))?`<div class="tv-art ${type==='welcome'?'welcome-art':'spotlight-photo-art'}">${body}</div>`:`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Léman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='spotlight'?'CFL SPOTLIGHT':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
+ frame.innerHTML=(type==='welcome'||(type==='spotlight'&&opts.photoOnly===true))?`<div class="tv-art ${type==='welcome'?'welcome-art':'spotlight-photo-art'}">${body}</div>`:`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Leman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='spotlight'?'CFL SPOTLIGHT':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
  scaleArtwork(frame);textFit(frame.querySelector('.tv-art'));
  const qrEl=frame.querySelector('.qr-target');
  if(qrEl && window.QRCode){

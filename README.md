@@ -29,3 +29,6 @@ Note : les descriptions très longues peuvent encore devenir denses sur un écra
 
 ## V15 : Activité et Leaderboard BTWB
 Voir `README_V15_BTWB_ACTIVITY_LEADERBOARD.md`.
+
+
+V37: agenda category color adjustment (lighter reds for Community Events and Sport Events), all other agenda visuals reverted to prior style baseline.

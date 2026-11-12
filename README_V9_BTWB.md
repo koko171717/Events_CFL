@@ -5,7 +5,7 @@
 2. Dans **Vercel → Project → Settings → Environment Variables**, ajouter `BTWB_WEBWIDGET_KEY` avec **la clé Webwidgets** visible dans BTWB Admin → Extras → Webwidgets. Activer pour Production (et Preview si souhaité). **Ne pas placer cette clé dans GitHub.**
 3. Déclencher un **nouveau déploiement Vercel** pour activer la variable.
 4. Ouvrir `https://<votre-projet>.vercel.app/api/btwb-widget?track=84043` et vérifier que le WOD du jour apparaît. Si le widget ne rend rien, inspecter la console navigateur et contacter BTWB (le widget est tiers).
-5. Dans `/tv.html`, ajouter une slide, sélectionner **BTWB**, choisir la programmation **CrossFit Léman Program** puis 30 secondes, **Enregistrer** et **Publier la playlist**.
+5. Dans `/tv.html`, ajouter une slide, sélectionner **BTWB**, choisir la programmation **CrossFit Leman Program** puis 30 secondes, **Enregistrer** et **Publier la playlist**.
 6. Ouvrir `/diaporama.html` sur la TV ; le widget se recharge à chaque passage de la slide. Le nouveau WOD apparaît automatiquement lors de la nouvelle journée à **Europe/Zurich** (si BTWB le publie sur le track). Aucun republier manuel.
 
 ## Restrictions connues, importantes

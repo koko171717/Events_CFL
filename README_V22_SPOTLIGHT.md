@@ -15,7 +15,7 @@
 - Les photos sont uploadées par l'Admin dans le bucket existant `cfl-events` (préfixe `spotlights/`). URLs publiques pour lecture sur TV.
 - Les dates de diffusion sont facultatives. Les slides Spotlight ne sont diffusées que pendant la plage choisie (fuseau Europe/Zurich), sans republier chaque jour.
 - Les modifications et suppressions se font dans CFL TV, avec publication explicite.
-- Le logo CrossFit Léman est conservé et la présentation est adaptée au format 16:9.
+- Le logo CrossFit Leman est conservé et la présentation est adaptée au format 16:9.
 - L'agenda et BTWB ne sont pas modifiés.
 
 ## Points à contrôler
