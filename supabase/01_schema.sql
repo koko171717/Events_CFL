@@ -26,6 +26,7 @@ create table if not exists public.events (
  start_date date not null,
  end_date date not null,
  description text not null default '',
+ box_closed boolean not null default false,
  summary text not null default '',
  audience text not null default '',
  price_label text not null default '',
