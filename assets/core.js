@@ -122,9 +122,9 @@ function artRender(frame,slide,events){
    return `<section class="annual-slide-month"><header><span>${String(m+1).padStart(2,'0')}</span>${label}</header><div class="annual-slide-items">${items.slice(0,5).map(e=>`<div class="annual-slide-item"><b>${esc(e.start_date.slice(8,10))}</b><span>${esc(e.short_title||e.title)}</span></div>`).join('')||'<span class="annual-slide-empty">—</span>'}${items.length>5?`<small>+${items.length-5} événements</small>`:''}</div></section>`;
   }).join('')}</div></div>`;
  }else if(type==='btwb'){
-  const mode=['wod','activity','leaderboard','daily-leaderboard'].includes(opts.widget)?opts.widget:'wod';
+  const mode=['wod','cfl-wod','activity','leaderboard','daily-leaderboard'].includes(opts.widget)?opts.widget:'wod';
   const mainId=String(opts.trackId||'84043');const trainId=String(opts.trainTrackId||'');
-  const safeId=/^\d+$/.test(mainId)?mainId:'84043';const safeTrain=mode==='wod'&&/^\d+$/.test(trainId)&&trainId!==safeId?trainId:'';
+  const safeId=/^\d+$/.test(mainId)?mainId:'84043';const safeTrain=(mode==='wod'||mode==='cfl-wod')&&/^\d+$/.test(trainId)&&trainId!==safeId?trainId:'';
   const trackNames={'84043':'CROSSFIT LEMAN PROGRAM','1237036':'HWPO FOCUS','1237037':'HWPO AFFILIATE','1237038':'HWPO AFFILIATE — COACHES NOTES','1237039':'HWPO SWEAT','1237040':'HWPO ACCESSORY','1237041':'HWPO EMOM 40','1237042':'HWPO HYROX','1237043':'HWPO BODYBUILDING'};
   const workoutId=/^[1-9]\d{0,9}$/.test(String(opts.workoutId||''))?String(opts.workoutId):'';
   const count=Math.max(1,Math.min(mode==='activity'?30:20,Number(opts.count)||5));
@@ -136,6 +136,11 @@ function artRender(frame,slide,events){
   let title='',pane='';
   if(mode==='activity'){title='ACTIVITÉ DES MEMBRES';pane=widgetFrame(safeId,'PERFORMANCES RÉCENTES','activity')}
   else if(mode==='leaderboard'){title='CLASSEMENT BTWB';pane=workoutId?widgetFrame(safeId,'WORKOUT #'+workoutId,'leaderboard'):'<div class="btwb-no-workout">Sélectionne un identifiant de workout BTWB dans le Studio pour afficher son classement.</div>'}
+  else if(mode==='cfl-wod'){
+   title='WOD DU JOUR · '+(trackNames[safeId]||'BTWB');
+   const tracks=[safeId,...(safeTrain?[safeTrain]:[])];
+   pane=`<div class="cfl-custom-wod" data-tracks="${esc(tracks.join(','))}" data-size="${esc(textSize)}" data-duration="${Math.max(10,Number(slide.duration_seconds)||45)}"><div class="cfl-wod-loading">Chargement du WOD du jour…</div></div>`;
+  }
   else if(mode==='daily-leaderboard'){title='CLASSEMENT DU JOUR · '+(trackNames[safeId]||'BTWB');pane=widgetFrame(safeId,'WOD + RÉSULTATS','daily-leaderboard')}
   else{title=trackNames[safeId]||'PROGRAMMATION BTWB';pane=widgetFrame(safeId,safeTrain?'WOD PRINCIPAL':'PROGRAMMATION DU JOUR','wod')+(safeTrain?widgetFrame(safeTrain,'TRAIN · '+(trackNames[safeTrain]||'BTWB'),'wod'):'')}
   body=`<div class="btwb-screen"><div class="btwb-date"><strong>${esc(title)}</strong><span>${esc(dateStr)}</span></div><div class="btwb-panes ${safeTrain?'two':''}">${pane}</div><p class="btwb-note">BTWB · données actualisées à chaque diffusion</p></div>`;
@@ -151,6 +156,7 @@ function artRender(frame,slide,events){
  }
  frame.innerHTML=(type==='welcome'||(type==='spotlight'&&opts.photoOnly===true))?`<div class="tv-art ${type==='welcome'?'welcome-art':'spotlight-photo-art'}">${body}</div>`:`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Leman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='spotlight'?'CFL SPOTLIGHT':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
  scaleArtwork(frame);textFit(frame.querySelector('.tv-art'));
+ if(type==='btwb' && opts.widget==='cfl-wod' && window.CFL_WOD)window.CFL_WOD.mount(frame.querySelector('.cfl-custom-wod'));
  const qrEl=frame.querySelector('.qr-target');
  if(qrEl && window.QRCode){
   qrEl.innerHTML='';new window.QRCode(qrEl,{text:qrEl.dataset.qr,width:124,height:124,colorDark:'#10121a',colorLight:'#ffffff',correctLevel:window.QRCode.CorrectLevel.M});
