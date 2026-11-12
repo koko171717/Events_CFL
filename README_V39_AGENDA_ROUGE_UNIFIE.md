@@ -1,0 +1,1 @@
+V39: agenda admin and public updated so Community Events and Sport Events use the same CFL red as the annual grid selector and the THE BOX title accent (#B8151F).
