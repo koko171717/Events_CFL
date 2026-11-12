@@ -485,14 +485,20 @@ body{background:radial-gradient(ellipse 65% 17% at 50% 0%,#221015 0%,#0d0d11 66%
 .event-detail-card .event-visual.visual-wordmark img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;filter:none}
 .event-detail-card .event-visual.visual-wordmark:after{display:none}
 
-/* V36: agenda graphite lisible - noir/gris/rouge CFL */
-body{background:#202124}
-.top{background:#292a2e;border:1px solid #47484e;border-radius:15px;padding:18px 24px!important}
-.card{background:#303136!important;border-color:#515258!important;box-shadow:0 8px 24px #0002!important}
-.monthhead{background:#3b3c42!important;border-bottom-color:#B8151F!important}
-.day{background:#424349!important}.day.weekend{background:#4b4c52!important}.day.vacation{background:#515158!important}.day.invalid{background:#33343a!important}
-.monthday,.month-week-day{background:#414248!important;border-color:#58595f!important}
-.pill,.btn{background:#3c3d43!important;border-color:#66676b!important;color:#fff!important}
+/* V41 — Agenda public harmonise sur le fond noir de l'agenda admin.
+   Garder les couleurs de categories, les events et les controles inchanges. */
+body{background:radial-gradient(ellipse 65% 17% at 50% 0%,#221015 0%,#0d0d11 66%);color:#f6f6f8}
+.top{background:linear-gradient(115deg,#16161b 0%,#111115 60%,#1b1014 100%);border:1px solid #33333b;border-radius:18px;padding:23px 25px 25px!important;box-shadow:0 20px 52px #0007}
+.card{background:linear-gradient(160deg,#15151b 0%,#111116 70%)!important;border-color:#32323c!important;box-shadow:0 15px 45px #0006!important}
+.monthhead{background:linear-gradient(180deg,#303037,#26262d)!important;border-bottom-color:#B8151F!important}
+.day{background:#202126!important}
+.day.weekend{background:#2d2d35!important}
+.day.vacation{background:#303035!important}
+.day.invalid{background:#15151a!important}
+.monthday,.month-week-day{background:#202027!important;border-color:#36363e!important}
+.monthday.weekend,.month-week-day.weekend{background:#2d2d35!important}
+.monthday.vacation,.month-week-day.vacation{background:#303035!important}
+.pill,.btn{background:#222228!important;border-color:#3c3c46!important;color:#fff!important}
 .btn.red,.btn.active{background:#B8151F!important;border-color:#B8151F!important}
 .pill.off{opacity:.55}
 </style><style id="cfl-integration-styles">
