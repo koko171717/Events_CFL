@@ -12,6 +12,7 @@ module.exports = function handler(req,res){
   const count=Math.max(1,Math.min(kind==='activity'?30:20,Number.parseInt(get('count'),10)||5));
   const workoutId=/^[1-9]\d{0,9}$/.test(String(get('workout')||''))?String(get('workout')):'';
   const compact=String(get('compact')||'')==='1';
+  const activityColumns=kind==='activity'&&String(get('layout')||'')==='columns';
   // Readable TV presets, independent for single and two-column layouts.
   const size=['compact','balanced','large'].includes(String(get('size')))?String(get('size')):'balanced';
   const typography={compact:{body:compact?16:19,small:compact?14:16,h1:compact?25:30,h2:compact?23:27,h3:compact?21:24},balanced:{body:compact?20:24,small:compact?16:19,h1:compact?29:37,h2:compact?27:33,h3:compact?24:29},large:{body:compact?25:32,small:compact?20:25,h1:compact?35:47,h2:compact?31:41,h3:compact?28:35}}[size];
@@ -55,6 +56,27 @@ module.exports = function handler(req,res){
     #cfl-widget-actions button{font:700 13px system-ui;padding:7px 11px;color:#162135;border:1px solid #bcc4cf;background:#fff;border-radius:8px;cursor:pointer}
     body.cfl-overflow #cfl-widget-actions{display:flex}
     body.cfl-overflow #cfl-widget-state.ready{display:block;background:#47566b}
+    ${activityColumns ? `
+    html,body{height:100%;min-height:100%;overflow:hidden;background:#181818;color:#fff}
+    body{padding:14px 18px 12px!important}
+    .btwb_webwidget{color:#fff!important;height:100%;overflow:auto;scrollbar-color:#6c3d44 #222}
+    .btwb_webwidget a{color:#ffc8cd!important}
+    /* CFL Activities: two full-height leaderboard-like tables, not cards. */
+    .btwb_webwidget .cfl-activity-source{display:none!important}
+    .btwb_webwidget .cfl-activity-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;width:100%;height:100%;min-height:0;color:#fff}
+    .btwb_webwidget .cfl-activity-column{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid #4b4b4b;border-radius:10px;overflow:hidden;background:#222}
+    .btwb_webwidget .cfl-activity-table-head{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.15fr);gap:12px;padding:14px 18px;background:#B8151F;color:#fff!important;font-size:18px;font-weight:900;letter-spacing:.04em}
+    .btwb_webwidget .cfl-activity-rows{display:grid;grid-auto-rows:minmax(0,1fr);min-height:0;height:100%;overflow:auto;scrollbar-width:thin;scrollbar-color:#924348 #292929}
+    .btwb_webwidget .cfl-activity-row{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.15fr);gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #444;min-height:66px;font-size:clamp(17px,1.65vw,26px);line-height:1.24}
+    .btwb_webwidget .cfl-activity-row:nth-child(even){background:#303030}
+    .btwb_webwidget .cfl-activity-row:last-child{border-bottom:0}
+    .btwb_webwidget .cfl-activity-person{font-weight:850;color:#fff;overflow-wrap:anywhere}
+    .btwb_webwidget .cfl-activity-performance{font-weight:650;color:#e1e1e1;overflow-wrap:anywhere;white-space:pre-line}
+    .btwb_webwidget .cfl-activity-board *{box-sizing:border-box}
+    @media(max-width:650px){.btwb_webwidget .cfl-activity-board{gap:8px}.btwb_webwidget .cfl-activity-row{padding:8px;gap:5px;font-size:14px}.btwb_webwidget .cfl-activity-table-head{padding:8px;font-size:13px}}
+    #cfl-widget-actions{background:#202020e8;border-radius:10px;padding:4px}
+    #cfl-widget-state.warning{display:block}
+    ` : ''}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
   `;
   const presentationJs = `
@@ -64,9 +86,59 @@ module.exports = function handler(req,res){
       const actions=document.getElementById('cfl-widget-actions');
       const prev=document.getElementById('cfl-scroll-prev'),next=document.getElementById('cfl-scroll-next');
       let checked=0;let lastContent='';
+      const twoColumns=${activityColumns?'true':'false'};
+      function arrangeActivities(){
+        if(!twoColumns||!root)return;
+        // Only read the official BTWB widget. Do not generate synthetic athletes or scores.
+        const candidates=[...root.querySelectorAll('ul,ol,[class*=activity-list],[class*=activity-feed],[class*=activities]')]
+          .filter(e=>!e.closest('.cfl-activity-board'));
+        let selected=null,best=0;
+        for(const candidate of candidates){
+          const items=[...candidate.children].filter(e=>e.nodeType===1&&e.innerText?.trim().length>=8);
+          if(items.length<2||items.length>30)continue;
+          const score=items.length*10+items.filter(e=>e.querySelector('a,strong,b,img')).length;
+          if(score>best){selected=candidate;best=score;}
+        }
+        if(!selected)return; // Keep the official widget if it cannot be parsed safely.
+        const items=[...selected.children].filter(e=>e.nodeType===1&&e.innerText?.trim().length>=8);
+        const signature=items.map(e=>e.innerText.trim()).join('\n---\n');
+        if(signature===root.dataset.cflActivitySignature)return;
+        const entries=items.map(el=>{
+          const lines=(el.innerText||'').split(/\n+/).map(v=>v.trim()).filter(Boolean);
+          const personNode=el.querySelector('[class*=member-name],[class*=athlete-name],[class*=user-name],a[href*=member],a[href*=athlete],strong,b');
+          let person=(personNode?.textContent||lines[0]||'').replace(/\s+/g,' ').trim();
+          // Preserve all remaining reported information; it may be a PR, workout or score.
+          let details=lines.slice();
+          const at=details.findIndex(line=>line===person);
+          if(at>=0)details.splice(at,1);
+          if(!details.length&&lines.length===1&&lines[0].startsWith(person))details=[lines[0].slice(person.length).trim()];
+          if(!person)person=lines.shift()||'';
+          return {person,performance:details.join(' · ')||'—'};
+        });
+        let board=root.querySelector('.cfl-activity-board');
+        if(!board){board=document.createElement('div');board.className='cfl-activity-board';root.prepend(board);}
+        board.replaceChildren();
+        const midpoint=Math.ceil(entries.length/2);
+        [entries.slice(0,midpoint),entries.slice(midpoint)].forEach(part=>{
+          const column=document.createElement('section');column.className='cfl-activity-column';
+          const header=document.createElement('div');header.className='cfl-activity-table-head';
+          ['MEMBRE','PERFORMANCE'].forEach(label=>{const cell=document.createElement('span');cell.textContent=label;header.append(cell)});
+          const rows=document.createElement('div');rows.className='cfl-activity-rows';
+          part.forEach(entry=>{
+            const row=document.createElement('div');row.className='cfl-activity-row';
+            const member=document.createElement('div');member.className='cfl-activity-person';member.textContent=entry.person;
+            const result=document.createElement('div');result.className='cfl-activity-performance';result.textContent=entry.performance;
+            row.append(member,result);rows.append(row);
+          });
+          column.append(header,rows);board.append(column);
+        });
+        selected.classList.add('cfl-activity-source');
+        root.dataset.cflActivitySignature=signature;
+      }
       function setState(state,copy){badge.className=state;badge.textContent=copy;}
       function measure(){
         if(!root)return;
+        arrangeActivities();
         const text=root.innerText.trim();
         const nodes=root.querySelectorAll('table tr,li,article,.workout,.wod,section').length;
         const hasContent=text.length>25||nodes>2;

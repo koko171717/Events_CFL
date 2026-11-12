@@ -154,19 +154,19 @@ function artRender(frame,slide,events){
    return `<section class="annual-slide-month"><header><span>${String(m+1).padStart(2,'0')}</span>${label}</header><div class="annual-slide-items">${items.slice(0,5).map(e=>`<div class="annual-slide-item"><b>${esc(e.start_date.slice(8,10))}</b><span>${esc(e.short_title||e.title)}</span></div>`).join('')||'<span class="annual-slide-empty">—</span>'}${items.length>5?`<small>+${items.length-5} événements</small>`:''}</div></section>`;
   }).join('')}</div></div>`;
  }else if(type==='btwb'){
-  const mode=['wod','cfl-wod','activity','leaderboard','daily-leaderboard'].includes(opts.widget)?opts.widget:'wod';
+  const mode=['wod','cfl-wod','activity','cfl-activity','leaderboard','daily-leaderboard'].includes(opts.widget)?opts.widget:'wod';
   const mainId=String(opts.trackId||'84043');const trainId=String(opts.trainTrackId||'');
   const safeId=/^\d+$/.test(mainId)?mainId:'84043';const safeTrain=(mode==='wod'||mode==='cfl-wod')&&/^\d+$/.test(trainId)&&trainId!==safeId?trainId:'';
   const trackNames={'84043':'CROSSFIT LEMAN PROGRAM','1237036':'HWPO FOCUS','1237037':'HWPO AFFILIATE','1237038':'HWPO AFFILIATE — COACHES NOTES','1237039':'HWPO SWEAT','1237040':'HWPO ACCESSORY','1237041':'HWPO EMOM 40','1237042':'HWPO HYROX','1237043':'HWPO BODYBUILDING'};
   const workoutId=/^[1-9]\d{0,9}$/.test(String(opts.workoutId||''))?String(opts.workoutId):'';
-  const count=Math.max(1,Math.min(mode==='activity'?30:20,Number(opts.count)||5));
+  const count=Math.max(1,Math.min((mode==='activity'||mode==='cfl-activity')?30:20,Number(opts.count)||5));
   const textSize=['compact','balanced','large'].includes(opts.textSize)?opts.textSize:'balanced';
   const currentDay=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Zurich',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const revision=Math.floor(Date.now()/300000);
-  const widgetFrame=(id,label,kind)=>{const params=new URLSearchParams({type:kind,track:id,count:String(count),v:String(revision),day:currentDay,compact:safeTrain?'1':'0',size:textSize});if(kind==='leaderboard'&&workoutId)params.set('workout',workoutId);return `<section class="btwb-pane"><div class="btwb-pane-label">${esc(label)}</div><iframe class="btwb-embed" title="BTWB ${esc(label)}" loading="eager" src="/api/btwb-widget?${params.toString()}" referrerpolicy="same-origin"></iframe></section>`};
+  const widgetFrame=(id,label,kind)=>{const params=new URLSearchParams({type:kind,track:id,count:String(count),v:String(revision),day:currentDay,compact:safeTrain?'1':'0',size:textSize,layout:mode==='cfl-activity'?'columns':'default'});if(kind==='leaderboard'&&workoutId)params.set('workout',workoutId);return `<section class="btwb-pane"><div class="btwb-pane-label">${esc(label)}</div><iframe class="btwb-embed" title="BTWB ${esc(label)}" loading="eager" src="/api/btwb-widget?${params.toString()}" referrerpolicy="same-origin"></iframe></section>`};
   const dateStr=new Intl.DateTimeFormat('fr-CH',{timeZone:'Europe/Zurich',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
   let title='',pane='';
-  if(mode==='activity'){title='ACTIVITÉ DES MEMBRES';pane=widgetFrame(safeId,'PERFORMANCES RÉCENTES','activity')}
+  if(mode==='activity'||mode==='cfl-activity'){title=mode==='cfl-activity'?'ACTIVITIES · CROSSFIT LEMAN':'ACTIVITÉ DES MEMBRES';pane=widgetFrame(safeId,mode==='cfl-activity'?'ACTIVITÉS DE LA COMMUNAUTÉ':'PERFORMANCES RÉCENTES','activity')}
   else if(mode==='leaderboard'){title='CLASSEMENT BTWB';pane=workoutId?widgetFrame(safeId,'WORKOUT #'+workoutId,'leaderboard'):'<div class="btwb-no-workout">Sélectionne un identifiant de workout BTWB dans le Studio pour afficher son classement.</div>'}
   else if(mode==='cfl-wod'){
    title='WOD DU JOUR · '+(trackNames[safeId]||'BTWB');
