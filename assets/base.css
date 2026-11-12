@@ -183,8 +183,8 @@
 .month-row b{font-size:44px;line-height:1.13}
 .month-row small{font-size:29px;margin-top:12px}
 .cfl-custom-wod.has-athlete-note .cfl-wod-grid{min-height:0;flex:1}
-.cfl-wod-athlete-note{padding:14px 24px;margin:6px 0 8px;background:linear-gradient(110deg,#861017 0%,#B8151F 72%,#99121B 100%);border-left:7px solid #F15D66;border:1px solid #D52B36;border-left-width:7px;border-radius:9px;white-space:pre-wrap;flex:0 0 auto;max-height:190px;overflow:auto;box-shadow:0 6px 18px #0007}
-.cfl-wod-athlete-label{font-weight:900;font-size:20px;color:#FFE2E4;letter-spacing:.07em;margin-bottom:4px}
+.cfl-wod-athlete-note{padding:14px 24px;margin:6px 0 8px;background:linear-gradient(90deg, rgba(184,21,31,.24) 0%, rgba(56,35,38,.82) 38%, rgba(34,34,34,.92) 100%);border:1px solid rgba(184,21,31,.45);border-left:7px solid #B8151F;border-radius:9px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);white-space:pre-wrap;flex:0 0 auto;max-height:190px;overflow:auto}
+.cfl-wod-athlete-label{font-weight:900;font-size:20px;color:#efadb1;letter-spacing:.07em;margin-bottom:4px}
 .cfl-wod-athlete-copy{font-size:27px;font-weight:650;line-height:1.22;color:#fff}
 
 /* V46: box closure labels for event and monthly TV slides */
