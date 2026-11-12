@@ -64,19 +64,19 @@ module.exports = function handler(req,res){
     /* CFL Activities: two full-height leaderboard-like tables, not cards. */
     .btwb_webwidget.cfl-activity-ready > :not(.cfl-activity-board){display:none!important}
     .btwb_webwidget .cfl-activity-source{display:none!important}
-    .btwb_webwidget .cfl-activity-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;width:100%;height:100%;min-height:0;color:#fff}
+    .btwb_webwidget .cfl-activity-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;width:100%;height:100%;min-height:0;color:#fff}
     .btwb_webwidget .cfl-activity-column{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid #4b4b4b;border-radius:10px;overflow:hidden;background:#222}
-    .btwb_webwidget .cfl-activity-table-head{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr) minmax(0,.9fr);gap:12px;padding:14px 18px;background:#B8151F;color:#fff!important;font-size:18px;font-weight:900;letter-spacing:.04em}
+    .btwb_webwidget .cfl-activity-table-head{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr) minmax(0,.9fr);gap:12px;padding:12px 16px;background:#B8151F;color:#fff!important;font-size:17px;font-weight:600;letter-spacing:.04em}
     .btwb_webwidget .cfl-activity-rows{display:grid;grid-auto-rows:minmax(0,1fr);min-height:0;height:100%;overflow:auto;scrollbar-width:thin;scrollbar-color:#924348 #292929}
-    .btwb_webwidget .cfl-activity-row{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr) minmax(0,.9fr);gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #444;min-height:66px;font-size:clamp(17px,1.65vw,26px);line-height:1.24}
+    .btwb_webwidget .cfl-activity-row{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr) minmax(0,.9fr);gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid #444;min-height:60px;font-size:clamp(17px,1.42vw,23px);line-height:1.29}
     .btwb_webwidget .cfl-activity-row:nth-child(even){background:#303030}
     .btwb_webwidget .cfl-activity-row:last-child{border-bottom:0}
-    .btwb_webwidget .cfl-activity-person{font-weight:850;color:#fff;overflow-wrap:anywhere}
-    .btwb_webwidget .cfl-activity-workout{font-weight:650;color:#e3e3e3;overflow-wrap:anywhere}
-    .btwb_webwidget .cfl-activity-age{display:block;margin-top:3px;color:#e8a6ad;font-weight:550;font-size:.68em}
-    .btwb_webwidget .cfl-activity-performance{font-weight:780!important;color:#fff!important;overflow-wrap:anywhere;white-space:pre-line}
+    .btwb_webwidget .cfl-activity-person{font-weight:550;color:#fff;overflow-wrap:anywhere}
+    .btwb_webwidget .cfl-activity-workout{font-weight:400;color:#e3e3e3;overflow-wrap:anywhere}
+    .btwb_webwidget .cfl-activity-age{display:block;margin-top:3px;color:#e8a6ad;font-weight:400;font-size:.70em}
+    .btwb_webwidget .cfl-activity-performance{font-weight:500!important;color:#fff!important;overflow-wrap:anywhere;white-space:pre-line}
     .btwb_webwidget .cfl-activity-detail{display:block;font-weight:450;font-size:.76em;color:#c9c9c9;margin-top:2px}
-    .btwb_webwidget .cfl-activity-performance{font-weight:650;color:#e1e1e1;overflow-wrap:anywhere;white-space:pre-line}
+    .btwb_webwidget .cfl-activity-performance{font-weight:500;color:#e1e1e1;overflow-wrap:anywhere;white-space:pre-line}
     .btwb_webwidget .cfl-activity-board *{box-sizing:border-box}
     @media(max-width:650px){.btwb_webwidget .cfl-activity-board{gap:8px}.btwb_webwidget .cfl-activity-row{padding:8px;gap:5px;font-size:14px}.btwb_webwidget .cfl-activity-table-head{padding:8px;font-size:13px}}
     #cfl-widget-actions{background:#202020e8;border-radius:10px;padding:4px}
@@ -150,10 +150,14 @@ module.exports = function handler(req,res){
         const ageLine=lines.find(x=>isActivityAge(x)&&x.length<110)||'';
         const remaining=lines.filter((x,i)=>i!==idx&&x!==person&&x!==ageLine&&!/^(?:like|comment|reply|j.aime|partager|share|rx.d|scaled|rx)$/i.test(x));
         const content=remaining.filter(x=>!/^(?:completed\\s*\\|\\s*rx.d.*|completed\\s*\\|\\s*scaled.*)$/i.test(x));
-        const workout=content[0]||'Activité enregistrée';
+        const rawWorkout=content[0]||'Activité enregistrée';
+        // Do not guess WOD membership from generic workout descriptions: BTWB
+        // activities can be submitted for other dates or separate sessions.
+        // Only abbreviate when the BTWB source explicitly names it as a WOD.
+        const workout=/^(?:WOD(?:\\s*[:—–-]|\\s*$)|Workout of the Day\\b)/i.test(rawWorkout)?'WOD':rawWorkout;
         // Keep exact source score rather than infer a number from an exercise name.
-        const resultLine=remaining.find(x=>/\\b(?:completed|rx.d|scaled|\\d+\\s*(?:kg|lb|lbs|reps|rounds|cal|m|km)|\\d{1,2}:\\d{2})\\b/i.test(x)&&x!==workout)||'';
-        const extras=remaining.filter(x=>x!==workout&&x!==resultLine).slice(0,2);
+        const resultLine=remaining.find(x=>/\\b(?:completed|rx.d|scaled|\\d+\\s*(?:kg|lb|lbs|reps|rounds|cal|m|km)|\\d{1,2}:\\d{2})\\b/i.test(x)&&x!==rawWorkout)||'';
+        const extras=remaining.filter(x=>x!==rawWorkout&&x!==resultLine).slice(0,2);
         return {person,age:ageLine,workout,performance:resultLine||extras.shift()||'—',detail:extras.join(' · ')};
       }
       function arrangeActivities(){
