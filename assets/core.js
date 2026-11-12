@@ -53,6 +53,21 @@ function textFit(art){
   art.dataset.overflow=spotlight.scrollHeight>spotlight.clientHeight+1?'true':'false';
   return;
  }
+ const bottom=art.querySelector('.tv-event-bottom');
+ if(bottom){
+  const copy=bottom.querySelector('.tv-copy'),title=copy?.querySelector('.tv-title'),desc=copy?.querySelector('.tv-description');
+  if(!copy||!title)return;
+  // Let the image take all space not required by the text. Never scroll.
+  for(let i=0;i<70;i++){
+   const t=Math.max(38,76-i*.65),d=Math.max(23,42-i*.38);
+   title.style.fontSize=t+'px'; if(desc)desc.style.fontSize=d+'px';
+   copy.style.gap=Math.max(6,13-i*.11)+'px';
+   if(copy.scrollHeight<=bottom.clientHeight*.70 && bottom.querySelector('.tv-poster').clientHeight>=200)break;
+  }
+  const poster=bottom.querySelector('.tv-poster');
+  art.dataset.overflow=(copy.scrollHeight>copy.clientHeight+1 || poster.clientHeight<190)?'true':'false';
+  return;
+ }
  const desc=art.querySelector('.tv-description'); if(!desc)return;
  const copy=art.querySelector('.tv-copy'); const title=copy?.querySelector('.tv-title');
  if(!copy||!title)return;
@@ -169,7 +184,13 @@ function artRender(frame,slide,events){
   const media=opts.posterOverride||imgUrl(e);
   const poster=`<div class="tv-poster ${media?'':'empty'}" style="--poster:url('${esc(media)}')">${media?`<img src="${esc(media)}" alt="Affiche de l’événement">`:''}</div>`;
   const copy=`<div class="tv-copy"><div class="tv-tag">${esc(e.category||'Événement')}</div><h1 class="tv-title">${esc(title)}</h1>${opts.showDesc!==false?`<div class="tv-description">${esc(description)}</div>`:''}${date}${e.box_closed===true?'<div class="tv-box-closed tv-box-closed-event">BOX FERMÉE</div>':''}${price}<div class="tv-footer"><div class="url">${esc(opts.qrUrl||e.link_url||'')}</div>${qr}</div></div>`;
-  body=opts.layout==='poster-left'?poster+copy:copy+poster;
+  const chosen=String(e.image_layout||opts.layout||'right');
+  const layout=({ 'poster-left':'left', 'poster-right':'right',left:'left',right:'right',bottom:'bottom' })[chosen]||'right';
+  if(layout==='bottom'){
+   // Text strictly above the poster, image fitted in the remaining space.
+   const bottomCopy=`<div class="tv-copy"><div class="tv-tag">${esc(e.category||'Événement')}</div><h1 class="tv-title">${esc(title)}</h1>${opts.showDesc!==false?`<div class="tv-description">${esc(description)}</div>`:''}${date}${e.box_closed===true?'<div class="tv-box-closed tv-box-closed-event">BOX FERMÉE</div>':''}</div>`;
+   body=`<div class="tv-event-bottom">${bottomCopy}${poster}</div>`;
+  }else body=layout==='left'?poster+copy:copy+poster;
  }
  frame.innerHTML=(type==='welcome'||(type==='spotlight'&&opts.photoOnly===true))?`<div class="tv-art ${type==='welcome'?'welcome-art':'spotlight-photo-art'}">${body}</div>`:`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Leman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='spotlight'?'CFL SPOTLIGHT':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
  scaleArtwork(frame);textFit(frame.querySelector('.tv-art'));
