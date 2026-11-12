@@ -62,15 +62,20 @@ module.exports = function handler(req,res){
     .btwb_webwidget{color:#fff!important;height:100%;overflow:auto;scrollbar-color:#6c3d44 #222}
     .btwb_webwidget a{color:#ffc8cd!important}
     /* CFL Activities: two full-height leaderboard-like tables, not cards. */
+    .btwb_webwidget.cfl-activity-ready > :not(.cfl-activity-board){display:none!important}
     .btwb_webwidget .cfl-activity-source{display:none!important}
     .btwb_webwidget .cfl-activity-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;width:100%;height:100%;min-height:0;color:#fff}
     .btwb_webwidget .cfl-activity-column{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid #4b4b4b;border-radius:10px;overflow:hidden;background:#222}
-    .btwb_webwidget .cfl-activity-table-head{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.15fr);gap:12px;padding:14px 18px;background:#B8151F;color:#fff!important;font-size:18px;font-weight:900;letter-spacing:.04em}
+    .btwb_webwidget .cfl-activity-table-head{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr) minmax(0,.9fr);gap:12px;padding:14px 18px;background:#B8151F;color:#fff!important;font-size:18px;font-weight:900;letter-spacing:.04em}
     .btwb_webwidget .cfl-activity-rows{display:grid;grid-auto-rows:minmax(0,1fr);min-height:0;height:100%;overflow:auto;scrollbar-width:thin;scrollbar-color:#924348 #292929}
-    .btwb_webwidget .cfl-activity-row{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.15fr);gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #444;min-height:66px;font-size:clamp(17px,1.65vw,26px);line-height:1.24}
+    .btwb_webwidget .cfl-activity-row{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr) minmax(0,.9fr);gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #444;min-height:66px;font-size:clamp(17px,1.65vw,26px);line-height:1.24}
     .btwb_webwidget .cfl-activity-row:nth-child(even){background:#303030}
     .btwb_webwidget .cfl-activity-row:last-child{border-bottom:0}
     .btwb_webwidget .cfl-activity-person{font-weight:850;color:#fff;overflow-wrap:anywhere}
+    .btwb_webwidget .cfl-activity-workout{font-weight:650;color:#e3e3e3;overflow-wrap:anywhere}
+    .btwb_webwidget .cfl-activity-age{display:block;margin-top:3px;color:#e8a6ad;font-weight:550;font-size:.68em}
+    .btwb_webwidget .cfl-activity-performance{font-weight:780!important;color:#fff!important;overflow-wrap:anywhere;white-space:pre-line}
+    .btwb_webwidget .cfl-activity-detail{display:block;font-weight:450;font-size:.76em;color:#c9c9c9;margin-top:2px}
     .btwb_webwidget .cfl-activity-performance{font-weight:650;color:#e1e1e1;overflow-wrap:anywhere;white-space:pre-line}
     .btwb_webwidget .cfl-activity-board *{box-sizing:border-box}
     @media(max-width:650px){.btwb_webwidget .cfl-activity-board{gap:8px}.btwb_webwidget .cfl-activity-row{padding:8px;gap:5px;font-size:14px}.btwb_webwidget .cfl-activity-table-head{padding:8px;font-size:13px}}
@@ -87,53 +92,101 @@ module.exports = function handler(req,res){
       const prev=document.getElementById('cfl-scroll-prev'),next=document.getElementById('cfl-scroll-next');
       let checked=0;let lastContent='';
       const twoColumns=${activityColumns?'true':'false'};
+      // BTWB activities are not necessarily rendered as UL/LI: several versions
+      // use nested DIV cards. Detect individual entries from their DOM content,
+      // without depending on any one undocumented class name.
+      function isActivityAge(s){return /(?:\\b\\d+\\s*(?:minutes?|mins?|heures?|hours?|hrs?|jours?|days?|semaines?|weeks?|secondes?|seconds?|sec|mois|months?)\\s*(?:ago|il y a)?\\b|\\bil y a\\b|\\byesterday\\b|\\bhier\\b|\\bjust now\\b|\\bà l.instant\\b)/i.test(s||'')}
+      function cleanLines(node){return (node.innerText||node.textContent||'').split(/\\n+/).map(s=>s.replace(/\\s+/g,' ').trim()).filter(Boolean)}
+      function isSourceCard(el){
+        if(!el || el.closest('.cfl-activity-board') || el.classList?.contains('cfl-activity-board'))return false;
+        const lines=cleanLines(el),txt=lines.join(' ');
+        if(lines.length<3||lines.length>18||txt.length<35||txt.length>1500)return false;
+        if(!isActivityAge(txt))return false;
+        if(!el.querySelector('a,img,strong,b,[class*=user],[class*=member],[class*=athlete]'))return false;
+        return true;
+      }
+      function findActivities(){
+        // First choose repeated smallest card-like blocks; works with UL, DIV and ARTICLE feeds.
+        const nodes=[...root.querySelectorAll('li,article,div,section')].filter(isSourceCard);
+        const leaves=nodes.filter(el=>!nodes.some(other=>other!==el&&el.contains(other)));
+        // A feed can contain intermediate divs for name + body. Prefer the wrapper
+        // that contains at least a time label and a workout/score line.
+        const chosen=[];
+        for(const el of leaves){
+          let item=el;
+          while(item.parentElement&&item.parentElement!==root && !item.parentElement.classList.contains('btwb_webwidget')){
+            const parent=item.parentElement;
+            const childActs=[...parent.children].filter(x=>x!==item&&isSourceCard(x));
+            if(childActs.length)break;
+            const parentLines=cleanLines(parent);
+            if(parentLines.length>14||(parent.textContent||'').length>900)break;
+            if(parent.querySelectorAll('a,img').length>5)break;
+            item=parent;
+          }
+          if(!chosen.some(prev=>prev.contains(item)||item.contains(prev)))chosen.push(item);
+        }
+        // Last resort: find the repeated parent of visible member/time labels.
+        if(chosen.length<2){
+          const anchors=[...root.querySelectorAll('a,strong,b')].filter(el=>!el.closest('.cfl-activity-board')&&el.textContent.trim().length>3);
+          const alternatives=[];
+          for(const a of anchors){
+            let el=a.parentElement;
+            for(let depth=0;el&&depth<5;depth++,el=el.parentElement){if(isSourceCard(el)){alternatives.push(el);break;}}
+          }
+          const unique=alternatives.filter((el,i)=>!alternatives.some((v,j)=>j!==i&&el.contains(v)));
+          if(unique.length>=2)return [...new Set(unique)];
+        }
+        return chosen;
+      }
+      function parseActivity(el){
+        const lines=cleanLines(el);
+        const nameNode=el.querySelector('[class*=member-name],[class*=athlete-name],[class*=user-name],a[href*=member],a[href*=athlete],a[href*=user],strong,b');
+        let person=(nameNode?.innerText||nameNode?.textContent||lines[0]||'').replace(/\\s+/g,' ').trim();
+        let idx=lines.findIndex(x=>x===person);
+        if(idx<0){ // Name and elapsed time may be on the same HTML text line.
+          idx=lines.findIndex(x=>x.startsWith(person));
+        }
+        if(!person || person.length>85 || isActivityAge(person))person=lines[0];
+        const ageLine=lines.find(x=>isActivityAge(x)&&x.length<110)||'';
+        const remaining=lines.filter((x,i)=>i!==idx&&x!==person&&x!==ageLine&&!/^(?:like|comment|reply|j.aime|partager|share|rx.d|scaled|rx)$/i.test(x));
+        const content=remaining.filter(x=>!/^(?:completed\\s*\\|\\s*rx.d.*|completed\\s*\\|\\s*scaled.*)$/i.test(x));
+        const workout=content[0]||'Activité enregistrée';
+        // Keep exact source score rather than infer a number from an exercise name.
+        const resultLine=remaining.find(x=>/\\b(?:completed|rx.d|scaled|\\d+\\s*(?:kg|lb|lbs|reps|rounds|cal|m|km)|\\d{1,2}:\\d{2})\\b/i.test(x)&&x!==workout)||'';
+        const extras=remaining.filter(x=>x!==workout&&x!==resultLine).slice(0,2);
+        return {person,age:ageLine,workout,performance:resultLine||extras.shift()||'—',detail:extras.join(' · ')};
+      }
       function arrangeActivities(){
         if(!twoColumns||!root)return;
-        // Only read the official BTWB widget. Do not generate synthetic athletes or scores.
-        const candidates=[...root.querySelectorAll('ul,ol,[class*=activity-list],[class*=activity-feed],[class*=activities]')]
-          .filter(e=>!e.closest('.cfl-activity-board'));
-        let selected=null,best=0;
-        for(const candidate of candidates){
-          const items=[...candidate.children].filter(e=>e.nodeType===1&&e.innerText?.trim().length>=8);
-          if(items.length<2||items.length>30)continue;
-          const score=items.length*10+items.filter(e=>e.querySelector('a,strong,b,img')).length;
-          if(score>best){selected=candidate;best=score;}
-        }
-        if(!selected)return; // Keep the official widget if it cannot be parsed safely.
-        const items=[...selected.children].filter(e=>e.nodeType===1&&e.innerText?.trim().length>=8);
-        const signature=items.map(e=>e.innerText.trim()).join('\n---\n');
+        const source=findActivities();
+        if(source.length<2)return;
+        const entries=source.map(parseActivity).filter(v=>v.person&&v.workout);
+        if(entries.length<2)return;
+        const signature=entries.map(v=>[v.person,v.age,v.workout,v.performance,v.detail].join('|')).join('\\n');
         if(signature===root.dataset.cflActivitySignature)return;
-        const entries=items.map(el=>{
-          const lines=(el.innerText||'').split(/\n+/).map(v=>v.trim()).filter(Boolean);
-          const personNode=el.querySelector('[class*=member-name],[class*=athlete-name],[class*=user-name],a[href*=member],a[href*=athlete],strong,b');
-          let person=(personNode?.textContent||lines[0]||'').replace(/\s+/g,' ').trim();
-          // Preserve all remaining reported information; it may be a PR, workout or score.
-          let details=lines.slice();
-          const at=details.findIndex(line=>line===person);
-          if(at>=0)details.splice(at,1);
-          if(!details.length&&lines.length===1&&lines[0].startsWith(person))details=[lines[0].slice(person.length).trim()];
-          if(!person)person=lines.shift()||'';
-          return {person,performance:details.join(' · ')||'—'};
-        });
         let board=root.querySelector('.cfl-activity-board');
-        if(!board){board=document.createElement('div');board.className='cfl-activity-board';root.prepend(board);}
-        board.replaceChildren();
+        if(!board){board=document.createElement('div');board.className='cfl-activity-board';root.prepend(board)}
+        const fragment=document.createDocumentFragment();
         const midpoint=Math.ceil(entries.length/2);
         [entries.slice(0,midpoint),entries.slice(midpoint)].forEach(part=>{
           const column=document.createElement('section');column.className='cfl-activity-column';
           const header=document.createElement('div');header.className='cfl-activity-table-head';
-          ['MEMBRE','PERFORMANCE'].forEach(label=>{const cell=document.createElement('span');cell.textContent=label;header.append(cell)});
+          ['MEMBRE','ACTIVITÉ','PERFORMANCE'].forEach(label=>{const cell=document.createElement('span');cell.textContent=label;header.append(cell)});
           const rows=document.createElement('div');rows.className='cfl-activity-rows';
           part.forEach(entry=>{
             const row=document.createElement('div');row.className='cfl-activity-row';
             const member=document.createElement('div');member.className='cfl-activity-person';member.textContent=entry.person;
-            const result=document.createElement('div');result.className='cfl-activity-performance';result.textContent=entry.performance;
-            row.append(member,result);rows.append(row);
+            if(entry.age){const age=document.createElement('small');age.className='cfl-activity-age';age.textContent=entry.age;member.append(age)}
+            const workout=document.createElement('div');workout.className='cfl-activity-workout';workout.textContent=entry.workout;
+            const perf=document.createElement('div');perf.className='cfl-activity-performance';perf.textContent=entry.performance;
+            if(entry.detail){const detail=document.createElement('small');detail.className='cfl-activity-detail';detail.textContent=entry.detail;perf.append(detail)}
+            row.append(member,workout,perf);rows.append(row);
           });
-          column.append(header,rows);board.append(column);
+          column.append(header,rows);fragment.append(column);
         });
-        selected.classList.add('cfl-activity-source');
+        board.replaceChildren(fragment);
         root.dataset.cflActivitySignature=signature;
+        root.classList.add('cfl-activity-ready');
       }
       function setState(state,copy){badge.className=state;badge.textContent=copy;}
       function measure(){
