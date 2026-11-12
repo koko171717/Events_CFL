@@ -5,7 +5,24 @@ window.CFL = {client, valid};
 const $ = id => document.getElementById(id);
 const esc = s => String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const pretty = d => d ? new Intl.DateTimeFormat('fr-CH',{day:'numeric',month:'long',year:'numeric'}).format(new Date(d+'T12:00:00')) : '';
-const period = e => e.start_date===e.end_date ? pretty(e.start_date) : pretty(e.start_date)+' — '+pretty(e.end_date);
+// Unified French event dates for both “Événements du mois” and dedicated event slides.
+// Parse calendar dates as UTC day numbers so DST in Switzerland cannot shift a duration.
+function period(e){
+ const start=String(e?.start_date||'');
+ const end=String(e?.end_date||start);
+ const valid=/^\d{4}-\d{2}-\d{2}$/;
+ if(!valid.test(start)||!valid.test(end)) return pretty(start)||'';
+ const a=start.split('-').map(Number),b=end.split('-').map(Number);
+ const startDay=Date.UTC(a[0],a[1]-1,a[2]);
+ const endDay=Date.UTC(b[0],b[1]-1,b[2]);
+ const span=Math.round((endDay-startDay)/86400000)+1;
+ if(span<=1) return pretty(start);
+ const monthNames=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+ if(span===2 && a[0]===b[0] && a[1]===b[1])return `${a[2]} et ${b[2]} ${monthNames[a[1]-1]} ${a[0]}`;
+ if(a[0]===b[0] && a[1]===b[1])return `Du ${a[2]} au ${b[2]} ${monthNames[a[1]-1]} ${a[0]}`;
+ if(a[0]===b[0])return `Du ${a[2]} ${monthNames[a[1]-1]} au ${b[2]} ${monthNames[b[1]-1]} ${a[0]}`;
+ return `Du ${a[2]} ${monthNames[a[1]-1]} ${a[0]} au ${b[2]} ${monthNames[b[1]-1]} ${b[0]}`;
+}
 const legacyVisual = e => (window.CFL_CAL_VISUALS||{})[e.legacy_visual_key] || '';
 const imgUrl = e => e.image_url || legacyVisual(e) || '';
 const imgMarkup = e => imgUrl(e)?`<img src="${esc(imgUrl(e))}" alt="">`:'<span class="muted tiny">CFL</span>';
