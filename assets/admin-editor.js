@@ -77,6 +77,7 @@
    <label class="cfl-v10-wide">Public concerné ${optionsGroup('audience',[['À définir','À définir'],['Membres CFL','Membres CFL'],['Membres CFL et sur invitation','Membres CFL et sur invitation'],['Ouvert au public','Ouvert au public']],r.audience||'À définir')}</label>
    <label class="cfl-v10-wide">Lien officiel<input name="link_url" type="url" placeholder="https://…" value="${esc(r.link_url||'')}"></label>
    <label class="cfl-v10-wide">Description<textarea name="description">${esc(r.description||'')}</textarea></label>
+   <div class="cfl-v10-wide cfl-video-form"><label>Vidéo CFL TV (facultatif)</label><p class="hint">MP4/WebM téléversé ou URL directe de vidéo. Lecture silencieuse, en boucle. Les liens Instagram sont enregistrés comme référence, mais ne garantissent pas la lecture automatique ; l’affiche reste le secours.</p><label>Ajouter une vidéo <input name="video_file" type="file" accept="video/mp4,video/webm"></label><label>URL vidéo / Reel Instagram <input name="video_url" type="url" placeholder="https://…" value="${esc(r.video_url||'')}"></label><label class="checkline"><input name="remove_video" type="checkbox"> Retirer la vidéo existante</label></div>
    <div class="cfl-v10-wide"><label>Banque d'images déjà enregistrées</label><div id="v12-gallery" class="visual-bank"><span class="hint">Chargement de la galerie…</span></div><p class="hint">Sélectionne une image existante ou importe-en une nouvelle.</p><img id="v12-chosen-image" src="${esc(r.image_url||'')}" alt="Image sélectionnée" ${r.image_url?'':'hidden'}><label>Nouvelle affiche <input name="poster" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label><input type="hidden" name="image_url" value="${esc(r.image_url||'')}"><input type="hidden" name="legacy_visual_key" value="${esc(r.legacy_visual_key||'')}"></div>
    </div><div class="error" id="v10-form-error" role="status"></div><div class="cfl-v10-actions">${id?'<button type="button" class="danger" id="v10-delete">Supprimer</button>':''}<button type="button" id="v10-cancel">Annuler</button><button type="submit" class="primary" id="v10-save">Enregistrer dans Supabase</button></div></form>`;
    overlay.classList.add('open');bindChoiceGroups();fillImageBank(r).catch(console.error);dialog.querySelector('#v10-cancel').onclick=close;
@@ -90,8 +91,19 @@
      const start=String(fd.get('start_date')),end=String(fd.get('end_date'));if(end<start)throw Error('La date de fin doit être égale ou postérieure au début.');
      let image_url=String(fd.get('image_url')||'')||null;const file=fd.get('poster');
      if(file instanceof File&&file.size){if(file.size>10*1024*1024)throw Error('Affiche limitée à 10 Mo.');if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type))throw Error('Format JPG, PNG, WebP ou GIF uniquement.');const ext=file.name.split('.').pop().toLowerCase();const path='events/'+crypto.randomUUID()+'.'+ext;const upload=await client.storage.from('cfl-events').upload(path,file,{contentType:file.type});if(upload.error)throw upload.error;image_url=client.storage.from('cfl-events').getPublicUrl(path).data.publicUrl;}
+     let video_url=fd.has('remove_video')?'':String(fd.get('video_url')||'').trim();
+     const videoFile=fd.get('video_file');
+     if(videoFile instanceof File&&videoFile.size){
+       if(!['video/mp4','video/webm'].includes(videoFile.type))throw Error('Vidéo au format MP4 ou WebM uniquement.');
+       if(videoFile.size>45*1024*1024)throw Error('Vidéo limitée à 45 Mo.');
+       const ext=videoFile.type==='video/webm'?'webm':'mp4';
+       const path='events/'+crypto.randomUUID()+'.'+ext;
+       const result=await client.storage.from('cfl-events').upload(path,videoFile,{contentType:videoFile.type,upsert:false});
+       if(result.error)throw result.error;
+       video_url=client.storage.from('cfl-events').getPublicUrl(path).data.publicUrl;
+     }
      const title=String(fd.get('title')).trim();if(!title)throw Error('Titre obligatoire.');const description=String(fd.get('description')||'');
-     const payload={id:id||'cfl-'+crypto.randomUUID(),title,short_title:String(fd.get('short_title')||'').trim()||title,category:String(fd.get('category')),start_date:start,end_date:end,status:String(fd.get('status')),description,summary:description.slice(0,280),price_label:String(fd.get('price_label')||''),audience:String(fd.get('audience')||''),link_url:String(fd.get('link_url')||''),box_closed:fd.has('box_closed'),image_layout:['left','right','bottom'].includes(String(fd.get('image_layout')))?String(fd.get('image_layout')):'right',image_url,legacy_visual_key:String(fd.get('legacy_visual_key')||'')};
+     const payload={id:id||'cfl-'+crypto.randomUUID(),title,short_title:String(fd.get('short_title')||'').trim()||title,category:String(fd.get('category')),start_date:start,end_date:end,status:String(fd.get('status')),description,summary:description.slice(0,280),price_label:String(fd.get('price_label')||''),audience:String(fd.get('audience')||''),link_url:String(fd.get('link_url')||''),box_closed:fd.has('box_closed'),image_layout:['left','right','bottom'].includes(String(fd.get('image_layout')))?String(fd.get('image_layout')):'right',image_url,video_url:video_url||null,legacy_visual_key:String(fd.get('legacy_visual_key')||'')};
      const {error}=await client.from('events').upsert(payload);if(error)throw error;close();notify('Événement enregistré dans Supabase ✓');location.reload();
     }catch(e){errorEl.textContent='Enregistrement impossible : '+e.message;saveBtn.disabled=false;saveBtn.textContent='Enregistrer dans Supabase'}
    };

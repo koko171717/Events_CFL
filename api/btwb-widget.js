@@ -81,6 +81,16 @@ module.exports = function handler(req,res){
     .btwb_webwidget .cfl-activity-board *{box-sizing:border-box}
     @media(max-width:650px){.btwb_webwidget .cfl-activity-board{gap:8px}.btwb_webwidget .cfl-activity-row{padding:8px;gap:5px;font-size:14px}.btwb_webwidget .cfl-activity-table-head{padding:8px;font-size:13px}}
     #cfl-widget-actions{background:#202020e8;border-radius:10px;padding:4px}
+    .cfl-leader-board{display:flex!important;flex-direction:column;gap:12px;overflow:hidden}
+    .cfl-leader-part{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+    .cfl-leader-part-title{font-size:15px;font-weight:550;letter-spacing:.07em;color:#f2b4b8;padding:2px 5px 6px}
+    .cfl-leader-panels{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .cfl-leader-head{font-size:16px;font-weight:500;padding:7px 12px}
+    .cfl-leader-labels{font-size:11px;padding:5px 10px;grid-template-columns:28px minmax(0,1.3fr) minmax(0,1fr)}
+    .cfl-leader-row{font-size:clamp(12px,1vw,17px);min-height:37px;padding:5px 10px;grid-template-columns:28px minmax(0,1.3fr) minmax(0,1fr);font-weight:400}
+    .cfl-leader-row .name{font-weight:450}.cfl-leader-row .rank{font-weight:500}
+    .cfl-leader-empty{font-size:14px;padding:12px}
+    .cfl-leader-embedded{width:100%;height:100%;min-height:130px;border:0;background:#f5f5f5}
     #cfl-widget-state.warning{display:block}
     ` : ''}
     ${leaderboardGender ? `

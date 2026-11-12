@@ -1,102 +1,94 @@
-/* CFL CONTROL V56 — official BTWB leaderboard transformed into two gender columns.
-   No names are used to infer gender. WOD description stays in the hidden source. */
+/* CFL V57: Parse BTWB's nested Perform / Train A+B leaderboards.
+   Never infer gender from names; only explicit Men's / Women's Leaderboard headers. */
 (()=>{
-  'use strict';
-  const root=document.querySelector('.btwb_webwidget');
-  if(!root)return;
-  const config=[{id:'men',title:'HOMMES',match:/^(?:hommes|men|male|males|masculin|masculine|male athletes)(?:\s*\(\d+\))?$/i},
-                {id:'women',title:'FEMMES',match:/^(?:femmes|women|female|females|feminin|féminin|feminine|female athletes)(?:\s*\(\d+\))?$/i}];
-  const txt=el=>(el?.innerText||el?.textContent||'').replace(/\s+/g,' ').trim();
-  const isInsideBoard=el=>!!el.closest('.cfl-leader-board');
-  const genderOf=s=>config.find(g=>g.match.test((s||'').trim()))?.id||null;
-  const rowsFrom=(container)=>{
-    if(!container)return [];
-    const rows=[...container.querySelectorAll('tbody tr, table tr, [role="row"]')]
-      .filter(el=>!isInsideBoard(el));
-    if(rows.length){return rows.map(el=>{
-      const cells=[...el.querySelectorAll(':scope > td,:scope > th,:scope > [role="cell"],:scope > [role="rowheader"]')].map(txt).filter(Boolean);
-      if(cells.length<2)return null;
-      let rank='';let name='';let score='';
-      if(/^#?\d{1,3}(?:st|nd|rd|th|er|e|ème)?[.)]?$/i.test(cells[0])){rank=cells[0].replace(/[^\d]/g,'');name=cells[1];score=cells.slice(2).join(' · ')}
-      else{name=cells[0];score=cells.slice(1).join(' · ')}
-      if(!name||!score||/^(?:name|athlete|member|nom|membre|score|result|performance|rank|rang|place)$/i.test(name))return null;
-      return {rank,name,score};
-    }).filter(Boolean)}
-    // Some BTWB versions use div or list rows rather than tables.
-    const candidates=[...container.querySelectorAll('li,[class*="leaderboard-row"],[class*="leader-row"],[class*="ranking-row"],[class*="result-row"]')]
-      .filter(el=>!isInsideBoard(el)&&![...el.children].some(c=>c.matches('li,[class*="leaderboard-row"],[class*="leader-row"],[class*="ranking-row"],[class*="result-row"]')));
-    return candidates.map(el=>{
-      const children=[...el.children].map(txt).filter(Boolean);
-      if(children.length<2)return null;
-      const rank=/^#?\d{1,3}$/.test(children[0])?children.shift().replace('#',''):'';
-      const name=children.shift();const score=children.join(' · ');
-      if(!name||!score)return null;
-      return {rank,name,score};
-    }).filter(Boolean);
-  };
-  function discover(){
-    const found={men:[],women:[]};
-    // Require an explicit category in the BTWB markup; never infer from a first name.
-    const labels=[...root.querySelectorAll('h1,h2,h3,h4,h5,h6,th,legend,[role="heading"],.title,.heading,.gender,button,span,strong')]
-      .filter(el=>!isInsideBoard(el)&&genderOf(txt(el)));
-    for(const label of labels){
-      const gender=genderOf(txt(label));
-      if(!gender||found[gender].length)continue;
-      // Prefer the smallest ancestor that contains the heading and scored rows.
-      let scope=label.parentElement;
-      for(let depth=0;scope&&scope!==root&&depth<5;depth++,scope=scope.parentElement){
-        const result=rowsFrom(scope);
-        if(result.length){found[gender]=result;break}
-      }
-      if(found[gender].length)continue;
-      // Many webwidgets place the title before the table rather than inside it.
-      for(let sib=label.nextElementSibling,i=0;sib&&i<3;sib=sib.nextElementSibling,i++){
-        const result=rowsFrom(sib);if(result.length){found[gender]=result;break}
-      }
-      if(!found[gender].length&&label.parentElement){
-        for(let sib=label.parentElement.nextElementSibling,i=0;sib&&i<3;sib=sib.nextElementSibling,i++){
-          const result=rowsFrom(sib);if(result.length){found[gender]=result;break}
-        }
-      }
-    }
-    return found;
+ 'use strict';
+ const root=document.querySelector('.btwb_webwidget');if(!root)return;
+ const normal=s=>String(s||'').replace(/\s+/g,' ').trim();
+ const text=el=>normal(el?.innerText||el?.textContent||'');
+ const genderOf=s=>/^(men'?s|male|hommes)\s+(?:leaderboard|classement)$/i.test(normal(s))?'men':/^(women'?s|female|femmes)\s+(?:leaderboard|classement)$/i.test(normal(s))?'women':'';
+ const partOf=s=>/\bperform\s*\/\s*train\s*a\b/i.test(s)?'A':/\bperform\s*\/\s*train\s*b\b/i.test(s)?'B':'';
+ const data={A:{men:[],women:[]},B:{men:[],women:[]}};
+ const source=document.createElement('div');source.className='cfl-leader-original';
+ const board=document.createElement('div');board.className='cfl-leader-board';
+ root.prepend(board);
+ const candidates=()=>[...root.querySelectorAll('h1,h2,h3,h4,h5,h6,div,span,strong,b,th,p')].filter(el=>!el.closest('.cfl-leader-board')&&el.children.length<3);
+ function findPart(label){
+  let scope=label;
+  for(let depth=0;scope&&depth<10;depth++,scope=scope.parentElement){
+   let sib=scope.previousElementSibling;
+   for(let i=0;sib&&i<12;i++,sib=sib.previousElementSibling){
+    const t=text(sib);if(t.length<240){const p=partOf(t);if(p)return p;}
+   }
+   if(scope!==label&&partOf(text(scope).slice(0,100)))return partOf(text(scope).slice(0,100));
   }
-  const board=document.createElement('div');board.className='cfl-leader-board';
-  root.prepend(board);
-  let last='';let firstLoad=Date.now();
-  function draw(){
-    const found=discover();
-    const signature=JSON.stringify(found);
-    if(signature===last)return;
-    last=signature;
-    const frag=document.createDocumentFragment();
-    for(const category of config){
-      const section=document.createElement('section');section.className='cfl-leader-section';
-      const head=document.createElement('div');head.className='cfl-leader-head';head.textContent=category.title;
-      const labels=document.createElement('div');labels.className='cfl-leader-labels';
-      ['RANG','MEMBRE','PERFORMANCE'].forEach(t=>{const span=document.createElement('span');span.textContent=t;labels.append(span)});
-      const list=document.createElement('div');list.className='cfl-leader-rows';
-      const entries=found[category.id];
-      entries.slice(0,20).forEach((entry,i)=>{
-        const row=document.createElement('div');row.className='cfl-leader-row';
-        for(const [cls,value] of [['rank',entry.rank||String(i+1)],['name',entry.name],['score',entry.score]]){
-          const cell=document.createElement('div');cell.className=cls;cell.textContent=value;row.append(cell);
-        }
-        list.append(row);
-      });
-      if(!entries.length){const empty=document.createElement('p');empty.className='cfl-leader-empty';empty.textContent='Aucun classement séparé disponible depuis BTWB pour cette catégorie.';list.append(empty)}
-      section.append(head,labels,list);frag.append(section);
-    }
-    board.replaceChildren(frag);
-    root.classList.add('cfl-leader-ready');
+  return '';
+ }
+ function nameAndScore(el){
+  const t=(el.innerText||'').replace(/\r/g,'').split('\n').map(normal).filter(Boolean);
+  const clean=t.filter(x=>!/^via\s*$/i.test(x)&&!/^\d+\s*(?:minutes?|hours?|heures?|jours?)\s*ago$/i.test(x));
+  let rank='',name='',score='';
+  for(let i=0;i<clean.length;i++){
+   let s=clean[i];const m=s.match(/^#?([1-9]\d?)\s*[.)]\s*(.*)$/);
+   if(m){rank=m[1];if(m[2]&&!/^completed|rx/i.test(m[2])){name=m[2].replace(/\s+via\b.*$/i,'');}else if(clean[i+1])name=clean[i+1];break;}
   }
-  function update(){
-    // Allow the BTWB script to finish loading before replacing its public view.
-    const hasSource=[...root.children].some(child=>child!==board&&txt(child).length>35);
-    if(hasSource||Date.now()-firstLoad>7500)draw();
+  if(!name){const anchors=[...el.querySelectorAll('a')].filter(a=>/^[\p{L}][\p{L}\p{M}'’ -]{3,70}$/u.test(text(a))&&!/leaderboard|via|rx|completed/i.test(text(a)));name=text(anchors[0]);}
+  if(!name)return null;
+  const performance=clean.find(s=>/\b(?:completed|rx'?d|not rx'?d|\d+\s*(?:reps|rounds|mins?|secs?|kg|lb)|\d+:\d{2})\b/i.test(s)&&s!==name);
+  score=performance||clean.slice(clean.indexOf(name)+1).find(s=>s.length>3&&!/^via/i.test(s))||'';
+  if(!score||/leaderboard/i.test(name))return null;
+  return {rank,name,score};
+ }
+ function extract(label){
+  // Prefer the nearest dedicated results panel. Its heading may be outside the iframe-like panel.
+  const elements=[];
+  let sibling=label.nextElementSibling;
+  for(let i=0;sibling&&i<5;i++,sibling=sibling.nextElementSibling){if(genderOf(text(sibling))||partOf(text(sibling).slice(0,80)))break;elements.push(sibling)}
+  let anc=label.parentElement;
+  for(let j=0;anc&&j<3;j++,anc=anc.parentElement){
+   if(anc){const children=[...anc.children];const index=children.findIndex(c=>c===label||c.contains(label));
+    for(let k=index+1;k<Math.min(index+4,children.length);k++)if(children[k]&&!elements.includes(children[k]))elements.push(children[k]);
+   }
   }
-  let pending=false;
-  const observer=new MutationObserver(()=>{if(pending)return;pending=true;setTimeout(()=>{pending=false;update()},350)});
-  observer.observe(root,{childList:true,subtree:true,characterData:true});
-  setInterval(update,2000);update();
+  const results=[];const seen=new Set();
+  for(const el of elements){
+   const nodes=[...el.querySelectorAll('li,article,[class*="leader"],[class*="athlete"],[class*="result"],tr')].filter(n=>n!==el&&text(n).length>6);
+   if(!nodes.length)nodes.push(...[...el.children].filter(n=>text(n).length>6));
+   for(const node of nodes){const nested=nodes.some(other=>other!==node&&node.contains(other));if(nested)continue;
+    const r=nameAndScore(node);if(r&&!seen.has(r.name+'|'+r.score)){seen.add(r.name+'|'+r.score);results.push(r);}
+   }
+   if(results.length)break;
+  }
+  if(!results.length){
+   for(const el of elements){const iframe=el.matches('iframe')?el:el.querySelector('iframe');
+    if(iframe&&(iframe.src||iframe.srcdoc))return [{embedded:true,src:iframe.src||'',srcdoc:iframe.srcdoc||''}];
+   }
+  }
+  return results.slice(0,12);
+ }
+ let last='';
+ function update(){
+  const labels=candidates().filter(el=>genderOf(text(el)));
+  const found={A:{men:[],women:[]},B:{men:[],women:[]}};
+  for(const label of labels){const gender=genderOf(text(label));const part=findPart(label);if(!part||found[part][gender].length)continue;found[part][gender]=extract(label)}
+  const sign=JSON.stringify(found);if(sign===last)return;last=sign;
+  const fragment=document.createDocumentFragment();
+  for(const part of ['A','B']){
+   const area=document.createElement('section');area.className='cfl-leader-part';
+   const heading=document.createElement('div');heading.className='cfl-leader-part-title';heading.textContent='PERFORM / TRAIN '+part;area.append(heading);
+   const panels=document.createElement('div');panels.className='cfl-leader-panels';
+   for(const [gender,title] of [['men','HOMMES'],['women','FEMMES']]){
+    const section=document.createElement('div');section.className='cfl-leader-section';
+    const head=document.createElement('div');head.className='cfl-leader-head';head.textContent=title;
+    const header=document.createElement('div');header.className='cfl-leader-labels';['#','MEMBRE','PERFORMANCE'].forEach(v=>{const x=document.createElement('span');x.textContent=v;header.append(x)});
+    const rows=document.createElement('div');rows.className='cfl-leader-rows';
+    found[part][gender].forEach((r,i)=>{if(r.embedded){const iframe=document.createElement('iframe');iframe.className='cfl-leader-embedded';iframe.title='Classement BTWB '+title+' '+part;iframe.loading='eager';if(r.srcdoc)iframe.srcdoc=r.srcdoc;else iframe.src=r.src;rows.append(iframe);return;}const row=document.createElement('div');row.className='cfl-leader-row';for(const [cls,value] of [['rank',r.rank||String(i+1)],['name',r.name],['score',r.score]]){const cell=document.createElement('div');cell.className=cls;cell.textContent=value;row.append(cell)}rows.append(row)});
+    if(!found[part][gender].length){const p=document.createElement('p');p.className='cfl-leader-empty';p.textContent='Aucun résultat disponible';rows.append(p)}
+    section.append(head,header,rows);panels.append(section);
+   }
+   area.append(panels);fragment.append(area);
+  }
+  board.replaceChildren(fragment);root.classList.add('cfl-leader-ready');
+ }
+ new MutationObserver(()=>{clearTimeout(window.__leaderTimer);window.__leaderTimer=setTimeout(update,300)}).observe(root,{childList:true,subtree:true,characterData:true});
+ setInterval(update,1800);update();
 })();

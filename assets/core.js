@@ -130,8 +130,11 @@ function artRender(frame,slide,events){
   const quote=String(opts.highlight??'').trim();
   const about=String(opts.description??'').trim();
   const img=String(opts.imageUrl||'');
+  const video=String(opts.videoUrl||'');
+  const videoDirect=/^blob:/i.test(video)||/^https:\/\//i.test(video)&&(/\.(?:mp4|webm)(?:[?#]|$)/i.test(video)||/\/storage\/v1\/object\//i.test(video));
+  const videoTag=videoDirect?`<video src="${esc(video)}" autoplay muted loop playsinline preload="metadata" poster="${esc(img)}"></video>`:'';
   const image=img&&/^(https:\/\/|blob:)/i.test(img)?`<img src="${esc(img)}" alt="Photo CFL">`:'<span class="spotlight-photo-empty">AJOUTER UNE PHOTO</span>';
-  const photo=`<div class="spotlight-photo">${image}</div>`;
+  const photo=`<div class="spotlight-photo">${videoTag||image}</div>`;
   const noText=![title,name,subtitle,quote,about].some(Boolean);
   const info=`<div class="spotlight-content">${title?`<h1 class="spotlight-headline">${esc(title)}</h1>`:''}${name?`<div class="spotlight-person">${esc(name)}</div>`:''}${subtitle?`<div class="spotlight-subtitle">${esc(subtitle)}</div>`:''}${quote?`<div class="spotlight-highlight">${esc(quote)}</div>`:''}${about?`<div class="spotlight-about">${esc(about)}</div>`:''}</div>`;
   body=(photoOnly||noText)?`<div class="spotlight-layout photo-only">${photo}</div>`:`<div class="spotlight-layout ${mode} ${opts.imageSide==='right'?'picture-right':''}">${photo}${info}</div>`;
@@ -183,7 +186,9 @@ function artRender(frame,slide,events){
   const price=opts.showPrice===true && e.price_label?`<div class="tv-meta">${esc(e.price_label)}</div>`:'';
   const qrLink=opts.qrUrl||e.link_url||'';const qr=opts.showQR!==false && /^https?:\/\//.test(qrLink) ? `<div class="tv-qr qr-target" data-qr="${esc(qrLink)}"></div>`:'';
   const media=opts.posterOverride||imgUrl(e);
-  const poster=`<div class="tv-poster ${media?'':'empty'}" style="--poster:url('${esc(media)}')">${media?`<img src="${esc(media)}" alt="Affiche de l’événement">`:''}</div>`;
+  const video=String(e.video_url||'');
+  const videoDirect=/^https:\/\//i.test(video)&&(/\.(?:mp4|webm)(?:[?#]|$)/i.test(video)||/\/storage\/v1\/object\//i.test(video));
+  const poster=`<div class="tv-poster ${media||videoDirect?'':'empty'}" style="--poster:url('${esc(media)}')">${videoDirect?`<video src="${esc(video)}" autoplay muted loop playsinline preload="metadata" poster="${esc(media)}"></video>`:media?`<img src="${esc(media)}" alt="Affiche de l’événement">`:''}</div>`;
   const copy=`<div class="tv-copy"><div class="tv-tag">${esc(e.category||'Événement')}</div><h1 class="tv-title">${esc(title)}</h1>${opts.showDesc!==false?`<div class="tv-description">${esc(description)}</div>`:''}${date}${e.box_closed===true?'<div class="tv-box-closed tv-box-closed-event">BOX FERMÉE</div>':''}${price}<div class="tv-footer"><div class="url">${esc(opts.qrUrl||e.link_url||'')}</div>${qr}</div></div>`;
   const chosen=String(e.image_layout||opts.layout||'right');
   const layout=({ 'poster-left':'left', 'poster-right':'right',left:'left',right:'right',bottom:'bottom' })[chosen]||'right';
