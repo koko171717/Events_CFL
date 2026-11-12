@@ -1,0 +1,28 @@
+/* CFL Control V35 — visual identity only. Official CFL Red #B8151F. */
+:root{--cfl-red:#B8151F;--cfl-red-hover:#D3444E;--cfl-black:#101010;--cfl-panel:#202020;--cfl-border:#424242;--cfl-text:#F5F5F5;--red:#B8151F;--red2:#D3444E;--navy:#171717}
+body{background-color:#111111;color:#F5F5F5}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #D3444E;outline-offset:2px}
+.btn.red,.btn.primary,button.primary,.btn.active,.type-button.active,.btwb-widget-btn.active,.calendar-view-btn.active{background:#B8151F;border-color:#B8151F;color:#fff}
+.btn.red:hover,.btn.primary:hover,button.primary:hover{background:#D3444E;border-color:#D3444E}
+.btn:not(.red):not(.primary),.slide-icon{border-color:#484848}
+.tv-frame{border-color:#444444;background:#111}
+.tv-art{background:radial-gradient(ellipse at 90% 0%,#4A121666,transparent 55%),linear-gradient(135deg,#202020,#090909 72%);color:#fff}
+.tv-art:has(.btwb-screen){background:radial-gradient(ellipse at 90% 0%,#541C2066,transparent 55%),linear-gradient(120deg,#191919,#0B0B0B 72%)}
+.tv-art .tv-art-kicker,.tv-art .btwb-date span,.tv-art .spotlight-eyebrow,.tv-art .cfl-tv-calendar-heading span{color:#F0A5AA}
+.tv-art .tv-description,.tv-art .spotlight-highlight{border-left-color:#B8151F}
+.tv-art .tv-art-head,.tv-art .cfl-tv-calendar-heading,.tv-art .annual-slide-top{border-bottom-color:#B8151F}
+.tv-art .annual-slide-month{background:linear-gradient(145deg,#292929,#151515)}
+.tv-art .annual-slide-month header{background:#52191D}
+.tv-art .btwb-pane{border-color:#454545}
+.tv-art .btwb-pane h2{background:#242424}
+.tv-art .btwb-note{color:#D4D4D4}
+.tv-art .welcome-design{background:#171717}
+.tv-art .welcome-badge{background:#151515CC;border-color:#B8151F}
+.tv-art .welcome-diagonal{background:linear-gradient(90deg,#B8151F,#D3444EAA)}
+.tv-art .welcome-website{border-bottom-color:#B8151F;background:#141414CC}
+.tv-art .spotlight-photo{background:linear-gradient(145deg,#303030,#131313)}
+.tv-art .spotlight-subtitle{color:#F0A5AA}
+.tv-art .spotlight-highlight{background:#FFFFFF10}
+.tv-thumb.active,.slide-item.selected{border-color:#B8151F;background:#361B1D}
+.tv-thumb-preview{background:linear-gradient(140deg,#4A171B,#1D1D1D 65%)}
+.tv-thumb-symbol{color:#F0A5AA}
