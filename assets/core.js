@@ -107,7 +107,7 @@ function artRender(frame,slide,events){
 
   const m=opts.month || '2027-03';const candidates=events.filter(x=>x.start_date<=m+'-31'&&x.end_date>=m+'-01').slice(0,Number(opts.count||6));
   const monthText=new Intl.DateTimeFormat('fr-CH',{month:'long',year:'numeric'}).format(new Date(m+'-01T12:00:00'));
-  body=`<div style="display:flex;flex-direction:column;height:100%;width:100%"><h1 class="month-title">Événements du mois</h1><div style="font-size:32px;color:#ffb5c3">${esc(monthText)}</div><div class="month-list" style="grid-template-rows:repeat(${Math.max(candidates.length,1)},minmax(0,1fr))">${candidates.map(x=>`<div class="month-row"><div class="month-image">${imgMarkup(x)}</div><div style="flex:1;min-width:0"><b>${esc(x.short_title||x.title)}</b><small>${esc(period(x))}</small><span class="month-summary">${esc(x.summary||x.description||'')}</span></div></div>`).join('')||'<div class="month-row">Aucun événement publié.</div>'}</div></div>`;
+  body=`<div style="display:flex;flex-direction:column;height:100%;width:100%"><h1 class="month-title">Événements du mois</h1><div style="font-size:32px;color:#F0A5AA">${esc(monthText)}</div><div class="month-list" style="grid-template-rows:repeat(${Math.max(candidates.length,1)},minmax(0,1fr))">${candidates.map(x=>`<div class="month-row"><div class="month-image">${imgMarkup(x)}</div><div style="flex:1;min-width:0"><b>${esc(x.short_title||x.title)}</b><small>${esc(period(x))}</small></div></div>`).join('')||'<div class="month-row">Aucun événement publié.</div>'}</div></div>`;
  }else if(type==='custom'&&opts.view==='annual'){
   const y=Math.min(2100,Math.max(2025,Number(opts.year)||new Date().getFullYear()));
   const monthLabels=['JAN','FÉV','MAR','AVR','MAI','JUIN','JUIL','AOÛ','SEP','OCT','NOV','DÉC'];
@@ -139,7 +139,7 @@ function artRender(frame,slide,events){
   else if(mode==='cfl-wod'){
    title='WOD DU JOUR · '+(trackNames[safeId]||'BTWB');
    const tracks=[safeId,...(safeTrain?[safeTrain]:[])];
-   pane=`<div class="cfl-custom-wod" data-tracks="${esc(tracks.join(','))}" data-size="${esc(textSize)}" data-duration="${Math.max(10,Number(slide.duration_seconds)||45)}"><div class="cfl-wod-loading">Chargement du WOD du jour…</div></div>`;
+   pane=`<div class="cfl-custom-wod" data-tracks="${esc(tracks.join(','))}" data-size="${esc(textSize)}" data-duration="${Math.max(10,Number(slide.duration_seconds)||45)}" data-instruction="${esc(String(opts.athleteInstruction||''))}" data-instruction-date="${esc(String(opts.athleteInstructionDate||''))}" data-instruction-track="${esc(String(opts.athleteInstructionTrack||''))}"><div class="cfl-wod-loading">Chargement du WOD du jour…</div></div>`;
   }
   else if(mode==='daily-leaderboard'){title='CLASSEMENT DU JOUR · '+(trackNames[safeId]||'BTWB');pane=widgetFrame(safeId,'WOD + RÉSULTATS','daily-leaderboard')}
   else{title=trackNames[safeId]||'PROGRAMMATION BTWB';pane=widgetFrame(safeId,safeTrain?'WOD PRINCIPAL':'PROGRAMMATION DU JOUR','wod')+(safeTrain?widgetFrame(safeTrain,'TRAIN · '+(trackNames[safeTrain]||'BTWB'),'wod'):'')}

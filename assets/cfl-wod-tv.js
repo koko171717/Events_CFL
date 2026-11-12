@@ -39,6 +39,10 @@ function mount(root){
  const trackIds=(root.dataset.tracks||'84043').split(',').filter(x=>/^\d+$/.test(x));
  const frames=[];let page=0,pages=[],timers=[],lastSignature='';const origin=swiss();
  const size=root.dataset.size||'balanced';
+ const instruction=clean(root.dataset.instruction||'');
+ const instructionDate=clean(root.dataset.instructionDate||'');
+ const instructionTrack=clean(root.dataset.instructionTrack||'');
+ const showInstruction=()=>Boolean(instruction&&instructionDate===swiss()&&instructionTrack===trackIds[0]);
  const asDiv=(tag,cls,label)=>{const el=document.createElement(tag);el.className=cls;if(label!==undefined)el.textContent=label;return el};
  function alive(){return root.isConnected&&swiss()===origin}
  function update(){
@@ -62,6 +66,13 @@ function mount(root){
   const head=asDiv('div','cfl-wod-head');head.append(asDiv('div','cfl-wod-track',p.title),asDiv('div','cfl-wod-counter',pages.length>1?`ÉCRAN ${page%pages.length+1}/${pages.length}`:'PROGRAMMATION DU JOUR'));root.append(head);
   const grid=asDiv('div','cfl-wod-grid');grid.style.setProperty('--cfl-cols',p.items.length===1?'1':'2');
   for(const w of p.items){const card=asDiv('section','cfl-wod-card');card.append(asDiv('h2','cfl-wod-title',w.title));const list=asDiv('div','cfl-wod-lines');for(const l of w.lines){const el=asDiv('div',/^(for time|amrap|emom|every|complete|\d+\s*rounds?)/i.test(l)?'intro':/^rest\b/i.test(l)?'rest':'',l);list.append(el)}card.append(list);grid.append(card)}root.append(grid);
+  if(showInstruction()){
+   const note=asDiv('aside','cfl-wod-athlete-note');
+   note.append(asDiv('div','cfl-wod-athlete-label','CONSIGNES AUX ATHLÈTES'));
+   note.append(asDiv('div','cfl-wod-athlete-copy',instruction));
+   root.append(note);
+   root.classList.add('has-athlete-note');
+  }else root.classList.remove('has-athlete-note');
   root.append(asDiv('div','cfl-wod-bottom','BTWB · CROSSFIT LEMAN'));
   // Fit text down only when necessary, retain readability and never silently truncate.
   const cards=[...grid.children];for(const card of cards){const list=card.querySelector('.cfl-wod-lines');let fs=parseFloat(getComputedStyle(root).getPropertyValue('--cfl-font'))||31;while(list.scrollHeight>list.clientHeight+2&&fs>20){fs-=1;list.style.fontSize=fs+'px'}if(list.scrollHeight>list.clientHeight+2){card.title='Entraînement long : consulter le widget officiel pour toutes les consignes';list.style.overflow='auto'}}
