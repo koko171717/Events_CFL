@@ -16,6 +16,11 @@
  #cfl-v10-dialog label{font-weight:750;color:#e7e8f1;font-size:13px;display:flex;flex-direction:column;gap:6px}
  #cfl-v10-dialog input,#cfl-v10-dialog textarea,#cfl-v10-dialog select{width:100%;box-sizing:border-box;background:#0b1220;color:white;border:1px solid #59637b;padding:11px;border-radius:9px;font:15px system-ui}
  #cfl-v10-dialog textarea{resize:vertical;min-height:115px}
+ #cfl-v10-dialog .cfl-closure-panel{grid-column:1/-1;display:flex;align-items:flex-start;gap:13px;padding:15px 16px;border:1px solid #B8151F;border-left:5px solid #B8151F;border-radius:11px;background:#312126;color:#fff;cursor:pointer}
+ #cfl-v10-dialog .cfl-closure-panel input[type="checkbox"]{width:21px;height:21px;min-width:21px;margin:2px 0 0;accent-color:#B8151F;cursor:pointer}
+ #cfl-v10-dialog .cfl-closure-panel strong{display:block;font-size:14px;line-height:1.35;color:#fff}
+ #cfl-v10-dialog .cfl-closure-panel small{display:block;margin-top:4px;font-size:12px;line-height:1.4;font-weight:400;color:#ded0d2}
+
  .cfl-v10-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.cfl-v10-wide{grid-column:1/-1}
  .cfl-v10-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:22px}
  .cfl-v10-actions button{padding:12px 20px;border-radius:9px;border:1px solid #6e7687;color:white;background:#273449;font:700 14px system-ui;cursor:pointer}
@@ -65,6 +70,7 @@
    <label>Catégorie<select name="category">${categories().map(c=>`<option ${c===r.category?'selected':''}>${esc(c)}</option>`).join('')}</select></label>
    <label>Début<input type="date" required name="start_date" value="${esc(r.start_date||d)}"></label>
    <label>Fin<input type="date" required name="end_date" value="${esc(r.end_date||d)}"></label>
+   <label class="cfl-closure-panel"><input type="checkbox" name="box_closed" value="true" ${r.box_closed===true?'checked':''}><span><strong>Box fermée pendant cet événement</strong><small>La mention « BOX FERMÉE » apparaîtra dans l’agenda public et sur les slides CFL TV.</small></span></label>
    <label class="cfl-v10-wide">Publication ${optionsGroup('status',[['draft','Brouillon'],['published','Publié']],r.status||'draft')}</label>
    <label class="cfl-v10-wide">Tarif ${optionsGroup('price_label',[['À confirmer','À confirmer'],['Gratuit','Gratuit'],['Payant','Payant']],r.price_label||'À confirmer')}</label>
    <label class="cfl-v10-wide">Public concerné ${optionsGroup('audience',[['À définir','À définir'],['Membres CFL','Membres CFL'],['Membres CFL et sur invitation','Membres CFL et sur invitation'],['Ouvert au public','Ouvert au public']],r.audience||'À définir')}</label>
@@ -84,7 +90,7 @@
      let image_url=String(fd.get('image_url')||'')||null;const file=fd.get('poster');
      if(file instanceof File&&file.size){if(file.size>10*1024*1024)throw Error('Affiche limitée à 10 Mo.');if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type))throw Error('Format JPG, PNG, WebP ou GIF uniquement.');const ext=file.name.split('.').pop().toLowerCase();const path='events/'+crypto.randomUUID()+'.'+ext;const upload=await client.storage.from('cfl-events').upload(path,file,{contentType:file.type});if(upload.error)throw upload.error;image_url=client.storage.from('cfl-events').getPublicUrl(path).data.publicUrl;}
      const title=String(fd.get('title')).trim();if(!title)throw Error('Titre obligatoire.');const description=String(fd.get('description')||'');
-     const payload={id:id||'cfl-'+crypto.randomUUID(),title,short_title:String(fd.get('short_title')||'').trim()||title,category:String(fd.get('category')),start_date:start,end_date:end,status:String(fd.get('status')),description,summary:description.slice(0,280),price_label:String(fd.get('price_label')||''),audience:String(fd.get('audience')||''),link_url:String(fd.get('link_url')||''),image_url,legacy_visual_key:String(fd.get('legacy_visual_key')||'')};
+     const payload={id:id||'cfl-'+crypto.randomUUID(),title,short_title:String(fd.get('short_title')||'').trim()||title,category:String(fd.get('category')),start_date:start,end_date:end,status:String(fd.get('status')),description,summary:description.slice(0,280),price_label:String(fd.get('price_label')||''),audience:String(fd.get('audience')||''),link_url:String(fd.get('link_url')||''),box_closed:fd.has('box_closed'),image_url,legacy_visual_key:String(fd.get('legacy_visual_key')||'')};
      const {error}=await client.from('events').upsert(payload);if(error)throw error;close();notify('Événement enregistré dans Supabase ✓');location.reload();
     }catch(e){errorEl.textContent='Enregistrement impossible : '+e.message;saveBtn.disabled=false;saveBtn.textContent='Enregistrer dans Supabase'}
    };
