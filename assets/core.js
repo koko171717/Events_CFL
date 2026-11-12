@@ -154,7 +154,7 @@ function artRender(frame,slide,events){
    return `<section class="annual-slide-month"><header><span>${String(m+1).padStart(2,'0')}</span>${label}</header><div class="annual-slide-items">${items.slice(0,5).map(e=>`<div class="annual-slide-item"><b>${esc(e.start_date.slice(8,10))}</b><span>${esc(e.short_title||e.title)}</span></div>`).join('')||'<span class="annual-slide-empty">—</span>'}${items.length>5?`<small>+${items.length-5} événements</small>`:''}</div></section>`;
   }).join('')}</div></div>`;
  }else if(type==='btwb'){
-  const mode=['wod','cfl-wod','activity','cfl-activity','leaderboard','daily-leaderboard'].includes(opts.widget)?opts.widget:'wod';
+  const mode=['wod','cfl-wod','activity','cfl-activity','leaderboard','daily-leaderboard','cfl-leaderboard'].includes(opts.widget)?opts.widget:'wod';
   const mainId=String(opts.trackId||'84043');const trainId=String(opts.trainTrackId||'');
   const safeId=/^\d+$/.test(mainId)?mainId:'84043';const safeTrain=(mode==='wod'||mode==='cfl-wod')&&/^\d+$/.test(trainId)&&trainId!==safeId?trainId:'';
   const trackNames={'84043':'CROSSFIT LEMAN PROGRAM','1237036':'HWPO FOCUS','1237037':'HWPO AFFILIATE','1237038':'HWPO AFFILIATE — COACHES NOTES','1237039':'HWPO SWEAT','1237040':'HWPO ACCESSORY','1237041':'HWPO EMOM 40','1237042':'HWPO HYROX','1237043':'HWPO BODYBUILDING'};
@@ -163,7 +163,7 @@ function artRender(frame,slide,events){
   const textSize=['compact','balanced','large'].includes(opts.textSize)?opts.textSize:'balanced';
   const currentDay=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Zurich',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const revision=Math.floor(Date.now()/300000);
-  const widgetFrame=(id,label,kind)=>{const params=new URLSearchParams({type:kind,track:id,count:String(count),v:String(revision),day:currentDay,compact:safeTrain?'1':'0',size:textSize,layout:mode==='cfl-activity'?'columns':'default'});if(kind==='leaderboard'&&workoutId)params.set('workout',workoutId);return `<section class="btwb-pane"><div class="btwb-pane-label">${esc(label)}</div><iframe class="btwb-embed" title="BTWB ${esc(label)}" loading="eager" src="/api/btwb-widget?${params.toString()}" referrerpolicy="same-origin"></iframe></section>`};
+  const widgetFrame=(id,label,kind)=>{const params=new URLSearchParams({type:kind,track:id,count:String(count),v:String(revision),day:currentDay,compact:safeTrain?'1':'0',size:textSize,layout:mode==='cfl-activity'?'columns':mode==='cfl-leaderboard'?'gender':'default'});if(kind==='leaderboard'&&workoutId)params.set('workout',workoutId);return `<section class="btwb-pane"><div class="btwb-pane-label">${esc(label)}</div><iframe class="btwb-embed" title="BTWB ${esc(label)}" loading="eager" src="/api/btwb-widget?${params.toString()}" referrerpolicy="same-origin"></iframe></section>`};
   const dateStr=new Intl.DateTimeFormat('fr-CH',{timeZone:'Europe/Zurich',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
   let title='',pane='';
   if(mode==='activity'||mode==='cfl-activity'){title=mode==='cfl-activity'?'ACTIVITIES · CROSSFIT LEMAN':'ACTIVITÉ DES MEMBRES';pane=widgetFrame(safeId,mode==='cfl-activity'?'ACTIVITÉS DE LA COMMUNAUTÉ':'PERFORMANCES RÉCENTES','activity')}
@@ -173,6 +173,7 @@ function artRender(frame,slide,events){
    const tracks=[safeId,...(safeTrain?[safeTrain]:[])];
    pane=`<div class="cfl-custom-wod" data-tracks="${esc(tracks.join(','))}" data-size="${esc(textSize)}" data-duration="${Math.max(10,Number(slide.duration_seconds)||45)}" data-instruction="${esc(String(opts.athleteInstruction||''))}" data-instruction-date="${esc(String(opts.athleteInstructionDate||''))}" data-instruction-track="${esc(String(opts.athleteInstructionTrack||''))}"><div class="cfl-wod-loading">Chargement du WOD du jour…</div></div>`;
   }
+  else if(mode==='cfl-leaderboard'){title='LEADERBOARD · CROSSFIT LEMAN';pane=widgetFrame(safeId,'CLASSEMENT HOMMES / FEMMES','daily-leaderboard')}
   else if(mode==='daily-leaderboard'){title='CLASSEMENT DU JOUR · '+(trackNames[safeId]||'BTWB');pane=widgetFrame(safeId,'WOD + RÉSULTATS','daily-leaderboard')}
   else{title=trackNames[safeId]||'PROGRAMMATION BTWB';pane=widgetFrame(safeId,safeTrain?'WOD PRINCIPAL':'PROGRAMMATION DU JOUR','wod')+(safeTrain?widgetFrame(safeTrain,'TRAIN · '+(trackNames[safeTrain]||'BTWB'),'wod'):'')}
   body=`<div class="btwb-screen"><div class="btwb-date"><strong>${esc(title)}</strong><span>${esc(dateStr)}</span></div><div class="btwb-panes ${safeTrain?'two':''}">${pane}</div><p class="btwb-note">BTWB · données actualisées à chaque diffusion</p></div>`;

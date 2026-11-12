@@ -13,6 +13,7 @@ module.exports = function handler(req,res){
   const workoutId=/^[1-9]\d{0,9}$/.test(String(get('workout')||''))?String(get('workout')):'';
   const compact=String(get('compact')||'')==='1';
   const activityColumns=kind==='activity'&&String(get('layout')||'')==='columns';
+  const leaderboardGender=kind==='daily-leaderboard'&&String(get('layout')||'')==='gender';
   // Readable TV presets, independent for single and two-column layouts.
   const size=['compact','balanced','large'].includes(String(get('size')))?String(get('size')):'balanced';
   const typography={compact:{body:compact?16:19,small:compact?14:16,h1:compact?25:30,h2:compact?23:27,h3:compact?21:24},balanced:{body:compact?20:24,small:compact?16:19,h1:compact?29:37,h2:compact?27:33,h3:compact?24:29},large:{body:compact?25:32,small:compact?20:25,h1:compact?35:47,h2:compact?31:41,h3:compact?28:35}}[size];
@@ -80,6 +81,24 @@ module.exports = function handler(req,res){
     .btwb_webwidget .cfl-activity-board *{box-sizing:border-box}
     @media(max-width:650px){.btwb_webwidget .cfl-activity-board{gap:8px}.btwb_webwidget .cfl-activity-row{padding:8px;gap:5px;font-size:14px}.btwb_webwidget .cfl-activity-table-head{padding:8px;font-size:13px}}
     #cfl-widget-actions{background:#202020e8;border-radius:10px;padding:4px}
+    #cfl-widget-state.warning{display:block}
+    ` : ''}
+    ${leaderboardGender ? `
+    html,body{height:100%;min-height:100%;overflow:hidden;background:#181818!important;color:#fff}
+    body{padding:12px 17px!important}
+    .btwb_webwidget{height:100%;color:#fff!important;overflow:hidden}
+    .btwb_webwidget.cfl-leader-ready > :not(.cfl-leader-board){display:none!important}
+    .cfl-leader-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;width:100%;height:100%;min-height:0;color:#fff}
+    .cfl-leader-section{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid #4c4c4c;border-radius:10px;overflow:hidden;background:#222}
+    .cfl-leader-head{padding:12px 18px;background:#B8151F;color:#fff;font-size:20px;font-weight:600;letter-spacing:.06em}
+    .cfl-leader-labels{display:grid;grid-template-columns:48px minmax(0,1.5fr) minmax(0,1fr);gap:10px;padding:10px 13px;border-bottom:1px solid #494949;color:#ddd;font-size:14px;letter-spacing:.055em}
+    .cfl-leader-rows{flex:1;min-height:0;display:flex;flex-direction:column;overflow:auto;scrollbar-color:#90464a #242424}
+    .cfl-leader-row{display:grid;grid-template-columns:48px minmax(0,1.5fr) minmax(0,1fr);gap:10px;align-items:center;padding:10px 13px;min-height:61px;border-bottom:1px solid #3e3e3e;font-size:clamp(17px,1.4vw,23px);font-weight:400;line-height:1.25}
+    .cfl-leader-row:nth-child(even){background:#2e2e2e}
+    .cfl-leader-row .rank{color:#f2acb1;font-weight:600}
+    .cfl-leader-row .name{color:#fff;font-weight:450;overflow-wrap:anywhere}
+    .cfl-leader-row .score{color:#eee;font-weight:400;overflow-wrap:anywhere}
+    .cfl-leader-empty{padding:24px 16px;color:#c7c7c7;font-size:18px;line-height:1.4;font-weight:400}
     #cfl-widget-state.warning{display:block}
     ` : ''}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
@@ -213,6 +232,6 @@ module.exports = function handler(req,res){
       setInterval(measure,1900);measure();
     })();
   `;
-  const page=`<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://static.btwb.com/libs/webwidgets/2/webwidgets.css"><style>${presentationCss}</style></head><body><div id="cfl-widget-state" role="status">Chargement BTWB…</div><div class="btwb_webwidget" ${widgetAttributes}></div><div id="cfl-widget-actions" aria-label="Navigation contenu long"><button id="cfl-scroll-prev" type="button">↑ Plus haut</button><button id="cfl-scroll-next" type="button">↓ Suite</button></div><script id="btwb_config" data-api_key="${safeKey}"></script><script src="https://static.btwb.com/libs/webwidgets/2/webwidgets.js"></script><script>${presentationJs.replace(/<\/script/gi,'<\\/script')}</script></body></html>`;
+  const page=`<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://static.btwb.com/libs/webwidgets/2/webwidgets.css"><style>${presentationCss}</style></head><body><div id="cfl-widget-state" role="status">Chargement BTWB…</div><div class="btwb_webwidget" ${widgetAttributes}></div><div id="cfl-widget-actions" aria-label="Navigation contenu long"><button id="cfl-scroll-prev" type="button">↑ Plus haut</button><button id="cfl-scroll-next" type="button">↓ Suite</button></div><script id="btwb_config" data-api_key="${safeKey}"></script><script src="https://static.btwb.com/libs/webwidgets/2/webwidgets.js"></script><script>${presentationJs.replace(/<\/script/gi,'<\\/script')}</script>${leaderboardGender?'<script src="/assets/cfl-leaderboard-tv.js"></script>':''}</body></html>`;
   res.status(200).end(page);
 };
