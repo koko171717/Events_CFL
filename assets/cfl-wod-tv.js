@@ -54,7 +54,7 @@ function mount(root){
    lastSignature=signature;page=0;pages=[];
    for(const d of data){for(const group of chunks(d.items,d.track)){
     const normalized=group.flatMap(w=>{const maxLines=10;if(w.lines.length<=maxLines && w.lines.join(' ').length<580)return [w];const slices=[];for(let k=0;k<w.lines.length;k+=7)slices.push({...w,title:w.title+(k?' · suite '+(Math.floor(k/7)+1):''),lines:w.lines.slice(k,k+7)});return slices});
-    for(let i=0;i<normalized.length;i+=2){const subset=normalized.slice(i,i+2);pages.push({title:trNames[d.track]||'Programmation BTWB',items:subset});}
+    for(let i=0;i<normalized.length;i+=3){const subset=normalized.slice(i,i+3);pages.push({title:trNames[d.track]||'Programmation BTWB',items:subset});}
    }}
    render();
   }
@@ -64,7 +64,7 @@ function mount(root){
   root.replaceChildren();const p=pages[page%pages.length];
   if(!p){root.append(asDiv('div','cfl-wod-loading','BTWB — récupération du WOD en cours…'));return}
   const head=asDiv('div','cfl-wod-head');head.append(asDiv('div','cfl-wod-track',p.title),asDiv('div','cfl-wod-counter',pages.length>1?`ÉCRAN ${page%pages.length+1}/${pages.length}`:'PROGRAMMATION DU JOUR'));root.append(head);
-  const grid=asDiv('div','cfl-wod-grid');grid.style.setProperty('--cfl-cols',p.items.length===1?'1':'2');
+  const grid=asDiv('div','cfl-wod-grid');grid.style.setProperty('--cfl-cols',String(Math.min(3,p.items.length)));root.classList.toggle('cfl-wod-three',p.items.length===3);
   for(const w of p.items){const card=asDiv('section','cfl-wod-card');card.append(asDiv('h2','cfl-wod-title',w.title));const list=asDiv('div','cfl-wod-lines');for(const l of w.lines){const el=asDiv('div',/^(for time|amrap|emom|every|complete|\d+\s*rounds?)/i.test(l)?'intro':/^rest\b/i.test(l)?'rest':'',l);list.append(el)}card.append(list);grid.append(card)}root.append(grid);
   if(showInstruction()){
    const note=asDiv('aside','cfl-wod-athlete-note');
@@ -75,7 +75,7 @@ function mount(root){
   }else root.classList.remove('has-athlete-note');
   root.append(asDiv('div','cfl-wod-bottom','BTWB · CROSSFIT LEMAN'));
   // Fit text down only when necessary, retain readability and never silently truncate.
-  const cards=[...grid.children];for(const card of cards){const list=card.querySelector('.cfl-wod-lines');let fs=parseFloat(getComputedStyle(root).getPropertyValue('--cfl-font'))||31;while(list.scrollHeight>list.clientHeight+2&&fs>20){fs-=1;list.style.fontSize=fs+'px'}if(list.scrollHeight>list.clientHeight+2){card.title='Entraînement long : consulter le widget officiel pour toutes les consignes';list.style.overflow='auto'}}
+  const cards=[...grid.children];for(const card of cards){const list=card.querySelector('.cfl-wod-lines');let fs=parseFloat(getComputedStyle(root).getPropertyValue('--cfl-font'))||31;if(p.items.length===3)fs=Math.min(fs,27);list.style.fontSize=fs+'px';while(list.scrollHeight>list.clientHeight+2&&fs>19){fs-=1;list.style.fontSize=fs+'px'}if(list.scrollHeight>list.clientHeight+2){card.title='Entraînement long : consulter le widget officiel pour toutes les consignes';list.style.overflow='auto'}}
  }
  function stop(){for(const id of timers)clearInterval(id);timers.length=0;for(const f of frames)f.iframe.remove()}
  const host=document.createElement('div');host.style.cssText='position:absolute;left:-12000px;top:0;width:1000px;height:900px;overflow:hidden;pointer-events:none;opacity:0';root.append(host);
