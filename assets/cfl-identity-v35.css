@@ -66,3 +66,35 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .cfl-custom-wod.cfl-wod-six .cfl-wod-lines .rest{margin:1px 0}
 .cfl-custom-wod.cfl-wod-six .cfl-wod-head{margin:3px 0 9px}
 .cfl-custom-wod.cfl-wod-six .cfl-wod-bottom{margin-top:7px;padding-top:5px}
+
+/* V60: complete HWPO Affiliate B variants, never split into "suite" cards. */
+.cfl-custom-wod.cfl-wod-hwpo-b .cfl-wod-grid{gap:12px}
+.cfl-custom-wod.cfl-wod-hwpo-b .cfl-wod-card{padding:14px 16px 11px;border-top-width:4px;border-radius:12px}
+.cfl-custom-wod.cfl-wod-hwpo-b .cfl-wod-title{font-size:25px;line-height:1.08;margin-bottom:7px;font-weight:800}
+.cfl-custom-wod.cfl-wod-hwpo-b .cfl-wod-lines{gap:1px;line-height:1.08;font-weight:630}
+.cfl-custom-wod.cfl-wod-hwpo-b .cfl-wod-lines .intro{margin:1px 0 3px;font-weight:550}
+.cfl-custom-wod.cfl-wod-hwpo-b .cfl-wod-head{margin:3px 0 9px}
+.cfl-custom-wod.cfl-wod-hwpo-b .cfl-wod-bottom{margin-top:7px;padding-top:5px}
+
+/* V61: 4–5 short HWPO metcon levels, arranged across two rows. */
+.cfl-custom-wod.cfl-wod-hwpo-dense .cfl-wod-grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));grid-auto-flow:row;gap:9px}
+.cfl-custom-wod.cfl-wod-hwpo-dense .cfl-wod-card{padding:11px 13px 9px;border-top-width:3px;border-radius:9px}
+.cfl-custom-wod.cfl-wod-hwpo-dense .cfl-wod-title{font-size:22px;line-height:1.08;margin-bottom:5px}
+.cfl-custom-wod.cfl-wod-hwpo-dense .cfl-wod-lines{gap:1px;line-height:1.07;font-weight:590}
+.cfl-custom-wod.cfl-wod-hwpo-dense .cfl-wod-lines .intro{margin:0 0 2px}
+.cfl-custom-wod.cfl-wod-hwpo-dense .cfl-wod-head{margin:2px 0 7px}
+.cfl-custom-wod.cfl-wod-hwpo-dense .cfl-wod-bottom{margin-top:5px;padding-top:4px}
+
+
+/* V63 — Hyrox: readable, dynamic number of complete workout sections. */
+.cfl-custom-wod.cfl-wod-hyrox .cfl-wod-grid{gap:12px}
+.cfl-custom-wod.cfl-wod-hyrox .cfl-wod-card{padding:17px 19px 14px;border-top-width:4px;border-radius:12px}
+.cfl-custom-wod.cfl-wod-hyrox .cfl-wod-title{font-size:26px;font-weight:700;line-height:1.12;margin-bottom:9px}
+.cfl-custom-wod.cfl-wod-hyrox .cfl-wod-lines{font-weight:500;gap:3px;line-height:1.12}
+.cfl-custom-wod.cfl-wod-hyrox .cfl-wod-lines .intro{font-weight:500;margin:2px 0}
+.cfl-custom-wod.cfl-wod-hyrox .cfl-wod-head{margin:4px 0 11px}
+.cfl-custom-wod.cfl-wod-hyrox .cfl-wod-bottom{margin-top:7px;padding-top:5px}
+.cfl-custom-wod.cfl-wod-hyrox-dense .cfl-wod-grid{grid-template-columns:repeat(var(--cfl-cols,3),minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));grid-auto-flow:row;gap:10px}
+.cfl-custom-wod.cfl-wod-hyrox-dense .cfl-wod-card{padding:10px 14px 9px;border-top-width:3px}
+.cfl-custom-wod.cfl-wod-hyrox-dense .cfl-wod-title{font-size:23px;margin-bottom:5px}
+.cfl-custom-wod.cfl-wod-hyrox-dense .cfl-wod-lines{gap:2px;line-height:1.08}
