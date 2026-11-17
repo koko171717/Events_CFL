@@ -56,3 +56,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .cfl-custom-wod.cfl-wod-three .cfl-wod-lines{gap:4px;line-height:1.17;font-weight:690}
 .cfl-custom-wod.cfl-wod-three .cfl-wod-head{margin:4px 0 12px}
 .cfl-custom-wod.cfl-wod-three .cfl-wod-bottom{margin-top:8px;padding-top:6px}
+
+/* V59 — adaptive 6-part paired WOD: each column shows level A, then B. */
+.cfl-custom-wod.cfl-wod-six .cfl-wod-grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:11px}
+.cfl-custom-wod.cfl-wod-six .cfl-wod-card{padding:13px 16px 11px;border-top-width:4px;border-radius:11px}
+.cfl-custom-wod.cfl-wod-six .cfl-wod-title{font-size:25px;line-height:1.1;margin-bottom:7px;letter-spacing:-.012em}
+.cfl-custom-wod.cfl-wod-six .cfl-wod-lines{font-weight:650;line-height:1.12;gap:2px}
+.cfl-custom-wod.cfl-wod-six .cfl-wod-lines .intro{margin:1px 0 0}
+.cfl-custom-wod.cfl-wod-six .cfl-wod-lines .rest{margin:1px 0}
+.cfl-custom-wod.cfl-wod-six .cfl-wod-head{margin:3px 0 9px}
+.cfl-custom-wod.cfl-wod-six .cfl-wod-bottom{margin-top:7px;padding-top:5px}
