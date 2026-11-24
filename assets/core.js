@@ -143,6 +143,11 @@ function artRender(frame,slide,events){
   const m=opts.month || '2027-03';const candidates=events.filter(x=>x.start_date<=m+'-31'&&x.end_date>=m+'-01').slice(0,Number(opts.count||6));
   const monthText=new Intl.DateTimeFormat('fr-CH',{month:'long',year:'numeric'}).format(new Date(m+'-01T12:00:00'));
   body=`<div style="display:flex;flex-direction:column;height:100%;width:100%"><h1 class="month-title">Événements du mois</h1><div style="font-size:32px;color:#F0A5AA">${esc(monthText)}</div><div class="month-list" style="grid-template-rows:repeat(${Math.max(candidates.length,1)},minmax(0,1fr))">${candidates.map(x=>`<div class="month-row"><div class="month-image">${imgMarkup(x)}</div><div style="flex:1;min-width:0"><b>${esc(x.short_title||x.title)}</b><small>${esc(period(x))}</small>${x.box_closed===true?'<span class="tv-box-closed tv-box-closed-month">BOX FERMÉE</span>':''}</div></div>`).join('')||'<div class="month-row">Aucun événement publié.</div>'}</div></div>`;
+ }else if(type==='custom'&&opts.view==='notice'){
+  const lines=String(opts.rows||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).slice(0,10);
+  const items=lines.map(line=>{const idx=line.indexOf('|');const label=idx>=0?line.slice(0,idx).trim():'';const value=idx>=0?line.slice(idx+1).trim():line;const closed=/\bferm[ée](?:e|s|es)?\b|\bclosed\b/i.test(value);return `<div class="cfl-notice-row ${closed?'is-closed':''}"><div class="cfl-notice-label">${esc(label)}</div><div class="cfl-notice-value">${esc(value)}</div></div>`}).join('');
+  const title=String(opts.title||'COMMUNICATION CFL').trim();const subtitle=String(opts.subtitle||'').trim();const footer=String(opts.footer||'').trim();
+  body=`<section class="cfl-notice" style="--notice-count:${Math.max(1,lines.length)}"><div class="cfl-notice-heading"><span class="cfl-notice-eyebrow">INFORMATIONS DE LA BOX</span><h1>${esc(title)}</h1>${subtitle?`<p>${esc(subtitle)}</p>`:''}</div><div class="cfl-notice-table">${items||'<div class="cfl-notice-empty">Ajoute des lignes dans le Studio CFL TV.</div>'}</div>${footer?`<div class="cfl-notice-footer">${esc(footer)}</div>`:''}</section>`;
  }else if(type==='custom'&&opts.view==='annual'){
   const y=Math.min(2100,Math.max(2025,Number(opts.year)||new Date().getFullYear()));
   const monthLabels=['JAN','FÉV','MAR','AVR','MAI','JUIN','JUIL','AOÛ','SEP','OCT','NOV','DÉC'];
@@ -198,7 +203,7 @@ function artRender(frame,slide,events){
    body=`<div class="tv-event-bottom">${bottomCopy}${poster}</div>`;
   }else body=layout==='left'?poster+copy:copy+poster;
  }
- frame.innerHTML=(type==='welcome'||(type==='spotlight'&&opts.photoOnly===true))?`<div class="tv-art ${type==='welcome'?'welcome-art':'spotlight-photo-art'}">${body}</div>`:`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Leman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='spotlight'?'CFL SPOTLIGHT':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
+ frame.innerHTML=(type==='welcome'||(type==='spotlight'&&opts.photoOnly===true))?`<div class="tv-art ${type==='welcome'?'welcome-art':'spotlight-photo-art'}">${body}</div>`:`<div class="tv-art"><div class="tv-art-head"><div class="tv-art-brand"><img src="/assets/logo-crossfit-leman.svg" alt="CrossFit Leman"></div><div class="tv-art-kicker">${type==='btwb'?'BTWB':type==='spotlight'?'CFL SPOTLIGHT':type==='custom'&&opts.view==='notice'?'CFL INFOS':(type==='month'||type==='custom')?'AGENDA':'CFL EVENTS'}</div></div><div class="tv-art-body">${body}</div></div>`;
  scaleArtwork(frame);textFit(frame.querySelector('.tv-art'));
  if(type==='btwb' && opts.widget==='cfl-wod' && window.CFL_WOD)window.CFL_WOD.mount(frame.querySelector('.cfl-custom-wod'));
  const qrEl=frame.querySelector('.qr-target');

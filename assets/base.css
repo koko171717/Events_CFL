@@ -205,3 +205,20 @@
 .tv-poster video,.spotlight-photo video{position:relative;display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;background:#111}
 .spotlight-photo video{object-fit:cover}
 .tv-event-bottom .tv-poster video{object-fit:contain}
+
+/* V65 — Communications CFL : informations lisibles sur les écrans 16:9 */
+.cfl-notice{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;gap:18px;color:#f7f7f7}
+.cfl-notice-heading{flex:0 0 auto;display:flex;flex-direction:column;gap:8px}
+.cfl-notice-eyebrow{font-size:23px;letter-spacing:.16em;color:#e79da5;font-weight:550}
+.cfl-notice-heading h1{font-size:76px;line-height:1.02;letter-spacing:-.025em;margin:0;font-weight:750}
+.cfl-notice-heading p{font-size:26px;color:#c7c7c7;margin:0}
+.cfl-notice-table{flex:1 1 auto;min-height:0;display:grid;grid-template-rows:repeat(var(--notice-count), minmax(0,1fr));gap:9px}
+.cfl-notice-row{display:grid;grid-template-columns:42% 58%;align-items:center;background:#ffffff0d;border:1px solid #ffffff1f;border-radius:14px;min-height:0;overflow:hidden}
+.cfl-notice-row:nth-child(even){background:#ffffff14}
+.cfl-notice-label{font-size:35px;font-weight:550;padding:5px 26px;line-height:1.14}
+.cfl-notice-value{font-size:35px;font-weight:450;padding:5px 26px;line-height:1.14;color:#f4f4f4}
+.cfl-notice-row.is-closed{border-color:#B8151F70;background:linear-gradient(90deg,#391c20,#452125)}
+.cfl-notice-row.is-closed .cfl-notice-value{color:#ffd7da;font-weight:700;letter-spacing:.07em}
+.cfl-notice-footer{flex:0 0 auto;font-size:33px;font-weight:500;color:#fff;text-align:center;border-top:2px solid #B8151F;padding-top:19px;line-height:1.22}
+.cfl-notice-empty{font-size:32px;padding:28px;color:#bbb}
+.tv-art:has(.cfl-notice) .tv-art-body{gap:0}
