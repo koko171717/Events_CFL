@@ -222,3 +222,10 @@
 .cfl-notice-footer{flex:0 0 auto;font-size:33px;font-weight:500;color:#fff;text-align:center;border-top:2px solid #B8151F;padding-top:19px;line-height:1.22}
 .cfl-notice-empty{font-size:32px;padding:28px;color:#bbb}
 .tv-art:has(.cfl-notice) .tv-art-body{gap:0}
+
+/* V66 — surlignage individuel des annonces depuis le studio TV */
+.notice-row-highlights{display:grid;gap:7px;max-height:260px;overflow:auto}
+.notice-row-highlight-item{display:flex;align-items:center;gap:12px;padding:9px 13px;background:#242428;border:1px solid #48484b;border-radius:9px;cursor:pointer;font-size:14px;min-height:40px}
+.notice-row-highlight-item input{width:18px;height:18px;flex:0 0 auto;accent-color:#B8151F}
+.notice-row-highlight-item span:nth-child(2){flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notice-row-red-hint{font-size:11px;letter-spacing:.06em;color:#eea7ad}
